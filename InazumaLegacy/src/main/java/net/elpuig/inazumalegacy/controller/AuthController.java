@@ -20,7 +20,7 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
-    public String login() { return "ogin"; }
+    public String login() { return "login"; }
 
     @GetMapping("/registro")
     public String registroForm() { return "registro"; }
