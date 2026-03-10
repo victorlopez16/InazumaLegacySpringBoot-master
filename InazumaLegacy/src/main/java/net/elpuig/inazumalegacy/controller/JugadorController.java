@@ -23,6 +23,19 @@ public class JugadorController {
     @GetMapping("/inicio")
     public String inicio() { return "inicio"; }
 
+    @GetMapping("/jugador/{id}")
+    public String detalle(@PathVariable Long id, @RequestParam int temporada, Model model) {
+        if (temporada == 2) {
+            model.addAttribute("jugador", jugadorS2Repo.findById(id).orElse(null));
+        } else if (temporada == 3) {
+            model.addAttribute("jugador", jugadorS3Repo.findById(id).orElse(null));
+        } else {
+            model.addAttribute("jugador", jugadorRepo.findById(id).orElse(null));
+        }
+        model.addAttribute("temporada", temporada);
+        return "jugador-detalle";
+    }
+
     @GetMapping("/jugadores")
     public String jugadores(@RequestParam(defaultValue = "1") int temporada, Model model) {
         if (temporada == 2) {

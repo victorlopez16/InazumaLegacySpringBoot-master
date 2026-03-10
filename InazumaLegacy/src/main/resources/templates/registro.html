@@ -1,38 +1,488 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-    <title>Registro - Inazuma Legacy</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/estilos.css" rel="stylesheet">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Registro – Inazuma Legacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --navy:     #04101e;
+            --blue:     #071830;
+            --orange:   #ff6a00;
+            --orange2:  #ff8c00;
+            --electric: #00e5ff;
+            --white:    #f0f4ff;
+            --gold:     #ffd700;
+            --dim:      rgba(240,244,255,.38);
+            --ok:       #00cc66;
+            --err:      #ff3333;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+
+        body {
+            min-height: 100vh;
+            background: var(--navy);
+            font-family: 'Rajdhani', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse at 80% 30%, rgba(255,106,0,.16) 0%, transparent 50%),
+                radial-gradient(ellipse at 15% 70%, rgba(0,229,255,.07) 0%, transparent 45%),
+                radial-gradient(ellipse at 50% 100%, rgba(255,140,0,.09) 0%, transparent 40%),
+                linear-gradient(180deg, #04101e 0%, #071830 60%, #04101e 100%);
+        }
+
+        .hex-bg {
+            position: fixed; inset: 0; z-index: 0; opacity: 0.045;
+            background-image:
+                repeating-linear-gradient(60deg,  var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%),
+                repeating-linear-gradient(120deg, var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%),
+                repeating-linear-gradient(0deg,   var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%);
+            background-size: 58px 100px;
+            animation: hexDrift 30s linear infinite;
+        }
+        @keyframes hexDrift { 0% { transform: translateY(0); } 100% { transform: translateY(58px); } }
+
+        .scanline {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none;
+            background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,.07) 3px, rgba(0,0,0,.07) 4px);
+        }
+
+        .energy { position: fixed; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+        .energy span {
+            position: absolute; width: 1.5px;
+            background: linear-gradient(to bottom, transparent, var(--orange), transparent);
+            animation: bolt linear infinite; opacity: 0;
+        }
+        .energy span:nth-child(1) { left:  5%; height: 160px; animation-duration: 3.4s; animation-delay: 0.0s; }
+        .energy span:nth-child(2) { left: 18%; height: 220px; animation-duration: 5.2s; animation-delay: 1.3s; }
+        .energy span:nth-child(3) { left: 35%; height: 140px; animation-duration: 4.1s; animation-delay: 0.6s; }
+        .energy span:nth-child(4) { left: 52%; height: 200px; animation-duration: 3.8s; animation-delay: 2.0s; }
+        .energy span:nth-child(5) { left: 68%; height: 180px; animation-duration: 4.6s; animation-delay: 0.9s; }
+        .energy span:nth-child(6) { left: 82%; height: 240px; animation-duration: 5.0s; animation-delay: 1.7s; }
+        .energy span:nth-child(7) { left: 94%; height: 170px; animation-duration: 3.6s; animation-delay: 2.5s; }
+        .energy span:nth-child(8) { left: 11%; height: 130px; animation-duration: 4.3s; animation-delay: 1.1s; background: linear-gradient(to bottom, transparent, var(--electric), transparent); }
+        .energy span:nth-child(9) { left: 60%; height: 190px; animation-duration: 5.5s; animation-delay: 3.0s; background: linear-gradient(to bottom, transparent, var(--electric), transparent); }
+        @keyframes bolt {
+            0%   { top: -20%; opacity: 0; }
+            12%  { opacity: .8; }
+            88%  { opacity: .2; }
+            100% { top: 120%; opacity: 0; }
+        }
+
+        .particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+        .particle { position: absolute; border-radius: 50%; animation: floatUp linear infinite; }
+        @keyframes floatUp {
+            0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: .4; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        .deco-number  { position: fixed; left: -50px; top: -30px; font-family: 'Bebas Neue', sans-serif; font-size: 380px; line-height: 1; color: rgba(255,106,0,.032); user-select: none; z-index: 1; }
+        .deco-number2 { position: fixed; right: -40px; bottom: -60px; font-family: 'Bebas Neue', sans-serif; font-size: 300px; line-height: 1; color: rgba(0,229,255,.025); user-select: none; z-index: 1; }
+
+        .wrap {
+            position: relative; z-index: 10;
+            width: 100%; max-width: 480px; padding: 20px;
+            animation: riseUp .9s cubic-bezier(.16,1,.3,1) both;
+        }
+        @keyframes riseUp {
+            from { opacity: 0; transform: translateY(44px) scale(.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* CABECERA */
+        .brand { text-align: center; margin-bottom: 24px; }
+        .brand-badge {
+            display: inline-block;
+            background: rgba(255,106,0,.1); border: 1px solid rgba(255,106,0,.35);
+            border-radius: 2px; padding: 4px 16px;
+            font-size: .68rem; letter-spacing: 4px; color: var(--orange);
+            text-transform: uppercase; font-weight: 700; margin-bottom: 12px;
+            animation: badgePulse 3s ease-in-out infinite;
+        }
+        @keyframes badgePulse {
+            0%,100% { box-shadow: 0 0 0 rgba(255,106,0,0); }
+            50%      { box-shadow: 0 0 14px rgba(255,106,0,.3); }
+        }
+        .brand-name {
+            font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem;
+            letter-spacing: 6px; color: var(--white);
+            animation: textGlow 3s ease-in-out infinite alternate; line-height: 1;
+        }
+        @keyframes textGlow {
+            from { text-shadow: 0 0 20px rgba(255,106,0,.4), 0 0 40px rgba(255,106,0,.15); }
+            to   { text-shadow: 0 0 35px rgba(255,106,0,.7), 0 0 70px rgba(255,106,0,.3); }
+        }
+        .brand-sub { font-size: .75rem; letter-spacing: 6px; color: var(--electric); font-weight: 700; margin-top: 6px; opacity: .75; }
+
+        /* CARD */
+        .card {
+            background: linear-gradient(155deg, rgba(10,34,72,.95) 0%, rgba(7,24,48,.98) 50%, rgba(4,16,30,.97) 100%);
+            border: 1px solid rgba(255,106,0,.22);
+            border-radius: 6px; padding: 36px 40px 32px;
+            position: relative; backdrop-filter: blur(24px);
+            box-shadow: 0 0 0 1px rgba(255,106,0,.06), 0 2px 0 rgba(255,106,0,.15), 0 28px 80px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
+            overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--orange), rgba(255,215,0,.6), var(--orange), transparent);
+            animation: borderSweep 4s ease-in-out infinite;
+        }
+        @keyframes borderSweep { 0%,100% { opacity: .6; } 50% { opacity: 1; box-shadow: 0 0 12px var(--orange); } }
+
+        .corner { position: absolute; width: 20px; height: 20px; border-color: var(--orange); border-style: solid; }
+        .corner.tl { top: -1px; left: -1px;    border-width: 2px 0 0 2px; }
+        .corner.tr { top: -1px; right: -1px;   border-width: 2px 2px 0 0; }
+        .corner.bl { bottom: -1px; left: -1px;  border-width: 0 0 2px 2px; }
+        .corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+        .card-title {
+            font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem;
+            letter-spacing: 4px; color: var(--orange);
+            text-align: center; margin-bottom: 4px;
+        }
+        .card-title::before, .card-title::after { content: '──'; font-size: .75rem; opacity: .5; margin: 0 10px; vertical-align: middle; }
+        .card-desc { text-align: center; color: rgba(240,244,255,.32); font-size: .8rem; letter-spacing: 1.5px; margin-bottom: 22px; }
+
+        .divider { display: flex; align-items: center; gap: 12px; margin: 0 0 22px; color: rgba(240,244,255,.18); font-size: .72rem; letter-spacing: 3px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,106,0,.2), transparent); }
+
+        /* CAMPOS */
+        .field { margin-bottom: 16px; position: relative; }
+        .field label {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: .68rem; letter-spacing: 3px;
+            color: var(--orange); text-transform: uppercase;
+            font-weight: 700; margin-bottom: 7px; opacity: .85;
+        }
+        .field-status {
+            font-size: .65rem; letter-spacing: 1px; font-weight: 700;
+            opacity: 0; transition: opacity .3s, color .3s;
+        }
+        .field-status.show { opacity: 1; }
+        .field-status.ok  { color: var(--ok); }
+        .field-status.err { color: var(--err); }
+
+        .field input {
+            width: 100%;
+            background: rgba(255,255,255,.03);
+            border: 1px solid rgba(255,106,0,.18);
+            border-bottom-color: rgba(255,106,0,.35);
+            border-radius: 3px; padding: 13px 40px 13px 42px;
+            color: var(--white); font-family: 'Rajdhani', sans-serif;
+            font-size: .97rem; font-weight: 600; letter-spacing: 1px;
+            outline: none; transition: all .35s;
+        }
+        .field input::placeholder { color: rgba(240,244,255,.2); font-weight: 400; }
+        .field input:focus {
+            border-color: var(--orange);
+            background: rgba(255,106,0,.05);
+            box-shadow: 0 0 0 3px rgba(255,106,0,.08), 0 4px 20px rgba(255,106,0,.12);
+            transform: translateY(-1px);
+        }
+        /* Estado válido */
+        .field input.valid {
+            border-color: var(--ok) !important;
+            box-shadow: 0 0 0 3px rgba(0,204,102,.08) !important;
+        }
+        /* Estado inválido (solo tras tocar) */
+        .field input.invalid {
+            border-color: var(--err) !important;
+            box-shadow: 0 0 0 3px rgba(255,51,51,.08) !important;
+            animation: shake .3s ease;
+        }
+        @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+        .field-icon { position: absolute; left: 14px; bottom: 14px; color: rgba(255,106,0,.45); font-size: 1rem; pointer-events: none; transition: color .3s; }
+        .field:focus-within .field-icon { color: var(--orange); }
+
+        /* Icono de validación a la derecha */
+        .field-check { position: absolute; right: 14px; bottom: 14px; font-size: 1rem; opacity: 0; transition: opacity .3s; pointer-events: none; }
+        .field-check.show { opacity: 1; }
+
+        .field::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            height: 2px; width: 0;
+            background: linear-gradient(90deg, var(--orange), var(--gold));
+            border-radius: 0 0 3px 3px; transition: width .4s cubic-bezier(.4,0,.2,1);
+        }
+        .field:focus-within::after { width: 100%; }
+
+        /* Mensaje de ayuda bajo el campo */
+        .field-hint {
+            font-size: .62rem; letter-spacing: 1.5px; margin-top: 6px;
+            min-height: 14px; transition: color .3s, opacity .3s;
+            opacity: 0; text-transform: uppercase;
+        }
+        .field-hint.show { opacity: 1; }
+        .field-hint.ok  { color: var(--ok); }
+        .field-hint.err { color: var(--err); }
+        .field-hint.info { color: rgba(240,244,255,.35); }
+
+        /* Barra de fuerza */
+        .strength-wrap { margin-top: 8px; }
+        .strength-bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,.07); overflow: hidden; }
+        .strength-fill { height: 100%; width: 0; border-radius: 2px; transition: width .4s ease, background .4s ease; }
+        .strength-label { font-size: .62rem; letter-spacing: 2px; color: rgba(240,244,255,.3); margin-top: 5px; text-transform: uppercase; transition: color .4s; }
+
+        /* BOTÓN */
+        .btn-submit {
+            width: 100%; margin-top: 8px; padding: 15px;
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange2) 60%, #ffaa00 100%);
+            border: none; border-radius: 3px; color: #fff;
+            font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem;
+            letter-spacing: 5px; cursor: pointer;
+            position: relative; overflow: hidden;
+            transition: all .3s cubic-bezier(.4,0,.2,1);
+            box-shadow: 0 4px 20px rgba(255,106,0,.3), inset 0 1px 0 rgba(255,255,255,.15);
+        }
+        .btn-submit::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 100%); opacity: 0; transition: opacity .3s; }
+        .btn-submit::after  { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent); transition: left .6s; }
+        .btn-submit:hover::before { opacity: 1; }
+        .btn-submit:hover::after  { left: 140%; }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 10px 35px rgba(255,106,0,.5); }
+        .btn-submit:active { transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: .45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        .btn-submit span { position: relative; z-index: 1; }
+
+        .foot { text-align: center; margin-top: 20px; font-size: .88rem; color: var(--dim); }
+        .foot a { color: var(--orange); text-decoration: none; font-weight: 700; letter-spacing: 1px; position: relative; transition: color .3s; }
+        .foot a::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 100%; height: 1px; background: var(--gold); transition: right .3s; }
+        .foot a:hover { color: var(--gold); }
+        .foot a:hover::after { right: 0; }
+    </style>
 </head>
-<body class="bg-dark text-white d-flex justify-content-center align-items-center vh-100">
+<body>
 
-<div class="card bg-secondary text-white p-4 shadow" style="width: 360px;">
-    <h1 class="text-center fw-bold mb-4">Crear cuenta</h1>
+<div class="hex-bg"></div>
+<div class="scanline"></div>
+<div class="energy">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+</div>
+<div class="particles" id="particles"></div>
+<div class="deco-number">11</div>
+<div class="deco-number2">∞</div>
 
-    <form th:action="@{/registro}" method="post">
-        <div class="mb-3">
-            <input type="text" name="nombre" placeholder="Usuario"
-                   class="form-control bg-dark text-white border-warning" required/>
-        </div>
-        <div class="mb-3">
-            <input type="email" name="email" placeholder="Email"
-                   class="form-control bg-dark text-white border-warning" required/>
-        </div>
-        <div class="mb-3">
-            <input type="password" name="password" placeholder="Contraseña"
-                   class="form-control bg-dark text-white border-warning" required/>
-        </div>
-        <div class="d-grid">
-            <button type="submit" class="btn btn-warning fw-bold">Registrarse</button>
-        </div>
-    </form>
+<div class="wrap">
 
-    <p class="text-center mt-3 mb-0">
-        <a href="/login" class="text-warning">¿Ya tienes cuenta? Inicia sesión</a>
-    </p>
+    <div class="brand">
+        <div class="brand-badge">⚡ Nuevo Jugador</div>
+        <div class="brand-name">INAZUMA LEGACY</div>
+        <div class="brand-sub">RAIMON FC · REGISTRO</div>
+    </div>
+
+    <div class="card">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+
+        <div class="card-title">Únete al Equipo</div>
+        <div class="card-desc">Completa tu ficha de jugador para entrar al campo</div>
+        <div class="divider">Raimon FC</div>
+
+        <form th:action="@{/registro}" method="post" id="form">
+
+            <!-- Nombre -->
+            <div class="field">
+                <label>
+                    Nombre de jugador
+                    <span class="field-status" id="nombreStatus"></span>
+                </label>
+                <span class="field-icon">◈</span>
+                <input type="text" name="nombre" id="nombre"
+                       placeholder="Solo letras, 3–20 caracteres" required autocomplete="off"/>
+                <span class="field-check" id="nombreCheck"></span>
+                <div class="field-hint info show" id="nombreHint">Mínimo 3 caracteres, solo letras y espacios</div>
+            </div>
+
+            <!-- Email -->
+            <div class="field">
+                <label>
+                    Email
+                    <span class="field-status" id="emailStatus"></span>
+                </label>
+                <span class="field-icon">⬡</span>
+                <input type="email" name="email" id="email"
+                       placeholder="correo@ejemplo.com" required autocomplete="off"/>
+                <span class="field-check" id="emailCheck"></span>
+                <div class="field-hint info show" id="emailHint">Introduce un email válido</div>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="field">
+                <label>
+                    Contraseña
+                    <span class="field-status" id="pwdStatus"></span>
+                </label>
+                <span class="field-icon">◆</span>
+                <input type="password" name="password" id="pwd"
+                       placeholder="Mínimo 6 caracteres" required/>
+                <span class="field-check" id="pwdCheck"></span>
+                <div class="strength-wrap">
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <div class="strength-label" id="strengthLabel">Introduce una contraseña</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>
+                <span>⚡ Fichar por el Raimon</span>
+            </button>
+        </form>
+
+        <div class="foot">
+            ¿Ya eres del equipo? <a href="/login">Inicia sesión</a>
+        </div>
+    </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ── VALIDADORES ──
+    const rules = {
+        nombre: v => /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]{3,20}$/.test(v.trim()),
+        email:  v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()),
+        pwd:    v => v.length >= 6,
+    };
+
+    const hints = {
+        nombre: {
+            ok:  '✔ Nombre válido',
+            err: '✘ Solo letras y espacios, entre 3 y 20 caracteres',
+            info:'Mínimo 3 caracteres, solo letras y espacios'
+        },
+        email: {
+            ok:  '✔ Email válido',
+            err: '✘ El formato del email no es correcto',
+            info:'Introduce un email válido'
+        },
+    };
+
+    const state = { nombre: false, email: false, pwd: false };
+
+    function validate(id, value) {
+        const ok     = rules[id](value);
+        const input  = document.getElementById(id);
+        const status = document.getElementById(id + 'Status');
+        const check  = document.getElementById(id + 'Check');
+        const hint   = document.getElementById(id + 'Hint');
+
+        if (value === '') {
+            input.classList.remove('valid','invalid');
+            if (status) { status.textContent = ''; status.className = 'field-status'; }
+            if (check)  { check.textContent = ''; check.className = 'field-check'; }
+            if (hint && hints[id]) { hint.textContent = hints[id].info; hint.className = 'field-hint info show'; }
+            state[id] = false;
+        } else if (ok) {
+            input.classList.add('valid'); input.classList.remove('invalid');
+            if (status) { status.textContent = '✔ OK'; status.className = 'field-status show ok'; }
+            if (check)  { check.textContent = '✔'; check.style.color = 'var(--ok)'; check.className = 'field-check show'; }
+            if (hint && hints[id]) { hint.textContent = hints[id].ok; hint.className = 'field-hint ok show'; }
+            state[id] = true;
+        } else {
+            input.classList.add('invalid'); input.classList.remove('valid');
+            if (status) { status.textContent = '✘ Error'; status.className = 'field-status show err'; }
+            if (check)  { check.textContent = '✘'; check.style.color = 'var(--err)'; check.className = 'field-check show'; }
+            if (hint && hints[id]) { hint.textContent = hints[id].err; hint.className = 'field-hint err show'; }
+            state[id] = false;
+        }
+
+        updateBtn();
+    }
+
+    function updateBtn() {
+        const btn = document.getElementById('submitBtn');
+        const allOk = state.nombre && state.email && state.pwd;
+        btn.disabled = !allOk;
+    }
+
+    // Nombre — solo letras y espacios, bloquear números y símbolos
+    const nombreInput = document.getElementById('nombre');
+    nombreInput.addEventListener('keypress', e => {
+        if (!/[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/.test(e.key)) e.preventDefault();
+    });
+    nombreInput.addEventListener('input', e => validate('nombre', e.target.value));
+
+    // Email
+    document.getElementById('email').addEventListener('input', e => validate('email', e.target.value));
+
+    // Contraseña — barra de fuerza + validación
+    const pwdInput     = document.getElementById('pwd');
+    const fill         = document.getElementById('strengthFill');
+    const strengthLbl  = document.getElementById('strengthLabel');
+    const levels = [
+        { pct: '0%',   color: '#333',    text: 'Introduce una contraseña' },
+        { pct: '20%',  color: '#ff3333', text: '⚠ Muy débil' },
+        { pct: '40%',  color: '#ff8800', text: '▲ Débil — necesitas más' },
+        { pct: '65%',  color: '#ffcc00', text: '◆ Regular — sigue intentando' },
+        { pct: '85%',  color: '#88dd00', text: '★ Buena — casi lista' },
+        { pct: '100%', color: '#00cc66', text: '⚡ ¡Contraseña de campeón!' },
+    ];
+    pwdInput.addEventListener('input', e => {
+        const v = e.target.value;
+        let score = 0;
+        if (v.length >= 6)          score++;
+        if (v.length >= 10)         score++;
+        if (/[A-Z]/.test(v))        score++;
+        if (/[0-9]/.test(v))        score++;
+        if (/[^A-Za-z0-9]/.test(v)) score++;
+        const lvl = levels[score] || levels[0];
+        fill.style.width      = lvl.pct;
+        fill.style.background = lvl.color;
+        strengthLbl.style.color = lvl.color;
+        strengthLbl.textContent = lvl.text;
+        validate('pwd', v);
+
+        const check  = document.getElementById('pwdCheck');
+        const status = document.getElementById('pwdStatus');
+        if (v.length >= 6) {
+            check.textContent = '✔'; check.style.color = 'var(--ok)'; check.className = 'field-check show';
+            status.textContent = '✔ OK'; status.className = 'field-status show ok';
+        } else if (v.length > 0) {
+            check.textContent = '✘'; check.style.color = 'var(--err)'; check.className = 'field-check show';
+            status.textContent = '✘ Muy corta'; status.className = 'field-status show err';
+        } else {
+            check.className = 'field-check'; status.className = 'field-status';
+        }
+    });
+
+    // Bloquear envío si hay campos inválidos
+    document.getElementById('form').addEventListener('submit', e => {
+        if (!state.nombre || !state.email || !state.pwd) {
+            e.preventDefault();
+        }
+    });
+
+    // Partículas
+    const pc = document.getElementById('particles');
+    for (let i = 0; i < 22; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const size = Math.random() * 3 + 1;
+        const isBlue = Math.random() > .65;
+        p.style.cssText = `
+            left:${Math.random()*100}%;
+            width:${size}px;height:${size}px;
+            background:${isBlue?'var(--electric)':'var(--orange)'};
+            opacity:${Math.random()*.5+.1};
+            animation-duration:${Math.random()*12+8}s;
+            animation-delay:${Math.random()*10}s;
+            box-shadow:0 0 ${size*3}px ${isBlue?'var(--electric)':'var(--orange)'};
+        `;
+        pc.appendChild(p);
+    }
+</script>
 </body>
 </html>
