@@ -1,30 +1,27 @@
 package net.elpuig.inazumalegacy.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "chat_equipo")
+@Data
 public class Mensaje {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String autor;
-    private String contenido;
-    private LocalDateTime fecha;
+    private String remitente;
+    private String destinatario; // "GLOBAL", "IA", o nombre de usuario
+
+    @Column(columnDefinition = "TEXT")
+    private String contenido; // Aquí irá el texto o la cadena Base64 si es audio
+
+    private String tipo; // "TEXTO", "AUDIO"
+    private LocalDateTime fechaEnvio;
 
     @PrePersist
     public void prePersist() {
-        this.fecha = LocalDateTime.now();
+        this.fechaEnvio = LocalDateTime.now();
     }
-
-    public Long getId() { return id; }
-    public String getAutor() { return autor; }
-    public void setAutor(String autor) { this.autor = autor; }
-    public String getContenido() { return contenido; }
-    public void setContenido(String contenido) { this.contenido = contenido; }
-    public LocalDateTime getFecha() { return fecha; }
-    public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 }
