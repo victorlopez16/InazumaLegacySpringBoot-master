@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Chat Core – Inazuma Legacy</title>
@@ -219,49 +221,80 @@
 </div>
 
 <script>
+    const nombreUsuario = /*[[${nombreUsuario}]]*/ 'Jugador';
+    let stompClient = null;
+    let tabActual = 'global';
+
+    // Conectar WebSocket al cargar
+    window.onload = function () {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null; // silenciar logs
+
+        stompClient.connect({}, function () {
+            // Escuchar mensajes privados (IA y privados)
+            stompClient.subscribe('/user/queue/messages', function (msg) {
+                mostrarMensaje(JSON.parse(msg.body));
+            });
+            // Escuchar canal global
+            stompClient.subscribe('/topic/public', function (msg) {
+                mostrarMensaje(JSON.parse(msg.body));
+            });
+        });
+    };
+
     function switchTab(type) {
+        tabActual = type;
         const title = document.getElementById('chat-title');
-        const tabs = document.querySelectorAll('.tab-item');
-
-        tabs.forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         event.currentTarget.classList.add('active');
-
-        if(type === 'global') {
-            title.innerText = 'CANAL GLOBAL';
-        } else if(type === 'privado') {
-            title.innerText = 'MENSAJES PRIVADOS';
-        } else if(type === 'ia') {
-            title.innerText = 'INAZUMA ASSISTANT (IA)';
-        }
+        if (type === 'global')  title.innerText = 'CANAL GLOBAL';
+        if (type === 'privado') title.innerText = 'MENSAJES PRIVADOS';
+        if (type === 'ia')      title.innerText = 'INAZUMA ASSISTANT (IA)';
     }
 
     function sendMessage() {
         const input = document.getElementById('user-input');
-        const chatBox = document.getElementById('chat-box');
+        if (!input.value.trim() || !stompClient) return;
 
-        if(input.value.trim() !== "") {
-            const now = new Date();
-            const time = now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
+        const destinatario = tabActual === 'ia' ? 'IA' : 'GLOBAL';
 
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'msg msg-out';
-            msgDiv.innerHTML = `
-                <div class="msg-info">TÚ</div>
-                ${input.value}
-                <span class="msg-time">${time}</span>
-            `;
+        const mensaje = {
+            remitente: nombreUsuario,
+            destinatario: destinatario,
+            contenido: input.value,
+            tipo: 'TEXTO',
+            fechaEnvio: new Date().toISOString()
+        };
 
-            chatBox.appendChild(msgDiv);
-            input.value = "";
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+        stompClient.send('/app/chat.send', {}, JSON.stringify(mensaje));
+        input.value = '';
     }
 
-    // Permitir enviar con Enter
-    document.getElementById('user-input').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
+    function mostrarMensaje(msg) {
+        const chatBox = document.getElementById('chat-box');
+        const esPropio = msg.remitente === nombreUsuario;
+        const esIA = msg.remitente === 'CLAUDE_IA';
+
+        const div = document.createElement('div');
+        div.className = `msg ${esPropio ? 'msg-out' : 'msg-in'} ${esIA ? 'msg-ia' : ''}`;
+
+        const hora = msg.fechaEnvio
+            ? new Date(msg.fechaEnvio).toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'})
+            : '--:--';
+
+        div.innerHTML = `
+            <div class="msg-info">${esIA ? '⚡ CLAUDE IA' : msg.remitente}</div>
+            ${msg.contenido}
+            <span class="msg-time">${hora}</span>
+        `;
+
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById('user-input').addEventListener('keypress', e => {
+        if (e.key === 'Enter') sendMessage();
     });
 </script>
 

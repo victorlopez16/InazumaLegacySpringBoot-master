@@ -27,6 +27,12 @@
       <artifactId>spring-boot-starter-webmvc</artifactId>
     </dependency>
 
+    <!-- Cliente HTTP para llamar a la API de Claude -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+
     <!-- WebSocket para el chat -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -79,6 +85,7 @@
     </dependency>
 
     <dependency>
+
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <scope>provided</scope>
