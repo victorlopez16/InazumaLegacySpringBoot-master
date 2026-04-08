@@ -445,16 +445,19 @@
         <div class="corner bl"></div><div class="corner br"></div>
 
         <div class="welcome-eyebrow">⚡ Campo de Entrenamiento — Raimon FC</div>
+
         <div class="welcome-title">
-            ¡Bienvenido a<br><span th:if="${session.usuario != null}">
-                <span th:text="${session.usuario}">Jugador</span>,
-            </span><span> Inazuma!</span>
+            ¡Bienvenido a<br>
+            <span th:if="${session.usuario != null}">
+        <span>Inazuma</span>,
+    </span>
+            <span th:text="${session.usuario + '!'}">Jugador!</span>
         </div>
+
         <div class="welcome-sub">
             Selecciona una temporada para explorar el plantel completo del equipo Raimon FC.
             Consulta estadísticas, técnicas especiales y mucho más.
         </div>
-    </div>
 
     <!-- TEMPORADAS -->
     <div class="card seasons-card" style="grid-column:2; grid-row:2;">
