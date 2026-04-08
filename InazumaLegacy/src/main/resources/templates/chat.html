@@ -227,20 +227,21 @@
 
     // Conectar WebSocket al cargar
     window.onload = function () {
-        const socket = new SockJS('/ws');
+        const socket = new SockJS('/ws-inazuma');
         stompClient = Stomp.over(socket);
         stompClient.debug = null; // silenciar logs
 
         stompClient.connect({}, function () {
-            // Escuchar mensajes privados (IA y privados)
-            stompClient.subscribe('/user/queue/messages', function (msg) {
-                mostrarMensaje(JSON.parse(msg.body));
-            });
-            // Escuchar canal global
-            stompClient.subscribe('/topic/public', function (msg) {
-                mostrarMensaje(JSON.parse(msg.body));
-            });
-        });
+    // Escuchar mensajes privados e IA por topic personal
+    stompClient.subscribe('/topic/user.' + nombreUsuario, function (msg) {
+        mostrarMensaje(JSON.parse(msg.body));
+    });
+    // Escuchar canal global
+    stompClient.subscribe('/topic/public', function (msg) {
+        mostrarMensaje(JSON.parse(msg.body));
+    });
+
+    });
     };
 
     function switchTab(type) {
@@ -274,7 +275,7 @@
     function mostrarMensaje(msg) {
         const chatBox = document.getElementById('chat-box');
         const esPropio = msg.remitente === nombreUsuario;
-        const esIA = msg.remitente === 'CLAUDE_IA';
+        const esIA = msg.remitente === 'GEMINI_IA'
 
         const div = document.createElement('div');
         div.className = `msg ${esPropio ? 'msg-out' : 'msg-in'} ${esIA ? 'msg-ia' : ''}`;

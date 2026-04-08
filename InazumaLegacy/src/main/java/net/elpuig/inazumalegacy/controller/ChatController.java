@@ -25,94 +25,43 @@ public class ChatController {
 
     @Autowired
     private MensajeRepository mensajeRepository;
-
-    @Value("${anthropic.api.key}")
-    private String anthropicApiKey;
-
-    @GetMapping("/chat")
-    public String irAlChat(Model model, Principal principal) {
-        if (principal != null) {
-            model.addAttribute("nombreUsuario", principal.getName());
-        } else {
-            model.addAttribute("nombreUsuario", "Jugador_Raimon");
-        }
-        return "chat";
-    }
-
-    @MessageMapping("/chat.send")
-    public void processMessage(@Payload Mensaje mensaje) {
-        if (mensaje.getFechaEnvio() == null) {
-            mensaje.setFechaEnvio(LocalDateTime.now());
-        }
-
-        mensajeRepository.save(mensaje);
-
-        if ("GLOBAL".equals(mensaje.getDestinatario())) {
-            messagingTemplate.convertAndSend("/topic/public", mensaje);
-
-        } else if ("IA".equals(mensaje.getDestinatario())) {
-            // Mostrar el mensaje del usuario en su pantalla
-            messagingTemplate.convertAndSendToUser(
-                    mensaje.getRemitente(), "/queue/messages", mensaje);
-
-            // Llamar a la API de Claude
-            String respuestaTexto = llamarClaudeAPI(mensaje.getContenido());
-
-            Mensaje respuestaIA = new Mensaje();
-            respuestaIA.setRemitente("CLAUDE_IA");
-            respuestaIA.setDestinatario(mensaje.getRemitente());
-            respuestaIA.setTipo("TEXTO");
-            respuestaIA.setFechaEnvio(LocalDateTime.now());
-            respuestaIA.setContenido(respuestaTexto);
-
-            mensajeRepository.save(respuestaIA);
-            messagingTemplate.convertAndSendToUser(
-                    mensaje.getRemitente(), "/queue/messages", respuestaIA);
-
-        } else {
-            messagingTemplate.convertAndSendToUser(
-                    mensaje.getDestinatario(), "/queue/messages", mensaje);
-            messagingTemplate.convertAndSendToUser(
-                    mensaje.getRemitente(), "/queue/messages", mensaje);
-        }
-    }
+    @Value("${gemini.api.key}")
+    private String geminiApiKey;
 
     private String llamarClaudeAPI(String preguntaUsuario) {
         try {
             WebClient client = WebClient.builder()
-                    .baseUrl("https://api.anthropic.com")
-                    .defaultHeader("x-api-key", anthropicApiKey)
-                    .defaultHeader("anthropic-version", "2023-06-01")
-                    .defaultHeader("content-type", "application/json")
+                    .baseUrl("https://generativelanguage.googleapis.com")
+                    .defaultHeader("Content-Type", "application/json")
                     .build();
 
+            Map<String, Object> part = Map.of("text", """
+                    Eres el asistente táctico oficial de Inazuma Legacy.
+                    Tu nombre es GEMINI_IA. Respondes siempre en español,
+                    de forma concisa y con el estilo épico del universo
+                    Inazuma Eleven. Máximo 3 frases por respuesta.
+                    Pregunta del usuario: """ + preguntaUsuario);
+
             Map<String, Object> body = Map.of(
-                    "model", "claude-sonnet-4-20250514",
-                    "max_tokens", 500,
-                    "system", """
-                    Eres el asistente táctico oficial de Inazuma Legacy, un juego de fútbol.
-                    Tu nombre es CLAUDE_IA. Respondes siempre en español, de forma concisa
-                    y con el estilo épico del universo Inazuma Eleven. Puedes hablar de
-                    jugadores, tácticas, temporadas y estadísticas del equipo Raimon FC.
-                    Máximo 3 frases por respuesta.
-                    """,
-                    "messages", List.of(
-                            Map.of("role", "user", "content", preguntaUsuario)
+                    "contents", List.of(
+                            Map.of("parts", List.of(part))
                     )
             );
 
             Map response = client.post()
-                    .uri("/v1/messages")
+                    .uri("/v1beta/models/gemini-2.0-flash:generateContent?key=" + geminiApiKey)
                     .bodyValue(body)
                     .retrieve()
                     .bodyToMono(Map.class)
                     .block();
 
-            List<Map> content = (List<Map>) response.get("content");
-            return (String) content.get(0).get("text");
+            List<Map> candidates = (List<Map>) response.get("candidates");
+            Map content = (Map) candidates.get(0).get("content");
+            List<Map> parts = (List<Map>) content.get("parts");
+            return (String) parts.get(0).get("text");
 
         } catch (Exception e) {
-            return "⚡ [ERROR] No se pudo contactar con el asistente táctico. Inténtalo de nuevo.";
+            return "⚡ [ERROR] No se pudo contactar con el asistente táctico.";
         }
     }
 }
