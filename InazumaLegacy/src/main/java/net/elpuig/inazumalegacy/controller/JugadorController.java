@@ -1,5 +1,6 @@
 package net.elpuig.inazumalegacy.controller;
 
+import jakarta.servlet.http.HttpSession;
 import net.elpuig.inazumalegacy.model.Jugador;
 import net.elpuig.inazumalegacy.model.JugadorS2;
 import net.elpuig.inazumalegacy.model.JugadorS3;
@@ -20,8 +21,17 @@ public class JugadorController {
     @Autowired private JugadorS2Repository jugadorS2Repo;
     @Autowired private JugadorS3Repository jugadorS3Repo;
 
+    // BUG 2 CORREGIDO: se añade HttpSession y Model para pasar nombreUsuario
+    // a inicio.html (necesario para que el enlace /chat sepa quién es el usuario)
     @GetMapping("/inicio")
-    public String inicio() { return "inicio"; }
+    public String inicio(HttpSession session, Model model) {
+        String nombreUsuario = (String) session.getAttribute("usuario");
+        if (nombreUsuario == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("nombreUsuario", nombreUsuario);
+        return "inicio";
+    }
 
     @GetMapping("/jugador/{id}")
     public String detalle(@PathVariable Long id, @RequestParam int temporada, Model model) {
