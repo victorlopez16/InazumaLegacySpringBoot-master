@@ -28,7 +28,6 @@
             overflow: hidden; color: var(--white);
         }
 
-        /* Reutilizamos el fondo animado de la pantalla anterior */
         body::before {
             content: ''; position: fixed; inset: 0; z-index: -1;
             background: radial-gradient(ellipse at 50% 50%, rgba(255,106,0,.1) 0%, transparent 80%), var(--navy);
@@ -40,7 +39,6 @@
             background-size: 50px 80px;
         }
 
-        /* CONTENEDOR PRINCIPAL DEL CHAT */
         .chat-container {
             width: 95%; max-width: 1100px; height: 85vh;
             display: flex; background: var(--glass);
@@ -53,7 +51,6 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* BARRA LATERAL (TABS) */
         .chat-sidebar {
             width: 260px; background: rgba(4, 16, 30, 0.6);
             border-right: 1px solid rgba(255,106,0,.15);
@@ -83,7 +80,6 @@
             text-shadow: 0 0 10px rgba(255,106,0,0.3);
         }
 
-        /* ÁREA DE MENSAJES */
         .chat-main { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.1); }
 
         .chat-header {
@@ -96,13 +92,14 @@
         .status-online { font-size: 0.7rem; color: var(--electric); display: flex; align-items: center; gap: 5px; text-transform: uppercase; }
         .status-online::before { content: ''; width: 6px; height: 6px; background: var(--electric); border-radius: 50%; box-shadow: 0 0 8px var(--electric); }
 
-        .messages-display {
+        /* CHAT BOXES — uno por pestaña */
+        .chat-box {
             flex: 1; padding: 25px; overflow-y: auto;
-            display: flex; flex-direction: column; gap: 15px;
+            display: none; flex-direction: column; gap: 15px;
             background-image: radial-gradient(circle at 50% 50%, rgba(7, 24, 48, 0.5), transparent);
         }
+        .chat-box.active { display: flex; }
 
-        /* BURBUJAS DE MENSAJE */
         .msg { max-width: 70%; padding: 12px 18px; border-radius: 4px; position: relative; font-size: 0.95rem; line-height: 1.4; }
 
         .msg-in {
@@ -118,7 +115,6 @@
         .msg-info { font-size: 0.65rem; color: var(--dim); margin-bottom: 5px; text-transform: uppercase; }
         .msg-time { font-size: 0.6rem; margin-top: 5px; display: block; text-align: right; opacity: 0.5; }
 
-        /* INPUT AREA */
         .chat-input-area {
             padding: 20px 25px; background: rgba(4, 16, 30, 0.8);
             border-top: 1px solid rgba(255,106,0,0.1);
@@ -145,17 +141,26 @@
         .btn-icon:hover { color: var(--orange); transform: scale(1.1); }
         .btn-send { color: var(--orange) !important; padding-left: 10px; }
 
-        /* Estilo especial para la IA */
         .tab-item.ia-tab.active {
             border-left-color: var(--electric); color: var(--electric);
             background: rgba(0, 229, 255, 0.1);
         }
+
         .msg-ia {
-            border-left: 3px solid var(--gold);
+            border-left: 3px solid gold;
             background: linear-gradient(90deg, rgba(255, 215, 0, 0.05), transparent);
         }
 
-        /* Scrollbar Personalizado */
+        /* Typing indicator */
+        .typing-indicator {
+            align-self: flex-start; padding: 10px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 3px solid var(--electric);
+            border-radius: 4px; font-size: 0.85rem;
+            color: var(--electric); display: none;
+        }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 10px; }
@@ -169,13 +174,13 @@
     <div class="chat-sidebar">
         <div class="sidebar-header">COMUNICACIONES</div>
         <div class="chat-tabs">
-            <div class="tab-item active" onclick="switchTab('global')">
+            <div class="tab-item active" onclick="switchTab('global', this)">
                 <span>⚡</span> Global Chat
             </div>
-            <div class="tab-item" onclick="switchTab('privado')">
+            <div class="tab-item" onclick="switchTab('privado', this)">
                 <span>👤</span> Mensajes Privados
             </div>
-            <div class="tab-item ia-tab" onclick="switchTab('ia')">
+            <div class="tab-item ia-tab" onclick="switchTab('ia', this)">
                 <span>🤖</span> IA - Inazuma Assistant
             </div>
         </div>
@@ -195,17 +200,24 @@
             </div>
         </div>
 
-        <div class="messages-display" id="chat-box">
-            <div class="msg msg-in msg-ia">
-                <div class="msg-info">SISTEMA IA // GEMINI</div>
-                ¡Saludos, capitán! Soy tu asistente de Inazuma Legacy. ¿En qué puedo ayudarte hoy con tu equipo?
-                <span class="msg-time">12:00 PM</span>
-            </div>
+        <!-- CHAT GLOBAL -->
+        <div class="chat-box active" id="box-global"></div>
 
-            <div class="msg msg-out">
-                <div class="msg-info">TÚ</div>
-                ¡Hola! Necesito revisar las estadísticas de Mark Evans.
-                <span class="msg-time">12:01 PM</span>
+        <!-- CHAT PRIVADO -->
+        <div class="chat-box" id="box-privado">
+            <div class="msg msg-in">
+                <div class="msg-info">SISTEMA</div>
+                Los mensajes privados aparecerán aquí.
+                <span class="msg-time">--:--</span>
+            </div>
+        </div>
+
+        <!-- CHAT IA -->
+        <div class="chat-box" id="box-ia">
+            <div class="msg msg-in msg-ia">
+                <div class="msg-info">GEMINI_IA // ASISTENTE</div>
+                ¡Saludos, capitán! Soy tu asistente de Inazuma Legacy. ¿En qué puedo ayudarte?
+                <span class="msg-time">--:--</span>
             </div>
         </div>
 
@@ -225,33 +237,42 @@
     let stompClient = null;
     let tabActual = 'global';
 
-    // Conectar WebSocket al cargar
     window.onload = function () {
         const socket = new SockJS('/ws-inazuma');
         stompClient = Stomp.over(socket);
-        stompClient.debug = null; // silenciar logs
+        stompClient.debug = null;
 
         stompClient.connect({}, function () {
-    // Escuchar mensajes privados e IA por topic personal
-    stompClient.subscribe('/topic/user.' + nombreUsuario, function (msg) {
-        mostrarMensaje(JSON.parse(msg.body));
-    });
-    // Escuchar canal global
-    stompClient.subscribe('/topic/public', function (msg) {
-        mostrarMensaje(JSON.parse(msg.body));
-    });
+            // Canal global
+            stompClient.subscribe('/topic/public', function (msg) {
+                const datos = JSON.parse(msg.body);
+                mostrarMensaje(datos, 'global');
+            });
 
-    });
+            // Canal privado e IA (mensajes dirigidos a este usuario)
+            stompClient.subscribe('/topic/user.' + nombreUsuario, function (msg) {
+                const datos = JSON.parse(msg.body);
+                // Si el remitente o destinatario es IA, va al box-ia; si no, al box-privado
+                const esIA = datos.remitente === 'GEMINI_IA' || datos.destinatario === 'IA';
+                mostrarMensaje(datos, esIA ? 'ia' : 'privado');
+            });
+        });
     };
 
-    function switchTab(type) {
+    function switchTab(type, el) {
         tabActual = type;
-        const title = document.getElementById('chat-title');
+
+        // Actualizar título
+        const titles = { global: 'CANAL GLOBAL', privado: 'MENSAJES PRIVADOS', ia: 'INAZUMA ASSISTANT (IA)' };
+        document.getElementById('chat-title').innerText = titles[type];
+
+        // Actualizar tab activo
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        if (type === 'global')  title.innerText = 'CANAL GLOBAL';
-        if (type === 'privado') title.innerText = 'MENSAJES PRIVADOS';
-        if (type === 'ia')      title.innerText = 'INAZUMA ASSISTANT (IA)';
+        el.classList.add('active');
+
+        // Mostrar el chat box correcto
+        document.querySelectorAll('.chat-box').forEach(b => b.classList.remove('active'));
+        document.getElementById('box-' + type).classList.add('active');
     }
 
     function sendMessage() {
@@ -272,20 +293,20 @@
         input.value = '';
     }
 
-    function mostrarMensaje(msg) {
-        const chatBox = document.getElementById('chat-box');
+    function mostrarMensaje(msg, tab) {
+        const chatBox = document.getElementById('box-' + tab);
         const esPropio = msg.remitente === nombreUsuario;
-        const esIA = msg.remitente === 'GEMINI_IA'
+        const esIA = msg.remitente === 'GEMINI_IA';
 
         const div = document.createElement('div');
         div.className = `msg ${esPropio ? 'msg-out' : 'msg-in'} ${esIA ? 'msg-ia' : ''}`;
 
         const hora = msg.fechaEnvio
-            ? new Date(msg.fechaEnvio).toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'})
+            ? new Date(msg.fechaEnvio).toLocaleTimeString('es', {hour: '2-digit', minute: '2-digit'})
             : '--:--';
 
         div.innerHTML = `
-            <div class="msg-info">${esIA ? '⚡ CLAUDE IA' : msg.remitente}</div>
+            <div class="msg-info">${esIA ? '⚡ GEMINI IA' : msg.remitente}</div>
             ${msg.contenido}
             <span class="msg-time">${hora}</span>
         `;
