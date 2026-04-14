@@ -58,7 +58,6 @@ public class ChatController {
             messagingTemplate.convertAndSend("/topic/public", mensaje);
 
         } else if ("IA".equals(mensaje.getDestinatario())) {
-            // Eco del mensaje propio al usuario
             messagingTemplate.convertAndSend(
                     "/topic/user." + mensaje.getRemitente(), mensaje);
 
@@ -74,7 +73,6 @@ public class ChatController {
                     "/topic/user." + mensaje.getRemitente(), msgIA);
 
         } else {
-            // Mensaje privado entre usuarios
             messagingTemplate.convertAndSend(
                     "/topic/user." + mensaje.getDestinatario(), mensaje);
             messagingTemplate.convertAndSend(

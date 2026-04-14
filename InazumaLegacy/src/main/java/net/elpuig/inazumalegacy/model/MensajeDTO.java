@@ -24,7 +24,6 @@ public class MensajeDTO {
     public String getFechaEnvio() { return fechaEnvio; }
     public void setFechaEnvio(String fechaEnvio) { this.fechaEnvio = fechaEnvio; }
 
-    // Campos legacy por compatibilidad (el DTO anterior usaba autor/contenido)
     public String getAutor() { return remitente; }
     public void setAutor(String autor) { this.remitente = autor; }
 }

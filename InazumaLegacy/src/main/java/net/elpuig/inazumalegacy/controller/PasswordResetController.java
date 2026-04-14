@@ -26,9 +26,6 @@ public class PasswordResetController {
     @Autowired
     private EmailService emailService;
 
-    // ══════════════════════════════════════════
-    // PASO 1 — Formulario pedir email
-    // ══════════════════════════════════════════
     @GetMapping("/recuperar-password")
     public String recuperarForm() {
         return "recuperar-paso1";
@@ -39,20 +36,15 @@ public class PasswordResetController {
                                 RedirectAttributes ra) {
         Optional<Usuario> opt = repo.findByEmail(email);
 
-        // Siempre mostramos el mismo mensaje por seguridad
-        // (no revelar si el email existe o no)
         if (opt.isPresent()) {
             Usuario u = opt.get();
 
-            // Generar código de 6 dígitos
             String codigo = String.format("%06d", new Random().nextInt(999999));
 
-            // Guardar en BD con expiración de 15 minutos
             u.setResetToken(codigo);
             u.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
             repo.save(u);
 
-            // Enviar email
             emailService.enviarCodigoRecuperacion(email, codigo);
         }
 
@@ -60,9 +52,6 @@ public class PasswordResetController {
         return "redirect:/verificar-codigo";
     }
 
-    // ══════════════════════════════════════════
-    // PASO 2 — Formulario verificar código
-    // ══════════════════════════════════════════
     @GetMapping("/verificar-codigo")
     public String verificarForm(Model model) {
         return "recuperar-paso2";
@@ -82,7 +71,6 @@ public class PasswordResetController {
 
         Usuario u = opt.get();
 
-        // Verificar que el código no ha expirado
         if (u.getResetTokenExpiry() == null ||
                 LocalDateTime.now().isAfter(u.getResetTokenExpiry())) {
             ra.addFlashAttribute("error", "El código ha expirado. Solicita uno nuevo.");
@@ -90,22 +78,17 @@ public class PasswordResetController {
             return "redirect:/verificar-codigo";
         }
 
-        // Verificar que el código es correcto
         if (!codigo.equals(u.getResetToken())) {
             ra.addFlashAttribute("error", "Código incorrecto. Inténtalo de nuevo.");
             ra.addFlashAttribute("email", email);
             return "redirect:/verificar-codigo";
         }
 
-        // Código válido → redirigir a cambiar contraseña
         ra.addFlashAttribute("email", email);
         ra.addFlashAttribute("token", codigo);
         return "redirect:/nueva-password";
     }
 
-    // ══════════════════════════════════════════
-    // PASO 3 — Formulario nueva contraseña
-    // ══════════════════════════════════════════
     @GetMapping("/nueva-password")
     public String nuevaPasswordForm() {
         return "recuperar-paso3";
@@ -117,7 +100,6 @@ public class PasswordResetController {
                                     @RequestParam String password,
                                     @RequestParam String password2,
                                     RedirectAttributes ra) {
-        // Verificar que las contraseñas coinciden
         if (!password.equals(password2)) {
             ra.addFlashAttribute("error", "Las contraseñas no coinciden.");
             ra.addFlashAttribute("email", email);
@@ -139,14 +121,12 @@ public class PasswordResetController {
 
         Usuario u = opt.get();
 
-        // Doble verificación del token
         if (!token.equals(u.getResetToken()) ||
                 LocalDateTime.now().isAfter(u.getResetTokenExpiry())) {
             ra.addFlashAttribute("error", "Sesión expirada. Inicia el proceso de nuevo.");
             return "redirect:/recuperar-password";
         }
 
-        // Actualizar contraseña y limpiar token
         u.setPassword(passwordEncoder.encode(password));
         u.setResetToken(null);
         u.setResetTokenExpiry(null);

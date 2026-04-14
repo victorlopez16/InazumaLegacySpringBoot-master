@@ -18,14 +18,12 @@ public class Usuario {
 
     private String password;
 
-    // ── CAMPOS NUEVOS para recuperación de contraseña ──
     @Column(name = "reset_token")
     private String resetToken;
 
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
-    // ── GETTERS Y SETTERS ──
     public Long getId() { return id; }
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
