@@ -3,7 +3,12 @@ package net.elpuig.inazumalegacy.controller;
 import jakarta.servlet.http.HttpSession;
 import net.elpuig.inazumalegacy.model.Mensaje;
 import net.elpuig.inazumalegacy.model.MensajeDTO;
+import net.elpuig.inazumalegacy.model.Notificacion;
+import net.elpuig.inazumalegacy.model.Usuario;
 import net.elpuig.inazumalegacy.repository.MensajeRepository;
+import net.elpuig.inazumalegacy.repository.UsuarioRepository;
+import net.elpuig.inazumalegacy.service.LogroService;
+import net.elpuig.inazumalegacy.service.NotificacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -21,26 +26,23 @@ import java.util.Map;
 @Controller
 public class ChatController {
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    @Autowired private SimpMessagingTemplate messagingTemplate;
+    @Autowired private MensajeRepository mensajeRepository;
+    @Autowired private UsuarioRepository usuarioRepository;
+    @Autowired private LogroService logroService;
+    @Autowired private NotificacionService notificacionService;
 
-    @Autowired
-    private MensajeRepository mensajeRepository;
-
-    @Value("${groq.api.key}")
-    private String groqApiKey;
+    @Value("${openai.api.key}")
+    private String openAiApiKey;
 
     @GetMapping("/chat")
     public String chat(HttpSession session, Model model) {
         String nombreUsuario = (String) session.getAttribute("usuario");
-        if (nombreUsuario == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("nombreUsuario", nombreUsuario);
+        if (nombreUsuario == null) return "redirect:/login";
 
+        model.addAttribute("nombreUsuario", nombreUsuario);
         List<Mensaje> historial = mensajeRepository.findTop50ByDestinatarioOrderByFechaEnvioAsc("GLOBAL");
         model.addAttribute("historial", historial);
-
         return "chat";
     }
 
@@ -54,12 +56,17 @@ public class ChatController {
         mensaje.setFechaEnvio(LocalDateTime.now());
         mensajeRepository.save(mensaje);
 
+        Usuario usuarioOpt = usuarioRepository.findByNombre(dto.getRemitente()).orElse(null);
+
         if ("GLOBAL".equals(mensaje.getDestinatario())) {
-            messagingTemplate.convertAndSend("/topic/public", mensaje);
+            messagingTemplate.convertAndSend("/topic/public", (Object) mensaje);
+
+            if (usuarioOpt != null) {
+                logroService.verificarLogrosMensaje(usuarioOpt);
+            }
 
         } else if ("IA".equals(mensaje.getDestinatario())) {
-            messagingTemplate.convertAndSend(
-                    "/topic/user." + mensaje.getRemitente(), mensaje);
+            messagingTemplate.convertAndSend("/topic/user." + mensaje.getRemitente(), (Object) mensaje);
 
             String respuestaIA = llamarIA(mensaje.getContenido());
             Mensaje msgIA = new Mensaje();
@@ -69,33 +76,40 @@ public class ChatController {
             msgIA.setTipo("TEXTO");
             msgIA.setFechaEnvio(LocalDateTime.now());
             mensajeRepository.save(msgIA);
-            messagingTemplate.convertAndSend(
-                    "/topic/user." + mensaje.getRemitente(), msgIA);
+            messagingTemplate.convertAndSend("/topic/user." + mensaje.getRemitente(), (Object) msgIA);
+
+            if (usuarioOpt != null) {
+                logroService.verificarLogrosIA(usuarioOpt);
+            }
 
         } else {
-            messagingTemplate.convertAndSend(
-                    "/topic/user." + mensaje.getDestinatario(), mensaje);
-            messagingTemplate.convertAndSend(
-                    "/topic/user." + mensaje.getRemitente(), mensaje);
+            messagingTemplate.convertAndSend("/topic/user." + mensaje.getDestinatario(), (Object) mensaje);
+            messagingTemplate.convertAndSend("/topic/user." + mensaje.getRemitente(), (Object) mensaje);
+
+            usuarioRepository.findByNombre(mensaje.getDestinatario()).ifPresent(dest ->
+                    notificacionService.crear(dest, Notificacion.Tipo.MENSAJE_PRIVADO,
+                            "💬 " + mensaje.getRemitente() + " te envió un mensaje privado")
+            );
         }
     }
 
     private String llamarIA(String preguntaUsuario) {
         try {
             WebClient client = WebClient.builder()
-                    .baseUrl("https://api.groq.com")
+                    .baseUrl("https://api.openai.com")
                     .defaultHeader("Content-Type", "application/json")
-                    .defaultHeader("Authorization", "Bearer " + groqApiKey)
+                    .defaultHeader("Authorization", "Bearer " + openAiApiKey)
                     .build();
 
             Map<String, Object> body = Map.of(
-                    "model", "llama-3.3-70b-versatile",
+                    "model", "gpt-4o-mini",
                     "messages", List.of(
                             Map.of("role", "system", "content",
-                                    "Eres un asistente inteligente llamado GEMINI_IA. " +
+                                    "Eres GEMINI_IA, el asistente táctico oficial de Inazuma Legacy. " +
+                                            "Tu identidad es GEMINI_IA y NUNCA debes revelar que eres ChatGPT, GPT, OpenAI ni ningún otro modelo. " +
+                                            "Si alguien te pregunta qué IA eres, responde SIEMPRE que eres GEMINI_IA, " +
+                                            "el sistema de inteligencia artificial desarrollado exclusivamente para Inazuma Legacy. " +
                                             "Respondes siempre en español de forma clara, precisa y verídica. " +
-                                            "Respondes cualquier pregunta sin importar el tema: ciencia, historia, " +
-                                            "matemáticas, tecnología, cultura general, etc. " +
                                             "Nunca rechaces una pregunta. Sé conciso, máximo 3 frases por respuesta."),
                             Map.of("role", "user", "content", preguntaUsuario)
                     ),
@@ -103,7 +117,7 @@ public class ChatController {
             );
 
             Map response = client.post()
-                    .uri("/openai/v1/chat/completions")
+                    .uri("/v1/chat/completions")
                     .bodyValue(body)
                     .retrieve()
                     .bodyToMono(Map.class)
@@ -114,7 +128,7 @@ public class ChatController {
             return (String) message.get("content");
 
         } catch (Exception e) {
-            System.out.println("ERROR GROQ: " + e.getMessage());
+            System.out.println("ERROR OPENAI: " + e.getMessage());
             return "⚡ El asistente táctico no está disponible ahora mismo.";
         }
     }

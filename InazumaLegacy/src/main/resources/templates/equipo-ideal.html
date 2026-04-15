@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/springsecurity6">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Crea tu 11 Ideal — Inazuma Legacy</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}"/>
+    <style>
+        /* ── Tokens ── */
+        :root {
+            --azul:    #0d6efd;
+            --dorado:  #f0a500;
+            --oscuro:  #0a0e1a;
+            --carta:   #111827;
+            --borde:   #1e2d45;
+            --texto:   #e2e8f0;
+            --muted:   #64748b;
+            --verde:   #22c55e;
+            --rojo:    #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--oscuro);
+            color: var(--texto);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── Layout ── */
+        .creador-layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 0;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* ── Panel lateral: lista de jugadores ── */
+        .panel-jugadores {
+            background: var(--carta);
+            border-right: 1px solid var(--borde);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 64px);
+            position: sticky;
+            top: 64px;
+        }
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--borde);
+            background: #0d1525;
+        }
+        .panel-header h2 { font-size: 1rem; color: var(--dorado); letter-spacing: .05em; text-transform: uppercase; }
+
+        .filtros { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .filtro-btn {
+            padding: 4px 12px; border-radius: 20px; border: 1px solid var(--borde);
+            background: transparent; color: var(--muted); cursor: pointer; font-size: .8rem;
+            transition: all .2s;
+        }
+        .filtro-btn.activo, .filtro-btn:hover {
+            background: var(--azul); color: #fff; border-color: var(--azul);
+        }
+
+        #buscador {
+            width: 100%; padding: 10px 14px; margin-top: 10px;
+            background: #1a2235; border: 1px solid var(--borde); border-radius: 8px;
+            color: var(--texto); font-size: .9rem;
+        }
+        #buscador:focus { outline: none; border-color: var(--azul); }
+
+        .lista-jugadores {
+            overflow-y: auto; flex: 1; padding: 8px;
+        }
+        .lista-jugadores::-webkit-scrollbar { width: 4px; }
+        .lista-jugadores::-webkit-scrollbar-thumb { background: var(--borde); border-radius: 4px; }
+
+        .jugador-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer;
+            transition: background .15s; margin-bottom: 2px;
+        }
+        .jugador-item:hover { background: #1a2d4a; }
+        .jugador-item.seleccionado { background: #0d2d1a; border: 1px solid var(--verde); }
+
+        .badge-pos {
+            font-size: .65rem; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: .04em; min-width: 32px; text-align: center;
+        }
+        .badge-PO { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed55; }
+        .badge-DE { background: #1d4ed822; color: #60a5fa; border: 1px solid #1d4ed855; }
+        .badge-CE { background: #15803d22; color: #4ade80; border: 1px solid #15803d55; }
+        .badge-DE_lat { background: #1d4ed822; color: #60a5fa; border: 1px solid #1d4ed855; }
+        .badge-DEL { background: #b45309;22; color: #fbbf24; border: 1px solid #b4530955; }
+
+        .jugador-info { flex: 1; }
+        .jugador-nombre { font-size: .9rem; font-weight: 600; }
+        .jugador-meta { font-size: .75rem; color: var(--muted); }
+
+        .badge-temp {
+            font-size: .65rem; padding: 2px 6px; border-radius: 4px;
+            background: #1e2d45; color: var(--muted);
+        }
+
+        /* ── Panel central: campo ── */
+        .panel-campo {
+            padding: 24px;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+
+        .campo-header {
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+        }
+        .campo-header h1 {
+            font-size: 1.4rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--dorado), #fff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .select-formacion {
+            padding: 8px 14px; background: var(--carta); border: 1px solid var(--borde);
+            border-radius: 8px; color: var(--texto); font-size: .9rem; cursor: pointer;
+        }
+        .select-formacion:focus { outline: none; border-color: var(--dorado); }
+
+        /* ── Campo de fútbol ── */
+        .campo-futbol {
+            background:
+                linear-gradient(to bottom, #1a4a1a 0%, #1e5a1e 50%, #1a4a1a 100%);
+            border-radius: 12px;
+            border: 2px solid #2d7a2d;
+            position: relative;
+            width: 100%;
+            max-width: 680px;
+            aspect-ratio: 7/10;
+            overflow: hidden;
+            box-shadow: 0 20px 60px #000a;
+        }
+
+        /* Líneas del campo */
+        .campo-futbol::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                /* Centro */
+                radial-gradient(ellipse 40% 5% at 50% 50%, #fff2 0%, transparent 100%),
+                /* Línea central */
+                linear-gradient(to bottom, transparent calc(50% - 1px), #fff3 calc(50% - 1px), #fff3 calc(50% + 1px), transparent calc(50% + 1px));
+            pointer-events: none;
+        }
+
+        .lineas-campo {
+            position: absolute; inset: 0; pointer-events: none;
+        }
+
+        /* Filas de jugadores en el campo */
+        .campo-filas {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            padding: 16px 8px;
+            gap: 0;
+        }
+
+        .campo-fila {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        /* Slot de jugador en el campo */
+        .slot {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            cursor: pointer; position: relative;
+        }
+
+        .slot-circulo {
+            width: 52px; height: 52px; border-radius: 50%;
+            border: 2px dashed #ffffff55;
+            background: #00000044;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .7rem; color: #ffffff88;
+            transition: all .2s;
+            backdrop-filter: blur(4px);
+        }
+        .slot.ocupado .slot-circulo {
+            border: 2px solid var(--dorado);
+            background: #0d2d1a88;
+        }
+        .slot:hover .slot-circulo {
+            border-color: var(--azul);
+            background: #0d1a2d88;
+            transform: scale(1.05);
+        }
+        .slot-nombre {
+            font-size: .6rem; font-weight: 700; color: #fff;
+            text-shadow: 0 1px 4px #000;
+            text-align: center; max-width: 60px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .slot-pos-label {
+            font-size: .55rem; color: #ffffff88;
+            text-transform: uppercase;
+        }
+
+        /* Botón quitar jugador del slot */
+        .slot-quitar {
+            position: absolute; top: -4px; right: -4px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--rojo); border: none; color: #fff;
+            font-size: .6rem; cursor: pointer; display: none;
+            align-items: center; justify-content: center;
+            line-height: 1;
+        }
+        .slot.ocupado .slot-quitar { display: flex; }
+
+        /* ── Panel guardar ── */
+        .panel-guardar {
+            background: var(--carta); border: 1px solid var(--borde);
+            border-radius: 12px; padding: 20px;
+            display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+        }
+        .panel-guardar label { font-size: .8rem; color: var(--muted); display: block; margin-bottom: 4px; }
+        .panel-guardar input[type="text"] {
+            padding: 10px 14px; background: #1a2235; border: 1px solid var(--borde);
+            border-radius: 8px; color: var(--texto); font-size: .9rem; width: 240px;
+        }
+        .panel-guardar input:focus { outline: none; border-color: var(--dorado); }
+
+        .btn-guardar {
+            padding: 10px 24px; background: var(--dorado); color: #000;
+            border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
+            font-size: .9rem; transition: opacity .2s;
+        }
+        .btn-guardar:hover { opacity: .85; }
+
+        .btn-limpiar {
+            padding: 10px 18px; background: transparent; color: var(--muted);
+            border: 1px solid var(--borde); border-radius: 8px; cursor: pointer;
+            font-size: .9rem; transition: all .2s;
+        }
+        .btn-limpiar:hover { border-color: var(--rojo); color: var(--rojo); }
+
+        /* ── Mis equipos guardados ── */
+        .mis-equipos { margin-top: 8px; }
+        .mis-equipos h2 { font-size: 1rem; margin-bottom: 12px; color: var(--dorado); }
+        .equipos-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+        }
+        .equipo-card {
+            background: var(--carta); border: 1px solid var(--borde);
+            border-radius: 10px; padding: 16px;
+        }
+        .equipo-card h3 { font-size: .95rem; margin-bottom: 4px; }
+        .equipo-card .meta { font-size: .8rem; color: var(--muted); margin-bottom: 12px; }
+        .btn-eliminar {
+            padding: 6px 14px; background: transparent; border: 1px solid var(--rojo);
+            color: var(--rojo); border-radius: 6px; cursor: pointer; font-size: .8rem;
+            transition: all .2s;
+        }
+        .btn-eliminar:hover { background: var(--rojo); color: #fff; }
+
+        /* ── Alertas ── */
+        .alerta {
+            padding: 12px 16px; border-radius: 8px; font-size: .9rem; margin-bottom: 16px;
+        }
+        .alerta-exito { background: #14532d44; border: 1px solid var(--verde); color: var(--verde); }
+        .alerta-error  { background: #7f1d1d44; border: 1px solid var(--rojo);  color: var(--rojo); }
+
+        /* ── Contador ── */
+        .contador {
+            font-size: .85rem; color: var(--muted);
+            margin-left: auto;
+        }
+        .contador span { color: var(--dorado); font-weight: 700; }
+
+        @media (max-width: 900px) {
+            .creador-layout { grid-template-columns: 1fr; }
+            .panel-jugadores { height: 300px; position: static; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar (reutiliza el tuyo) -->
+<nav style="height:64px; background:#0a0e1a; border-bottom:1px solid #1e2d45;"></nav>
+
+<div class="creador-layout">
+
+    <!-- ══════════ PANEL IZQUIERDO: JUGADORES ══════════ -->
+    <aside class="panel-jugadores">
+        <div class="panel-header">
+            <h2>⚡ Jugadores</h2>
+            <div class="filtros">
+                <button class="filtro-btn activo" data-filtro="todos">Todos</button>
+                <button class="filtro-btn" data-filtro="Portero">PO</button>
+                <button class="filtro-btn" data-filtro="Defensa">DE</button>
+                <button class="filtro-btn" data-filtro="Centrocampista">CE</button>
+                <button class="filtro-btn" data-filtro="Delantero">DEL</button>
+            </div>
+            <input type="text" id="buscador" placeholder="Buscar jugador..."/>
+        </div>
+
+        <div class="lista-jugadores" id="listaJugadores">
+            <div th:each="j : ${jugadores}" class="jugador-item"
+                 th:data-id="${j.id}"
+                 th:data-nombre="${j.nombre}"
+                 th:data-posicion="${j.posicion}"
+                 th:data-temporada="${j.temporada}"
+                 th:data-equipo="${j.equipo}"
+                 onclick="seleccionarJugador(this)">
+                <span class="badge-pos"
+                      th:classappend="${j.posicion == 'Portero'} ? 'badge-PO' :
+                                      (${j.posicion == 'Defensa'} ? 'badge-DE' :
+                                      (${j.posicion == 'Centrocampista'} ? 'badge-CE' : 'badge-DEL'))"
+                      th:text="${j.posicion == 'Portero'} ? 'PO' :
+                               (${j.posicion == 'Defensa'} ? 'DE' :
+                               (${j.posicion == 'Centrocampista'} ? 'CE' : 'DEL'))">
+                </span>
+                <div class="jugador-info">
+                    <div class="jugador-nombre" th:text="${j.nombre}"></div>
+                    <div class="jugador-meta" th:text="${j.equipo}"></div>
+                </div>
+                <span class="badge-temp" th:text="${j.temporada}"></span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ══════════ PANEL DERECHO: CAMPO + GUARDAR ══════════ -->
+    <main class="panel-campo">
+
+        <!-- Alertas -->
+        <div th:if="${exito}" class="alerta alerta-exito" th:text="${exito}"></div>
+        <div th:if="${error}"  class="alerta alerta-error"  th:text="${error}"></div>
+
+        <div class="campo-header">
+            <h1>🏆 Tu 11 Ideal</h1>
+            <select class="select-formacion" id="selectFormacion" onchange="cambiarFormacion(this.value)">
+                <option th:each="f : ${formaciones}" th:value="${f}" th:text="${f}"></option>
+            </select>
+            <span class="contador">Seleccionados: <span id="contadorNum">0</span>/11</span>
+        </div>
+
+        <!-- Campo de fútbol -->
+        <div class="campo-futbol">
+            <svg class="lineas-campo" viewBox="0 0 100 140" preserveAspectRatio="none">
+                <!-- Borde -->
+                <rect x="5" y="5" width="90" height="130" fill="none" stroke="white" stroke-opacity=".25" stroke-width=".8"/>
+                <!-- Línea central -->
+                <line x1="5" y1="70" x2="95" y2="70" stroke="white" stroke-opacity=".25" stroke-width=".8"/>
+                <!-- Círculo central -->
+                <circle cx="50" cy="70" r="15" fill="none" stroke="white" stroke-opacity=".2" stroke-width=".8"/>
+                <circle cx="50" cy="70" r="1" fill="white" fill-opacity=".3"/>
+                <!-- Área grande arriba -->
+                <rect x="22" y="5" width="56" height="22" fill="none" stroke="white" stroke-opacity=".2" stroke-width=".8"/>
+                <!-- Área pequeña arriba -->
+                <rect x="34" y="5" width="32" height="10" fill="none" stroke="white" stroke-opacity=".15" stroke-width=".8"/>
+                <!-- Área grande abajo -->
+                <rect x="22" y="113" width="56" height="22" fill="none" stroke="white" stroke-opacity=".2" stroke-width=".8"/>
+                <!-- Área pequeña abajo -->
+                <rect x="34" y="125" width="32" height="10" fill="none" stroke="white" stroke-opacity=".15" stroke-width=".8"/>
+                <!-- Punto penalti arriba -->
+                <circle cx="50" cy="20" r="1" fill="white" fill-opacity=".3"/>
+                <!-- Punto penalti abajo -->
+                <circle cx="50" cy="120" r="1" fill="white" fill-opacity=".3"/>
+            </svg>
+
+            <div class="campo-filas" id="campoFilas">
+                <!-- Generado por JS según formación -->
+            </div>
+        </div>
+
+        <!-- Formulario guardar -->
+        <form th:action="@{/equipo-ideal/guardar}" method="post" class="panel-guardar" id="formGuardar">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="formacion" id="inputFormacion" value="4-3-3"/>
+            <input type="hidden" name="jugadoresJson" id="inputJugadoresJson" value="[]"/>
+            <div>
+                <label>Nombre del equipo</label>
+                <input type="text" name="nombre" placeholder="Ej: Los Imbatibles" maxlength="80"/>
+            </div>
+            <button type="submit" class="btn-guardar" onclick="prepararGuardado()">💾 Guardar equipo</button>
+            <button type="button" class="btn-limpiar" onclick="limpiarCampo()">✕ Limpiar</button>
+        </form>
+
+        <!-- Mis equipos guardados -->
+        <div class="mis-equipos" th:if="${misEquipos != null and !misEquipos.isEmpty()}">
+            <h2>Mis equipos guardados</h2>
+            <div class="equipos-grid">
+                <div th:each="eq : ${misEquipos}" class="equipo-card">
+                    <h3 th:text="${eq.nombre}"></h3>
+                    <div class="meta">
+                        <span th:text="${eq.formacion}"></span> ·
+                        <span th:text="${#temporals.format(eq.creadoEn, 'dd/MM/yyyy')}"></span>
+                    </div>
+                    <form th:action="@{'/equipo-ideal/eliminar/' + ${eq.id}}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn-eliminar">🗑 Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    // ─── Estado global ───────────────────────────────────────────────────
+    let formacionActual = '4-3-3';
+    let slots = [];          // [{pos, label, jugadorId, jugadorNombre}]
+    let slotActivo = null;   // índice del slot que espera jugador
+
+    // ─── Formaciones: [porteros, defensas[], centros[], delanteros[]] ───
+    const FORMACIONES = {
+        '4-3-3': [1, 4, 3, 3],
+        '4-4-2': [1, 4, 4, 2],
+        '3-4-3': [1, 3, 4, 3],
+        '3-5-2': [1, 3, 5, 2],
+        '5-3-2': [1, 5, 3, 2],
+        '4-5-1': [1, 4, 5, 1],
+    };
+
+    const LABELS = ['PO', 'DE', 'CE', 'DEL'];
+    const POSICIONES = ['Portero', 'Defensa', 'Centrocampista', 'Delantero'];
+
+    function cambiarFormacion(f) {
+        formacionActual = f;
+        document.getElementById('inputFormacion').value = f;
+        construirCampo();
+    }
+
+    function construirCampo() {
+        const nums = FORMACIONES[formacionActual];
+        const contenedor = document.getElementById('campoFilas');
+        contenedor.innerHTML = '';
+        slots = [];
+
+        // Filas: portero abajo → delanteros arriba (en pantalla arriba→abajo)
+        const filasCampo = [...nums].reverse(); // DEL, CE, DE, PO
+        const posIdx = [3, 2, 1, 0];           // DEL, CE, DE, PO
+
+        filasCampo.forEach((count, fi) => {
+            const fila = document.createElement('div');
+            fila.className = 'campo-fila';
+
+            for (let i = 0; i < count; i++) {
+                const idx = slots.length;
+                const posicion = POSICIONES[posIdx[fi]];
+                const label = LABELS[posIdx[fi]];
+
+                slots.push({ posicion, label, jugadorId: null, jugadorNombre: null });
+
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.id = `slot-${idx}`;
+                slot.onclick = () => activarSlot(idx);
+                slot.innerHTML = `
+                    <button class="slot-quitar" onclick="event.stopPropagation(); quitarJugador(${idx})">✕</button>
+                    <div class="slot-circulo" id="circulo-${idx}">${label}</div>
+                    <div class="slot-nombre" id="nombre-${idx}">—</div>
+                `;
+                fila.appendChild(slot);
+            }
+            contenedor.appendChild(fila);
+        });
+
+        actualizarContador();
+    }
+
+    function activarSlot(idx) {
+        slotActivo = idx;
+        // Resaltar slot activo
+        document.querySelectorAll('.slot').forEach((s, i) => {
+            s.style.outline = i === idx ? '2px solid var(--dorado)' : 'none';
+            s.style.borderRadius = '50%';
+        });
+        // Si ya tiene jugador, no hacer nada más
+    }
+
+    function seleccionarJugador(el) {
+        if (slotActivo === null) {
+            // Sin slot activo: avisar
+            el.style.background = '#2d1a0d';
+            setTimeout(() => el.style.background = '', 400);
+            alert('Primero haz clic en un slot del campo para indicar dónde colocar al jugador.');
+            return;
+        }
+
+        const id      = el.dataset.id;
+        const nombre  = el.dataset.nombre;
+        const posicion = el.dataset.posicion;
+
+        // Validar posición
+        const slotPosicion = slots[slotActivo].posicion;
+        if (slotPosicion !== posicion) {
+            alert(`Ese slot es para ${slotPosicion}. ${nombre} es ${posicion}.`);
+            return;
+        }
+
+        // Comprobar que el jugador no esté ya en otro slot
+        const yaUsado = slots.findIndex(s => s.jugadorId === id);
+        if (yaUsado !== -1 && yaUsado !== slotActivo) {
+            alert(`${nombre} ya está en el equipo.`);
+            return;
+        }
+
+        // Asignar
+        slots[slotActivo].jugadorId     = id;
+        slots[slotActivo].jugadorNombre = nombre;
+
+        document.getElementById(`circulo-${slotActivo}`).textContent = '⚡';
+        document.getElementById(`nombre-${slotActivo}`).textContent  = nombre.split(' ')[0];
+        document.getElementById(`slot-${slotActivo}`).classList.add('ocupado');
+
+        // Marcar item como seleccionado
+        document.querySelectorAll('.jugador-item').forEach(i => i.classList.remove('seleccionado'));
+        el.classList.add('seleccionado');
+
+        // Reset slot activo
+        document.querySelectorAll('.slot').forEach(s => s.style.outline = 'none');
+        slotActivo = null;
+        actualizarContador();
+    }
+
+    function quitarJugador(idx) {
+        const idJugador = slots[idx].jugadorId;
+        slots[idx].jugadorId     = null;
+        slots[idx].jugadorNombre = null;
+
+        document.getElementById(`circulo-${idx}`).textContent = slots[idx].label;
+        document.getElementById(`nombre-${idx}`).textContent  = '—';
+        document.getElementById(`slot-${idx}`).classList.remove('ocupado');
+
+        // Desmarcar en lista
+        if (idJugador) {
+            document.querySelectorAll('.jugador-item').forEach(el => {
+                if (el.dataset.id === idJugador) el.classList.remove('seleccionado');
+            });
+        }
+        actualizarContador();
+    }
+
+    function limpiarCampo() {
+        construirCampo();
+        document.querySelectorAll('.jugador-item').forEach(el => el.classList.remove('seleccionado'));
+    }
+
+    function actualizarContador() {
+        const ocupados = slots.filter(s => s.jugadorId !== null).length;
+        document.getElementById('contadorNum').textContent = ocupados;
+    }
+
+    function prepararGuardado() {
+        const data = slots.map(s => ({ id: s.jugadorId, nombre: s.jugadorNombre, posicion: s.posicion }));
+        document.getElementById('inputJugadoresJson').value = JSON.stringify(data);
+        document.getElementById('inputFormacion').value = formacionActual;
+    }
+
+    // ─── Filtros y buscador ───────────────────────────────────────────────
+    document.querySelectorAll('.filtro-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('activo'));
+            btn.classList.add('activo');
+            filtrarLista();
+        });
+    });
+
+    document.getElementById('buscador').addEventListener('input', filtrarLista);
+
+    function filtrarLista() {
+        const filtro  = document.querySelector('.filtro-btn.activo').dataset.filtro;
+        const buscar  = document.getElementById('buscador').value.toLowerCase();
+
+        document.querySelectorAll('.jugador-item').forEach(el => {
+            const pos    = el.dataset.posicion;
+            const nombre = el.dataset.nombre.toLowerCase();
+            const equipo = (el.dataset.equipo || '').toLowerCase();
+
+            const pasaFiltro = filtro === 'todos' || pos === filtro;
+            const pasaBuscar = nombre.includes(buscar) || equipo.includes(buscar);
+
+            el.style.display = (pasaFiltro && pasaBuscar) ? '' : 'none';
+        });
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────────
+    cambiarFormacion('4-3-3');
+</script>
+
+</body>
+</html>
