@@ -18,6 +18,10 @@ public class Usuario {
 
     private String password;
 
+    private String descripcion;
+    private String afiliacion;
+    private String rango;
+
     @Column(name = "reset_token")
     private String resetToken;
 
@@ -31,6 +35,12 @@ public class Usuario {
     public void setEmail(String email) { this.email = email; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public String getAfiliacion() { return afiliacion; }
+    public void setAfiliacion(String afiliacion) { this.afiliacion = afiliacion; }
+    public String getRango() { return rango; }
+    public void setRango(String rango) { this.rango = rango; }
     public String getResetToken() { return resetToken; }
     public void setResetToken(String resetToken) { this.resetToken = resetToken; }
     public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }

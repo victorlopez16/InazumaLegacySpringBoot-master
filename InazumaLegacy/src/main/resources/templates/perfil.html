@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Inazuma Legacy – Profile HUD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --neon: #ff6a00;
+            --blue: #00e5ff;
+            --bg: #020812;
+            --glass: rgba(10, 25, 47, 0.8);
+        }
+        * { cursor: crosshair; }
+        body {
+            background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
+        }
+        .cyber-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(255,106,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,106,0,0.05) 1px, transparent 1px); background-size: 50px 50px; z-index: -1; }
+
+        .nav-header { position: fixed; top: 20px; display: flex; gap: 15px; z-index: 100; }
+        .nav-btn {
+            text-decoration: none; color: var(--blue); border: 1px solid var(--blue);
+            padding: 8px 15px; font-family: 'Orbitron'; font-size: 0.7rem; transition: 0.3s;
+        }
+        .nav-btn:hover { background: var(--blue); color: black; box-shadow: 0 0 15px var(--blue); }
+
+        .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; width: 95%; max-width: 1000px; margin-top: 50px; }
+
+        .module {
+            background: var(--glass); border: 1px solid var(--neon); padding: 25px;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+        }
+
+        .avatar-placeholder {
+            width: 140px; height: 140px; border: 2px solid var(--blue); margin: 0 auto 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Orbitron'; font-size: 3rem; color: var(--blue);
+            background: rgba(0, 229, 255, 0.1);
+            clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
+        }
+
+        label { font-family: 'Orbitron'; font-size: 0.65rem; color: var(--neon); display: block; margin-top: 15px; letter-spacing: 1px; }
+        input, textarea {
+            width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(0, 229, 255, 0.3);
+            padding: 12px; color: white; margin-top: 5px; font-family: 'Rajdhani'; outline: none;
+        }
+        input:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+
+        .btn-sync {
+            width: 100%; padding: 15px; background: transparent; border: 1px solid var(--neon);
+            color: var(--neon); font-family: 'Orbitron'; cursor: pointer; margin-top: 25px;
+            transition: 0.3s; font-weight: bold;
+            clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
+        }
+        .btn-sync:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
+
+        .success-msg { color: #00ff88; font-family: 'Orbitron'; text-align: center; font-size: 0.8rem; margin-bottom: 15px; text-shadow: 0 0 10px #00ff88; }
+        .preview-data { font-size: 0.8rem; color: var(--blue); margin-top: 10px; font-family: 'Orbitron'; }
+    </style>
+</head>
+<body>
+
+<div class="cyber-grid"></div>
+
+<nav class="nav-header">
+    <a th:href="@{/inicio}" class="nav-btn">CENTRO DE MANDO</a>
+    <a th:href="@{/perfil}" class="nav-btn" style="border-color: var(--neon); color: var(--neon);">ID_PERFIL</a>
+</nav>
+
+<div class="layout" th:if="${user != null}">
+    <div class="module" style="text-align: center;">
+        <span style="font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon);">IDENT_PREVIEW</span>
+        <div class="avatar-placeholder">
+            <span id="previewChar" th:text="${user.nombre != null ? #strings.toUpperCase(#strings.substring(user.nombre,0,1)) : 'U'}">V</span>
+        </div>
+        <h2 id="previewNombre" style="font-family: 'Orbitron'; margin-bottom: 10px;" th:text="${user.nombre}">AGENTE</h2>
+
+        <div style="border-top: 1px solid rgba(0,229,255,0.2); margin-top: 10px; padding-top: 10px;">
+            <p class="preview-data" id="previewRango" th:text="${user.rango != null ? #strings.toUpperCase(user.rango) : 'SIN_RANGO'}">CAPTAIN</p>
+            <p style="font-size: 0.6rem; color: white;" id="previewAfiliacion" th:text="${user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'SIN_AFILIACION'}">RAIMON_HIGH</p>
+        </div>
+    </div>
+
+    <div class="module">
+        <h1 style="font-family: 'Bebas Neue'; font-size: 2.2rem; border-bottom: 1px solid var(--neon); margin-bottom: 15px; letter-spacing: 2px;">MODIFICAR_DATOS_AGENTE</h1>
+
+        <div th:if="${param.success}" class="success-msg">>> BASE_DE_DATOS_ACTUALIZADA_CON_ÉXITO_</div>
+
+        <form th:action="@{/perfil/actualizar}" method="post">
+            <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <label>NOMBRE_DE_USUARIO</label>
+            <input type="text" id="inNombre" name="nombre" th:value="${user.nombre}" required autocomplete="off">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>RANGO / POSICIÓN</label>
+                    <input type="text" id="inRango" name="rango" th:value="${user.rango}" placeholder="Ej: PORTERO">
+                </div>
+                <div>
+                    <label>AFILIACIÓN (EQUIPO)</label>
+                    <input type="text" id="inAfiliacion" name="afiliacion" th:value="${user.afiliacion}" placeholder="Ej: INSTITUTO RAIMON">
+                </div>
+            </div>
+
+            <label>BIOGRAFÍA_TÁCTICA</label>
+            <textarea name="descripcion" rows="4" th:text="${user.descripcion}" placeholder="Escribe tu historial táctico aquí..."></textarea>
+
+            <button type="submit" class="btn-sync">SINCRONIZAR_CAMBIOS_CON_EL_NÚCLEO</button>
+        </form>
+    </div>
+</div>
+
+<div th:unless="${user != null}" class="module">
+    <p class="success-msg" style="color: #ff4444;">>> ERROR: SESIÓN_NO_IDENTIFICADA. RECONECTANDO...</p>
+    <a href="/login" class="nav-btn">VOLVER AL LOGIN</a>
+</div>
+
+<script>
+    const inNombre = document.getElementById('inNombre');
+    const inRango = document.getElementById('inRango');
+    const inAfiliacion = document.getElementById('inAfiliacion');
+
+    const preNombre = document.getElementById('previewNombre');
+    const preChar = document.getElementById('previewChar');
+    const preRango = document.getElementById('previewRango');
+    const preAfiliacion = document.getElementById('previewAfiliacion');
+
+    if(inNombre) {
+        inNombre.addEventListener('input', () => {
+            preNombre.innerText = inNombre.value || "AGENTE";
+            preChar.innerText = (inNombre.value.charAt(0) || "U").toUpperCase();
+        });
+    }
+
+    if(inRango) {
+        inRango.addEventListener('input', () => {
+            preRango.innerText = (inRango.value || "SIN_RANGO").toUpperCase();
+        });
+    }
+
+    if(inAfiliacion) {
+        inAfiliacion.addEventListener('input', () => {
+            preAfiliacion.innerText = (inAfiliacion.value || "SIN_AFILIACION").toUpperCase();
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -3,636 +3,197 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Inicio – Inazuma Legacy</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <title>Inazuma Legacy – Tactical Command</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
     <style>
         :root {
-            --navy:     #04101e;
-            --blue:     #071830;
-            --blue2:    #0a2248;
-            --orange:   #ff6a00;
-            --orange2:  #ff8c00;
-            --electric: #00e5ff;
-            --white:    #f0f4ff;
-            --gold:     #ffd700;
-            --dim:      rgba(240,244,255,.38);
+            --core-bg: #020812;
+            --neon-orange: #ff6a00;
+            --neon-blue: #00e5ff;
+            --glass: rgba(10, 25, 47, 0.7);
+            --text-main: #e0f2fe;
+            --dim: rgba(224, 242, 254, 0.4);
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
+
         body {
-            min-height: 100vh; background: var(--navy);
+            height: 100vh; background: var(--core-bg);
             font-family: 'Rajdhani', sans-serif;
             display: flex; align-items: center; justify-content: center;
-            overflow-x: hidden;
-        }
-        body::before {
-            content: ''; position: fixed; inset: 0; z-index: 0;
-            background:
-                radial-gradient(ellipse at 20% 50%, rgba(255,106,0,.18) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 20%, rgba(0,229,255,.09) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 100%, rgba(255,140,0,.12) 0%, transparent 45%),
-                linear-gradient(180deg, #04101e 0%, #071830 60%, #04101e 100%);
-        }
-        .hex-bg {
-            position: fixed; inset: 0; z-index: 0; opacity: 0.04;
-            background-image:
-                repeating-linear-gradient(60deg,  var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%),
-                repeating-linear-gradient(120deg, var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%),
-                repeating-linear-gradient(0deg,   var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%);
-            background-size: 58px 100px;
-            animation: hexDrift 30s linear infinite;
-        }
-        @keyframes hexDrift { 0% { transform: translateY(0); } 100% { transform: translateY(58px); } }
-        .scanline {
-            position: fixed; inset: 0; z-index: 1; pointer-events: none;
-            background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,.06) 3px, rgba(0,0,0,.06) 4px);
-        }
-        .energy { position: fixed; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
-        .energy span {
-            position: absolute; width: 1.5px;
-            background: linear-gradient(to bottom, transparent, var(--orange), transparent);
-            animation: bolt linear infinite; opacity: 0;
-        }
-        .energy span:nth-child(1) { left:  5%; height: 160px; animation-duration: 3.4s; animation-delay: 0.0s; }
-        .energy span:nth-child(2) { left: 18%; height: 220px; animation-duration: 5.2s; animation-delay: 1.3s; }
-        .energy span:nth-child(3) { left: 35%; height: 140px; animation-duration: 4.1s; animation-delay: 0.6s; }
-        .energy span:nth-child(4) { left: 52%; height: 200px; animation-duration: 3.8s; animation-delay: 2.0s; }
-        .energy span:nth-child(5) { left: 68%; height: 180px; animation-duration: 4.6s; animation-delay: 0.9s; }
-        .energy span:nth-child(6) { left: 82%; height: 240px; animation-duration: 5.0s; animation-delay: 1.7s; }
-        .energy span:nth-child(7) { left: 94%; height: 170px; animation-duration: 3.6s; animation-delay: 2.5s; }
-        .energy span:nth-child(8) { left: 11%; height: 130px; animation-duration: 4.3s; animation-delay: 1.1s; background: linear-gradient(to bottom, transparent, var(--electric), transparent); }
-        .energy span:nth-child(9) { left: 60%; height: 190px; animation-duration: 5.5s; animation-delay: 3.0s; background: linear-gradient(to bottom, transparent, var(--electric), transparent); }
-        @keyframes bolt {
-            0%   { top: -20%; opacity: 0; }
-            12%  { opacity: .8; }
-            88%  { opacity: .2; }
-            100% { top: 120%; opacity: 0; }
-        }
-        .particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
-        .particle { position: absolute; border-radius: 50%; animation: floatUp linear infinite; }
-        @keyframes floatUp {
-            0%   { transform: translateY(100vh) scale(0); opacity: 0; }
-            10%  { opacity: 1; }
-            90%  { opacity: .4; }
-            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+            overflow: hidden; color: var(--text-main);
         }
 
-        /* ── LAYOUT ── */
+        .cyber-grid {
+            position: fixed; inset: 0;
+            background-image: linear-gradient(rgba(255,106,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,106,0,0.05) 1px, transparent 1px);
+            background-size: 50px 50px; perspective: 1000px; transform: rotateX(45deg);
+            z-index: -1; animation: gridMove 10s linear infinite;
+        }
+        @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 50px; } }
+
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 20%, #000 100%); pointer-events: none; z-index: 1; }
+
         .layout {
             position: relative; z-index: 10;
-            width: 100%; max-width: 960px; padding: 20px;
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            grid-template-rows: auto 1fr auto auto;
-            gap: 16px;
-            animation: riseUp .9s cubic-bezier(.16,1,.3,1) both;
-        }
-        @keyframes riseUp {
-            from { opacity: 0; transform: translateY(44px) scale(.97); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
+            width: 100%; max-width: 1550px; height: 90vh;
+            padding: 20px; display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            gap: 20px;
         }
 
-        .panel-left { grid-column: 1; grid-row: 1 / 5; display: flex; flex-direction: column; gap: 16px; }
+        .module {
+            background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue));
+            padding: 1px;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+        }
 
-        .card {
-            background: linear-gradient(155deg, rgba(10,34,72,.95) 0%, rgba(7,24,48,.98) 50%, rgba(4,16,30,.97) 100%);
-            border: 1px solid rgba(255,106,0,.22); border-radius: 6px;
-            position: relative; backdrop-filter: blur(24px);
-            box-shadow: 0 0 0 1px rgba(255,106,0,.06), 0 28px 80px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);
+        .module-inner {
+            background: var(--core-bg);
+            height: 100%; width: 100%;
+            padding: 20px;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            position: relative;
+        }
+
+        .video-module-inner { padding: 0 !important; overflow: hidden; }
+        .video-container { width: 100%; height: 100%; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .header-module { border-left: 4px solid var(--neon-orange); padding-left: 20px; margin-bottom: 5px; }
+        .sys-status { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--neon-blue); letter-spacing: 3px; }
+        .sys-welcome { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; letter-spacing: 2px; line-height: 0.9; margin-top: 5px; }
+
+        .avatar-box {
+            width: 90px; height: 90px; margin: 0 auto 15px;
+            border: 2px solid var(--neon-blue);
+            clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0, 229, 255, 0.1);
+            font-family: 'Orbitron'; font-size: 2.5rem; color: var(--neon-blue);
             overflow: hidden;
         }
-        .card::before {
-            content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--orange), rgba(255,215,0,.6), var(--orange), transparent);
-            animation: borderSweep 4s ease-in-out infinite;
-        }
-        @keyframes borderSweep { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
-        .corner { position: absolute; width: 16px; height: 16px; border-color: var(--orange); border-style: solid; }
-        .corner.tl { top: -1px; left: -1px;    border-width: 2px 0 0 2px; }
-        .corner.tr { top: -1px; right: -1px;   border-width: 2px 2px 0 0; }
-        .corner.bl { bottom: -1px; left: -1px;  border-width: 0 0 2px 2px; }
-        .corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
 
-        .shield-card { padding: 32px 24px 28px; text-align: center; }
-        .shield-wrap {
-            display: inline-block;
-            animation: shieldFloat 4s ease-in-out infinite, glowPulse 3s ease-in-out infinite;
-            margin-bottom: 16px;
+        .bio-text {
+            font-size: 0.75rem; line-height: 1.4; color: var(--dim);
+            max-height: 100px; overflow-y: auto; padding-right: 5px;
+            text-align: justify; margin-top: 10px;
+            border-top: 1px solid rgba(0, 229, 255, 0.1);
+            padding-top: 10px;
         }
-        @keyframes shieldFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        @keyframes glowPulse {
-            0%,100% { filter: drop-shadow(0 0 14px rgba(255,106,0,.4)) drop-shadow(0 0 40px rgba(255,106,0,.15)); }
-            50%      { filter: drop-shadow(0 0 28px rgba(255,106,0,.7)) drop-shadow(0 0 70px rgba(255,106,0,.3)); }
-        }
-        .shield-wrap svg { width: 100px; height: 100px; }
-        .brand-name {
-            font-family: 'Bebas Neue', sans-serif; font-size: 2rem;
-            letter-spacing: 5px; color: var(--white);
-            animation: textGlow 3s ease-in-out infinite alternate; line-height: 1;
-        }
-        @keyframes textGlow {
-            from { text-shadow: 0 0 20px rgba(255,106,0,.4); }
-            to   { text-shadow: 0 0 35px rgba(255,106,0,.7), 0 0 70px rgba(255,106,0,.3); }
-        }
-        .brand-tag { font-size: .7rem; letter-spacing: 5px; color: var(--electric); font-weight: 700; margin-top: 6px; opacity: .85; }
-        .divider-line { height: 1px; margin: 16px 0; background: linear-gradient(90deg, transparent, rgba(255,106,0,.3), transparent); }
-        .stats-vert { display: flex; flex-direction: column; gap: 10px; }
-        .stat-row { display: flex; justify-content: space-between; align-items: center; font-size: .75rem; letter-spacing: 2px; }
-        .stat-row .label { color: var(--dim); text-transform: uppercase; }
-        .stat-row .value { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--orange); letter-spacing: 2px; }
+        .bio-text::-webkit-scrollbar { width: 2px; }
+        .bio-text::-webkit-scrollbar-thumb { background: var(--neon-blue); }
 
-        .welcome-card { grid-column: 2; grid-row: 1; padding: 28px 32px 24px; }
-        .welcome-eyebrow { font-size: .65rem; letter-spacing: 5px; color: var(--electric); font-weight: 700; text-transform: uppercase; opacity: .8; margin-bottom: 8px; }
-        .welcome-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 3px; color: var(--white); line-height: 1; }
-        .welcome-title span { color: var(--orange); }
-        .welcome-sub { font-size: .88rem; color: var(--dim); margin-top: 10px; letter-spacing: .5px; line-height: 1.6; max-width: 380px; }
+        .btn-tech {
+            display: block; width: 100%; padding: 12px; margin-top: 15px;
+            background: transparent; border: 1px solid var(--neon-orange);
+            color: var(--neon-orange); font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem; text-align: center; text-decoration: none;
+            transition: 0.3s; clip-path: polygon(0 0, 100% 0, 100% 70%, 90% 100%, 0 100%);
+        }
+        .btn-tech:hover { background: var(--neon-orange); color: #000; box-shadow: 0 0 15px var(--neon-orange); }
 
-        /* ── NOTIF BANNER ── */
-        .notif-banner {
-            margin-top: 16px; padding: 12px 16px;
-            background: rgba(255,106,0,.06); border: 1px solid rgba(255,106,0,.18);
-            border-radius: 5px; display: flex; align-items: center; gap: 12px;
-            cursor: pointer; transition: all 0.25s;
+        .season-link {
+            display: flex; align-items: center; gap: 15px; padding: 15px; margin-bottom: 10px;
+            border: 1px solid rgba(255,106,0,0.2); background: rgba(255,255,255,0.02);
+            text-decoration: none; color: white; transition: 0.3s;
         }
-        .notif-banner:hover { background: rgba(255,106,0,.12); border-color: rgba(255,106,0,.35); }
-        .notif-count {
-            background: var(--orange); color: white; font-family: 'Bebas Neue';
-            font-size: 1rem; padding: 2px 8px; border-radius: 3px;
-            min-width: 28px; text-align: center;
-        }
-        .notif-text { font-size: .78rem; letter-spacing: 1px; color: var(--dim); }
+        .season-link:hover { border-color: var(--neon-blue); background: rgba(0,229,255,0.05); transform: translateX(5px); }
+        .season-link span { font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--neon-orange); }
 
-        .seasons-card { grid-column: 2; grid-row: 2; padding: 24px 32px; }
-        .section-label {
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 16px; color: var(--orange);
-            font-size: .65rem; letter-spacing: 4px; font-weight: 700; text-transform: uppercase;
+        .btn-action {
+            display: block; width: 100%; padding: 15px; margin-top: 10px;
+            text-align: center; text-decoration: none; font-weight: bold;
+            font-family: 'Orbitron'; font-size: 0.8rem; transition: 0.3s;
         }
-        .section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,106,0,.35), transparent); }
-        .season-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .season-btn {
-            position: relative; overflow: hidden;
-            background: rgba(255,106,0,.05); border: 1px solid rgba(255,106,0,.2);
-            border-radius: 5px; padding: 22px 12px 18px;
-            color: var(--white); text-decoration: none; text-align: center;
-            transition: all .35s cubic-bezier(.4,0,.2,1); cursor: pointer; display: block;
-        }
-        .season-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,106,0,.15), rgba(255,215,0,.08)); opacity: 0; transition: opacity .3s; }
-        .season-btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent); transition: left .5s; }
-        .season-btn:hover::before { opacity: 1; }
-        .season-btn:hover::after  { left: 140%; }
-        .season-btn:hover { border-color: var(--orange); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(255,106,0,.2), 0 0 0 1px rgba(255,106,0,.15); }
-        .season-num { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--orange); line-height: 1; display: block; position: relative; z-index: 1; text-shadow: 0 0 30px rgba(255,106,0,.6); }
-        .season-name { font-family: 'Bebas Neue', sans-serif; font-size: .9rem; letter-spacing: 3px; color: var(--white); margin-top: 4px; display: block; position: relative; z-index: 1; }
-        .season-sub { font-size: .58rem; letter-spacing: 2px; color: var(--dim); margin-top: 3px; display: block; position: relative; z-index: 1; }
-        .season-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--orange), var(--gold), transparent); transform: scaleX(0); transform-origin: center; transition: transform .35s; }
-        .season-btn:hover .season-bar { transform: scaleX(1); }
+        .btn-chat { border: 1px solid var(--neon-blue); color: var(--neon-blue); }
+        .btn-logout { border: 1px solid #ff4444; color: #ff4444; margin-top: 20px; }
 
-        .actions-row { grid-column: 2; grid-row: 3; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-
-        .action-btn {
-            display: flex; align-items: center; justify-content: center; gap: 14px;
-            border-radius: 5px; padding: 18px 20px;
-            color: var(--white); text-decoration: none;
-            transition: all .35s cubic-bezier(.4,0,.2,1);
-            position: relative; overflow: hidden;
-        }
-        .action-btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent); transition: left .5s; }
-        .action-btn:hover::after { left: 140%; }
-        .action-btn:hover { transform: translateY(-4px); }
-
-        .chat-btn {
-            background: linear-gradient(135deg, rgba(0,229,255,.08) 0%, rgba(0,229,255,.03) 100%);
-            border: 1px solid rgba(0,229,255,.3);
-        }
-        .chat-btn::before { content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px; background: linear-gradient(90deg, transparent, var(--electric), transparent); opacity: .5; }
-        .chat-btn:hover { border-color: var(--electric); box-shadow: 0 10px 30px rgba(0,229,255,.12), 0 0 0 1px rgba(0,229,255,.15); background: linear-gradient(135deg, rgba(0,229,255,.12), rgba(0,229,255,.05)); }
-
-        .logros-btn {
-            background: linear-gradient(135deg, rgba(255,215,0,.08) 0%, rgba(255,215,0,.03) 100%);
-            border: 1px solid rgba(255,215,0,.3);
-        }
-        .logros-btn:hover { border-color: var(--gold); box-shadow: 0 10px 30px rgba(255,215,0,.12); background: linear-gradient(135deg, rgba(255,215,0,.12), rgba(255,215,0,.05)); }
-
-        .logout-btn {
-            background: rgba(255,50,50,.05); border: 1px solid rgba(255,80,80,.18);
-            color: #ff7070; font-family: 'Rajdhani'; font-size: .82rem; letter-spacing: 3px;
-            font-weight: 700; text-transform: uppercase; cursor: pointer;
-        }
-        .logout-btn:hover { border-color: rgba(255,80,80,.45); color: #ff9090; box-shadow: 0 8px 24px rgba(255,50,50,.1); }
-
-        .btn-icon-wrap {
-            width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            position: relative; z-index: 1;
-        }
-        .chat-btn   .btn-icon-wrap { background: rgba(0,229,255,.1); border: 1px solid rgba(0,229,255,.25); }
-        .logros-btn .btn-icon-wrap { background: rgba(255,215,0,.1); border: 1px solid rgba(255,215,0,.25); }
-
-        .btn-text { position: relative; z-index: 1; text-align: left; }
-        .btn-text strong { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 3px; display: block; }
-        .chat-btn   .btn-text strong { color: var(--electric); }
-        .logros-btn .btn-text strong { color: var(--gold); }
-        .btn-text span { font-size: .65rem; letter-spacing: 2px; color: var(--dim); text-transform: uppercase; }
-
-        .online-dot { position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--electric); box-shadow: 0 0 8px var(--electric); animation: blink 2s ease-in-out infinite; }
-        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
-
-        /* ── MINI PANEL NOTIF ── */
-        #mini-notif {
-            display: none; position: fixed; top: 0; right: 0; bottom: 0;
-            width: 320px; background: rgba(4,16,30,0.97);
-            border-left: 1px solid rgba(255,106,0,.2); z-index: 1000;
-            flex-direction: column; overflow: hidden;
-            animation: slideInRight .3s ease-out;
-        }
-        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        #mini-notif.open { display: flex; }
-        .mini-notif-header {
-            padding: 20px; border-bottom: 1px solid rgba(255,106,0,.15);
-            font-family: 'Bebas Neue'; font-size: 1.3rem; letter-spacing: 3px; color: var(--orange);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .mini-notif-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .notif-item { background: rgba(255,106,0,.04); border: 1px solid rgba(255,106,0,.1); border-radius: 5px; padding: 10px 12px; font-size: 0.82rem; }
-        .notif-item.no-leida { border-color: rgba(255,106,0,.3); background: rgba(255,106,0,.08); }
-        .notif-fecha { font-size: 0.65rem; color: var(--dim); margin-top: 3px; }
-        .btn-leer-todas { margin: 10px 12px; padding: 8px; background: rgba(255,106,0,.08); border: 1px solid rgba(255,106,0,.2); border-radius: 4px; color: var(--orange); font-family: 'Rajdhani'; font-size: 0.75rem; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
-        .btn-leer-todas:hover { background: rgba(255,106,0,.15); }
-
-        /* ── LOGROS & SOCIAL ── */
-        .extra-row {
-            grid-column: 2; grid-row: 4;
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        .section-card { padding: 22px 28px; }
-        .logros-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
-        .logro-badge {
-            background: rgba(255,215,0,.06); border: 1px solid rgba(255,215,0,.2);
-            border-radius: 5px; padding: 10px 12px; display: flex; align-items: center;
-            gap: 8px; font-size: .78rem; color: var(--white); min-width: 130px;
-        }
-        .logro-badge .logro-icono { font-size: 1.1rem; }
-        .logro-badge .logro-info strong { display: block; font-size: .75rem; color: var(--gold); letter-spacing: 1px; }
-        .logro-badge .logro-info small { color: var(--dim); font-size: .65rem; }
-        .logro-empty { color: var(--dim); font-size: .78rem; margin-top: 8px; }
-
-        .user-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
-        .user-row {
-            display: flex; align-items: center; justify-content: space-between;
-            background: rgba(0,229,255,.03); border: 1px solid rgba(0,229,255,.1);
-            border-radius: 5px; padding: 10px 14px;
-        }
-        .user-row .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-avatar {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: rgba(0,229,255,.1); border: 1px solid rgba(0,229,255,.2);
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'Bebas Neue'; font-size: .9rem; color: var(--electric);
-        }
-        .user-nombre { font-size: .82rem; color: var(--white); letter-spacing: 1px; }
-        .btn-seguir {
-            font-family: 'Rajdhani'; font-size: .7rem; letter-spacing: 2px; font-weight: 700;
-            text-transform: uppercase; cursor: pointer; padding: 5px 12px;
-            border-radius: 4px; border: 1px solid rgba(0,229,255,.3);
-            background: rgba(0,229,255,.05); color: var(--electric);
-            transition: all 0.2s;
-        }
-        .btn-seguir:hover { background: rgba(0,229,255,.15); border-color: var(--electric); }
-        .btn-seguir.siguiendo { border-color: rgba(255,106,0,.3); color: var(--orange); background: rgba(255,106,0,.05); }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 10px; }
-
-        @media (max-width: 720px) {
-            body { overflow-y: auto; align-items: flex-start; }
-            .layout { grid-template-columns: 1fr; grid-template-rows: auto; max-width: 460px; padding: 16px; }
-            .panel-left { grid-column: 1; grid-row: 1; }
-            .welcome-card { grid-column: 1; grid-row: 2; }
-            .seasons-card { grid-column: 1; grid-row: 3; }
-            .actions-row { grid-column: 1; grid-row: 4; grid-template-columns: 1fr 1fr; }
-            .extra-row { grid-column: 1; grid-row: 5; grid-template-columns: 1fr; }
-        }
+        .label { color: var(--neon-orange); font-size: 0.6rem; letter-spacing: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }
     </style>
 </head>
 <body>
 
-<div class="hex-bg"></div>
-<div class="scanline"></div>
-<div class="energy">
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span>
-</div>
-<div class="particles" id="particles"></div>
-
-<!-- PANEL NOTIFICACIONES -->
-<div id="mini-notif">
-    <div class="mini-notif-header">
-        🔔 NOTIFICACIONES
-        <span onclick="cerrarNotif()" style="cursor:pointer;font-size:1rem;color:var(--dim);">✕</span>
-    </div>
-    <button class="btn-leer-todas" onclick="marcarLeidas()">Marcar todas como leídas</button>
-    <div class="mini-notif-list" id="lista-notif-inicio"></div>
-</div>
+<div class="vignette"></div>
+<div class="cyber-grid"></div>
 
 <div class="layout">
 
-    <!-- PANEL IZQUIERDO -->
-    <div class="panel-left">
-        <div class="card shield-card">
-            <div class="corner tl"></div><div class="corner tr"></div>
-            <div class="corner bl"></div><div class="corner br"></div>
-            <div class="shield-wrap">
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%"   stop-color="#0e2a60"/>
-                            <stop offset="100%" stop-color="#04101e"/>
-                        </linearGradient>
-                        <linearGradient id="rayoG" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%"   stop-color="#ffd700"/>
-                            <stop offset="100%" stop-color="#ff6a00"/>
-                        </linearGradient>
-                        <filter id="glow">
-                            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
-                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                    </defs>
-                    <path d="M50 4 L92 20 L92 56 Q92 82 50 97 Q8 82 8 56 L8 20 Z" fill="url(#sg)" stroke="#ff6a00" stroke-width="2"/>
-                    <path d="M50 14 L82 27 L82 54 Q82 75 50 88 Q18 75 18 54 L18 27 Z" fill="none" stroke="rgba(255,106,0,.22)" stroke-width="1"/>
-                    <polygon points="55,22 43,50 52,50 45,78 60,46 51,46 57,22" fill="url(#rayoG)" filter="url(#glow)" opacity=".95"/>
-                    <circle cx="28" cy="40" r="2" fill="rgba(255,215,0,.4)"/>
-                    <circle cx="72" cy="40" r="2" fill="rgba(255,215,0,.4)"/>
-                </svg>
-            </div>
-            <div class="brand-name">INAZUMA<br>LEGACY</div>
-            <div class="brand-tag">⚡ RAIMON FC ⚡</div>
-            <div class="divider-line"></div>
-            <div class="stats-vert">
-                <div class="stat-row"><span class="label">Temporadas</span><span class="value">3</span></div>
-                <div class="stat-row"><span class="label">Jugadores</span><span class="value">∞</span></div>
-                <div class="stat-row"><span class="label">Equipo</span><span class="value">1</span></div>
-                <div class="stat-row"><span class="label">Desde</span><span class="value">2024</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- BIENVENIDA -->
-    <div class="card welcome-card">
-        <div class="corner tl"></div><div class="corner tr"></div>
-        <div class="corner bl"></div><div class="corner br"></div>
-        <div class="welcome-eyebrow">⚡ Campo de Entrenamiento — Raimon FC</div>
-        <div class="welcome-title">
-            ¡Bienvenido a<br>
-            <span th:if="${session.usuario != null}"><span>Inazuma</span>, </span>
-            <span th:text="${session.usuario + '!'}">Jugador!</span>
-        </div>
-        <div class="welcome-sub">
-            Selecciona una temporada para explorar el plantel completo del equipo Raimon FC.
-            Consulta estadísticas, técnicas especiales y mucho más.
-        </div>
-
-        <!-- BANNER NOTIFICACIONES -->
-        <div class="notif-banner" onclick="abrirNotif()" id="notif-banner" style="display:none;">
-            <span style="font-size:1.2rem;">🔔</span>
-            <span class="notif-count" id="notif-count-inicio">0</span>
-            <span class="notif-text">notificaciones sin leer — haz clic para verlas</span>
-        </div>
-    </div>
-
-    <!-- TEMPORADAS -->
-    <div class="card seasons-card">
-        <div class="corner tl"></div><div class="corner tr"></div>
-        <div class="corner bl"></div><div class="corner br"></div>
-        <div class="section-label">Temporadas</div>
-        <div class="season-grid">
-            <a href="/jugadores?temporada=1" class="season-btn">
-                <span class="season-num">1</span>
-                <span class="season-name">Temporada</span>
-                <span class="season-sub">Primera Era</span>
-                <div class="season-bar"></div>
-            </a>
-            <a href="/jugadores?temporada=2" class="season-btn">
-                <span class="season-num">2</span>
-                <span class="season-name">Temporada</span>
-                <span class="season-sub">Segunda Era</span>
-                <div class="season-bar"></div>
-            </a>
-            <a href="/jugadores?temporada=3" class="season-btn">
-                <span class="season-num">3</span>
-                <span class="season-name">Temporada</span>
-                <span class="season-sub">Tercera Era</span>
-                <div class="season-bar"></div>
-            </a>
-        </div>
-    </div>
-
-    <!-- ACCIONES -->
-    <div class="actions-row">
-        <!-- CHAT -->
-        <a href="/chat" class="action-btn chat-btn">
-            <div class="online-dot"></div>
-            <div class="btn-icon-wrap">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-            </div>
-            <div class="btn-text">
-                <strong>Chat Core</strong>
-                <span>IA · Global · Privado</span>
-            </div>
-        </a>
-
-        <!-- LOGROS (acceso rápido) -->
-        <a href="/chat" class="action-btn logros-btn">
-            <div class="btn-icon-wrap">
-                <span style="font-size:1.2rem;">🏆</span>
-            </div>
-            <div class="btn-text">
-                <strong>Mis Logros</strong>
-                <span id="logros-count-text">Cargando...</span>
-            </div>
-        </a>
-
-        <!-- LOGOUT -->
-        <a href="/logout" class="action-btn logout-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            Cerrar Sesión
-        </a>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════
-         LOGROS + SOCIAL  (fila extra, grid-row: 4)
-    ════════════════════════════════════════════════════ -->
-    <div class="extra-row">
-
-        <!-- MIS LOGROS -->
-        <div class="card section-card">
-            <div class="corner tl"></div><div class="corner tr"></div>
-            <div class="corner bl"></div><div class="corner br"></div>
-            <div class="section-label">Mis Logros</div>
-            <div class="logros-grid" id="logros-lista">
-                <div class="logro-empty">Cargando logros...</div>
-            </div>
-        </div>
-
-        <!-- USUARIOS SUGERIDOS -->
-        <div class="card section-card">
-            <div class="corner tl"></div><div class="corner tr"></div>
-            <div class="corner bl"></div><div class="corner br"></div>
-            <div class="section-label">Jugadores a seguir</div>
-            <div class="user-list" id="sugerencias-lista">
-                <th:block th:each="u : ${sugerencias}">
-                    <div class="user-row" th:data-nombre="${u.nombre}">
-                        <div class="user-info">
-                            <div class="user-avatar" th:text="${#strings.toUpperCase(#strings.substring(u.nombre,0,1))}">A</div>
-                            <span class="user-nombre" th:text="${u.nombre}">Jugador</span>
-                        </div>
-                        <button class="btn-seguir"
-                                th:data-nombre="${u.nombre}"
-                                onclick="toggleSeguir(this)">
-                            + Seguir
-                        </button>
-                    </div>
-                </th:block>
-                <div th:if="${#lists.isEmpty(sugerencias)}" class="logro-empty">
-                    Ya sigues a todos los jugadores
+    <div class="col" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="module" style="height: 100%;">
+            <div class="module-inner" style="text-align: center; display: flex; flex-direction: column; justify-content: flex-start;">
+                <span class="label">User_Profile</span>
+                <div class="avatar-box">
+                    <span th:text="${user != null ? #strings.toUpperCase(#strings.substring(user.nombre,0,1)) : 'U'}">V</span>
                 </div>
-            </div>
-        </div>
 
-    </div>
-    <!-- ═══════════════════════════════════════════════════ -->
+                <h2 style="font-family:'Orbitron'; font-size: 1.2rem; margin-bottom: 5px;" th:text="${user != null ? user.nombre : 'UNKNOWN'}">VICTOR</h2>
 
-</div><!-- /.layout -->
+                <p style="color:var(--neon-blue); font-size: 0.65rem; letter-spacing: 2px; margin-bottom: 20px;">
+                    RANK: <span th:text="${user != null && user.rango != null ? #strings.toUpperCase(user.rango) : 'UNASSIGNED'}">CAPTAIN</span>
+                </p>
 
-<script>
-    // ── Partículas ─────────────────────────────────────────────────────────
-    const pc = document.getElementById('particles');
-    for (let i = 0; i < 28; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        const size = Math.random() * 3 + 1;
-        const isBlue = Math.random() > .6;
-        p.style.cssText = `
-            left: ${Math.random()*100}%;
-            width: ${size}px; height: ${size}px;
-            background: ${isBlue ? 'var(--electric)' : 'var(--orange)'};
-            opacity: ${Math.random()*.5+.1};
-            animation-duration: ${Math.random()*12+8}s;
-            animation-delay: ${Math.random()*10}s;
-            box-shadow: 0 0 ${size*3}px ${isBlue ? 'var(--electric)' : 'var(--orange)'};
-        `;
-        pc.appendChild(p);
-    }
-
-    // ── Cargar datos al entrar ─────────────────────────────────────────────
-    window.addEventListener('load', async () => {
-        await cargarNotifCount();
-        await cargarLogrosCount();
-    });
-
-    async function cargarNotifCount() {
-        try {
-            const res = await fetch('/api/social/notificaciones/count');
-            const data = await res.json();
-            const count = data.noLeidas;
-            if (count > 0) {
-                document.getElementById('notif-banner').style.display = 'flex';
-                document.getElementById('notif-count-inicio').textContent = count;
-            }
-        } catch(e) {}
-    }
-
-    // ── Logros (acceso rápido + sección expandida) ─────────────────────────
-    async function cargarLogrosCount() {
-        try {
-            const res = await fetch('/api/social/logros');
-            const data = await res.json();
-
-            // Botón de acciones rápidas
-            document.getElementById('logros-count-text').textContent = data.length + ' desbloqueados';
-
-            // Sección expandida de logros
-            const el = document.getElementById('logros-lista');
-            if (data.length === 0) {
-                el.innerHTML = '<div class="logro-empty">Aún no tienes logros. ¡Sigue jugando!</div>';
-                return;
-            }
-            el.innerHTML = data.map(l => `
-                <div class="logro-badge" title="${l.descripcion}">
-                    <span class="logro-icono">${l.icono || '🏅'}</span>
-                    <div class="logro-info">
-                        <strong>${l.nombre}</strong>
-                        <small>${l.rareza}</small>
+                <div style="margin-bottom: 15px;">
+                    <img th:src="@{/images/escudo_raimon.webp}" style="width: 70px; filter: drop-shadow(0 0 10px var(--neon-orange)); margin-bottom: 10px;">
+                    <span class="label">Affiliation</span>
+                    <div style="font-family:'Orbitron'; font-size: 0.8rem; color: #fff;"
+                         th:text="${user != null && user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'NO_AFFILIATION'}">
+                        RAIMON_HIGH_SCHOOL
                     </div>
                 </div>
-            `).join('');
-        } catch(e) {
-            document.getElementById('logros-count-text').textContent = 'Error al cargar';
-        }
-    }
 
-    // ── Panel notificaciones ───────────────────────────────────────────────
-    async function abrirNotif() {
-        document.getElementById('mini-notif').classList.add('open');
-        await cargarNotificaciones();
-    }
-
-    function cerrarNotif() {
-        document.getElementById('mini-notif').classList.remove('open');
-    }
-
-    async function cargarNotificaciones() {
-        try {
-            const res = await fetch('/api/social/notificaciones');
-            const lista = await res.json();
-            const el = document.getElementById('lista-notif-inicio');
-            if (lista.length === 0) {
-                el.innerHTML = '<div style="color:var(--dim);font-size:0.8rem;text-align:center;margin-top:20px;">Sin notificaciones</div>';
-                return;
-            }
-            el.innerHTML = lista.map(n => `
-                <div class="notif-item ${!n.leida ? 'no-leida' : ''}">
-                    <div>${n.mensaje}</div>
-                    <div class="notif-fecha">${new Date(n.fecha).toLocaleString('es')}</div>
+                <span class="label">Tactical_Bio</span>
+                <div class="bio-text" th:text="${user != null && user.descripcion != null ? user.descripcion : 'No tactical data available for this agent.'}">
+                    Estratega táctico del equipo.
                 </div>
-            `).join('');
-        } catch(e) {}
-    }
 
-    async function marcarLeidas() {
-        await fetch('/api/social/notificaciones/leer', { method: 'POST' });
-        document.getElementById('notif-banner').style.display = 'none';
-        await cargarNotificaciones();
-    }
+                <div style="margin-top: auto;">
+                    <a href="/perfil" class="btn-tech">EDIT_DATABASE</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    // ── Seguir / Dejar de seguir ───────────────────────────────────────────
-    async function toggleSeguir(btn) {
-        const nombre = btn.dataset.nombre;
-        const siguiendo = btn.classList.contains('siguiendo');
-        try {
-            if (siguiendo) {
-                await fetch(`/api/social/seguir/${nombre}`, { method: 'DELETE' });
-                btn.classList.remove('siguiendo');
-                btn.textContent = '+ Seguir';
-            } else {
-                const res = await fetch(`/api/social/seguir/${nombre}`, { method: 'POST' });
-                const data = await res.json();
-                if (data.estado === 'siguiendo' || data.estado === 'ya_sigues') {
-                    btn.classList.add('siguiendo');
-                    btn.textContent = '✓ Siguiendo';
-                }
-            }
-        } catch(e) {}
-    }
-</script>
+    <div class="col" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="header-module">
+            <div class="sys-status">LIVE_FEED // ENCRYPTED_CONNECTION</div>
+            <h1 class="sys-welcome">WELCOME, <span style="color:var(--neon-orange);" th:text="${user != null ? user.nombre : 'AGENT'}">VICTOR</span></h1>
+        </div>
+
+        <div class="module" style="flex-grow: 1;">
+            <div class="module-inner video-module-inner">
+                <div class="video-container">
+                    <video controls loop playsinline>
+                        <source th:src="@{/Videos/peli-ogro-inazuma.mp4}" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col" style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="module" style="flex-grow: 1;">
+            <div class="module-inner">
+                <span class="label">Season_Archives</span>
+                <a th:href="@{/jugadores(temporada=1)}" class="season-link">
+                    <span>01</span> <div><strong>FUTBOL FRONTIER</strong><br><small style="color:var(--dim)">DATA_CORE</small></div>
+                </a>
+                <a th:href="@{/jugadores(temporada=2)}" class="season-link">
+                    <span>02</span> <div><strong>ALIUS ACADEMY</strong><br><small style="color:var(--dim)">DATA_CORE</small></div>
+                </a>
+                <a th:href="@{/jugadores(temporada=3)}" class="season-link">
+                    <span>03</span> <div><strong>F.F. INTERNATIONAL</strong><br><small style="color:var(--dim)">DATA_CORE</small></div>
+                </a>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="/chat" class="btn-action btn-chat">⚡ ACCESS_CHAT_CHANNEL</a>
+            <a href="/logout" class="btn-action btn-logout">TERMINATE_SESSION</a>
+        </div>
+    </div>
+
+</div>
+
 </body>
 </html>
