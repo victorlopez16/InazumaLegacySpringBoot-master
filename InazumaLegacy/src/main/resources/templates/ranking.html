@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking Legendario - Inazuma Legacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Exo+2:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --gold: #f0a500;
+            --gold-bright: #ffe566;
+            --blue-deep: #03001a;
+            --blue-electric: #00d4ff;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: var(--blue-deep);
+            background-image:
+                    radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.15) 0%, transparent 40%),
+                    radial-gradient(circle at 80% 70%, rgba(240, 165, 0, 0.1) 0%, transparent 40%);
+            color: var(--white);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(8, 8, 56, 0.8), transparent);
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--gold);
+            text-shadow: 0 0 10px var(--gold);
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+        .logo:hover { transform: scale(1.05); }
+
+        .btn-back {
+            text-decoration: none;
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 8px 25px;
+            border-radius: 5px;
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            background: transparent;
+        }
+
+        .btn-back:hover {
+            background: var(--gold);
+            color: var(--blue-deep);
+            box-shadow: 0 0 20px var(--gold);
+            transform: translateY(-2px);
+        }
+
+        /* CONTENEDOR */
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+            text-align: center;
+        }
+
+        h1.main-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            margin-bottom: 5px;
+            color: var(--white);
+            text-shadow: 3px 3px var(--blue-electric), -2px -2px var(--gold);
+            letter-spacing: 2px;
+        }
+
+        .divider {
+            height: 4px;
+            width: 200px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 0 auto 40px;
+            box-shadow: 0 0 15px var(--gold);
+        }
+
+        /* TABLA ESTILO VIDEOJUEGO */
+        .ranking-card {
+            background: rgba(8, 8, 56, 0.7);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+        }
+
+        th {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3rem;
+            color: var(--blue-electric);
+            padding: 10px 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+        }
+
+        tr.row-player {
+            background: rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        tr.row-player:hover {
+            background: rgba(0, 212, 255, 0.12);
+            transform: scale(1.02) translateX(5px);
+        }
+
+        td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        /* PUESTOS ESPECIALES */
+        .top-1 {
+            background: linear-gradient(90deg, rgba(240, 165, 0, 0.3), rgba(240, 165, 0, 0.05)) !important;
+            border-left: 6px solid var(--gold) !important;
+        }
+
+        .gold-text { color: var(--gold-bright); font-weight: bold; font-size: 1.1rem; }
+        .pt-val { color: var(--blue-electric); font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            display: inline-block;
+            min-width: 35px;
+        }
+        .bg-ataque { background: #007bff; box-shadow: 0 0 10px rgba(0, 123, 255, 0.5); }
+        .bg-defensa { background: #17a2b8; box-shadow: 0 0 10px rgba(23, 162, 184, 0.5); }
+
+        .medal { font-size: 1.8rem; }
+        .rank-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; opacity: 0.8; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/inicio" class="logo">⚡ INAZUMA LEGACY</a>
+    <a href="/inicio" class="btn-back">VOLVER AL INICIO</a>
+</nav>
+
+<div class="container fade-in">
+    <h1 class="main-title">RANKING FÚTBOL FRONTIER</h1>
+    <div class="divider"></div>
+
+    <div class="ranking-card">
+        <table>
+            <thead>
+            <tr>
+                <th>Rango</th>
+                <th style="text-align: left;">Jugador</th>
+                <th>Puntos PT</th>
+                <th>Ataque</th>
+                <th>Defensa</th>
+                <th>Victorias</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="jugador, i : ${jugadores}" class="row-player" th:classappend="${i.index == 0} ? 'top-1' : ''">
+                <td style="text-align: center;">
+                    <span th:if="${i.index == 0}" class="medal">🥇</span>
+                    <span th:if="${i.index == 1}" class="medal">🥈</span>
+                    <span th:if="${i.index == 2}" class="medal">🥉</span>
+                    <span th:if="${i.index > 2}" class="rank-num" th:text="${i.count}">4</span>
+                </td>
+                <td style="text-align: left;">
+                    <div style="display: flex; flex-direction: column;">
+                        <span class="gold-text" th:text="${jugador.nombre}">Mark Evans</span>
+                        <small style="color: rgba(255,255,255,0.5); letter-spacing: 1px;" th:text="${jugador.afiliacion}">Instituto Raimon</small>
+                    </div>
+                </td>
+                <td class="pt-val" style="text-align: center;" th:text="${jugador.puntosInazuma}">0</td>
+                <td style="text-align: center;"><span class="badge bg-ataque" th:text="${jugador.ataque}">10</span></td>
+                <td style="text-align: center;"><span class="badge bg-defensa" th:text="${jugador.defensa}">10</span></td>
+                <td style="text-align: center; font-size: 1.2rem; font-weight: bold; font-family: 'Bebas Neue';" th:text="${jugador.victorias}">0</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p style="margin-top: 30px; font-size: 0.9rem; opacity: 0.6;">
+        El ranking se actualiza en tiempo real tras cada duelo.
+    </p>
+</div>
+
+</body>
+</html>

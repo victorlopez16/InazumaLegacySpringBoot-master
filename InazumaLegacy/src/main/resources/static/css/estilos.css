@@ -1,4 +1,4 @@
-/* ===== INAZUMA LEGACY - EPIC CSS ===== */
+/* ===== INAZUMA LEGACY - EPIC CSS TOTAL ===== */
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Exo+2:wght@300;400;600;800&display=swap');
 
 /* ===== VARIABLES ===== */
@@ -14,429 +14,181 @@
     --white: #ffffff;
 }
 
-/* ===== RESET ===== */
+/* ===== RESET & BASE ===== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--blue-deep); }
-::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
-
-/* ===== BODY ===== */
 body {
     font-family: 'Exo 2', sans-serif;
-    background-color: var(--blue-deep);
+    background-color: var(--blue-deep) !important; /* Forzamos el fondo oscuro */
     color: var(--white);
     min-height: 100vh;
-    overflow-x: hidden;
+    margin: 0;
     position: relative;
 }
 
-/* Fondo animado con gradiente */
+/* Fondo animado y Grid - Asegurados detras de todo */
 body::before {
     content: '';
     position: fixed;
     inset: 0;
     background:
-        radial-gradient(ellipse at 20% 50%, rgba(0, 212, 255, 0.07) 0%, transparent 60%),
-        radial-gradient(ellipse at 80% 20%, rgba(240, 165, 0, 0.1) 0%, transparent 50%),
-        radial-gradient(ellipse at 60% 80%, rgba(13, 13, 90, 0.8) 0%, transparent 60%);
+            radial-gradient(ellipse at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 60%),
+            radial-gradient(ellipse at 80% 20%, rgba(240, 165, 0, 0.1) 0%, transparent 50%);
     animation: bgPulse 8s ease-in-out infinite alternate;
-    pointer-events: none;
-    z-index: 0;
+    z-index: -2;
 }
 
-/* Grid lines de campo de fútbol */
 body::after {
     content: '';
     position: fixed;
     inset: 0;
     background-image:
-        linear-gradient(rgba(240, 165, 0, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(240, 165, 0, 0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
+            linear-gradient(rgba(240, 165, 0, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(240, 165, 0, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
     animation: gridMove 20s linear infinite;
+    z-index: -1;
     pointer-events: none;
-    z-index: 0;
 }
 
-@keyframes bgPulse {
-    0% { opacity: 0.8; }
-    100% { opacity: 1; }
-}
-
-@keyframes gridMove {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(60px); }
-}
-
-/* ===== ASEGURAR CONTENIDO ENCIMA DEL FONDO ===== */
-.container, .card, nav, table {
-    position: relative;
-    z-index: 1;
-}
-
-/* ===== TÍTULOS ===== */
-h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    color: var(--gold);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    position: relative;
-}
-
-/* Efecto neón en h1 */
-h1.neon {
-    animation: neonPulse 3s ease-in-out infinite;
-}
-
-@keyframes neonPulse {
-    0%, 100% {
-        text-shadow:
-            0 0 10px var(--gold),
-            0 0 30px var(--gold),
-            0 0 60px var(--gold-dark);
-    }
-    50% {
-        text-shadow:
-            0 0 5px var(--gold-bright),
-            0 0 20px var(--gold),
-            0 0 40px var(--gold-dark),
-            0 0 80px rgba(240,165,0,0.3);
-    }
-}
-
-/* Efecto glitch en títulos */
-h1.glitch {
-    animation: glitch 4s infinite;
-}
-
-@keyframes glitch {
-    0%, 90%, 100% { transform: translate(0); filter: none; }
-    91% { transform: translate(-2px, 1px); filter: hue-rotate(90deg); }
-    92% { transform: translate(2px, -1px); }
-    93% { transform: translate(0); filter: none; }
-    95% { transform: translate(1px, 2px); filter: brightness(1.5); }
-    96% { transform: translate(-1px, -1px); }
-    97% { transform: translate(0); filter: none; }
-}
+@keyframes bgPulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+@keyframes gridMove { from { transform: translateY(0); } to { transform: translateY(50px); } }
 
 /* ===== NAVBAR ===== */
 nav.navbar-inazuma {
-    background: linear-gradient(90deg, var(--blue-deep), var(--blue-mid), var(--blue-deep));
+    background: linear-gradient(180deg, var(--blue-mid), var(--blue-deep)) !important;
     border-bottom: 2px solid var(--gold);
-    box-shadow: 0 4px 30px rgba(240, 165, 0, 0.3);
-    padding: 16px 0;
+    padding: 1rem 0;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
+
+/* ===== TÍTULOS ===== */
+h1, .titulo-ranking {
+    font-family: 'Bebas Neue', sans-serif;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-align: center;
+}
+
+.titulo-ranking {
+    font-size: 3.5rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 15px rgba(240, 165, 0, 0.5);
+}
+
+/* ===== CONTENEDOR Y TABLA (EL CORAZÓN) ===== */
+.ranking-wrapper {
     position: relative;
+    z-index: 10;
+    padding: 40px 15px;
 }
 
-nav.navbar-inazuma::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--electric), transparent);
-    animation: scanLine 3s linear infinite;
+.table-responsive {
+    background: rgba(8, 8, 56, 0.85) !important; /* Fondo azul oscuro semi-transparente */
+    border: 1px solid rgba(240, 165, 0, 0.3);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
 }
 
-@keyframes scanLine {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+.tabla-inazuma {
+    width: 100%;
+    border-collapse: separate !important;
+    border-spacing: 0 10px !important;
+    background: transparent !important;
 }
 
-/* ===== CARDS ===== */
-.card {
-    background: linear-gradient(145deg, rgba(8,8,56,0.95), rgba(3,0,26,0.98)) !important;
-    border: 1px solid rgba(240, 165, 0, 0.4) !important;
-    border-radius: 20px !important;
-    box-shadow:
-        0 0 40px rgba(240, 165, 0, 0.15),
-        0 20px 60px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(240,165,0,0.2) !important;
-    animation: cardAppear 0.6s ease-out;
-    position: relative;
-    overflow: hidden;
-}
-
-.card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(
-        from 0deg,
-        transparent 0deg,
-        rgba(240,165,0,0.05) 60deg,
-        transparent 120deg
-    );
-    animation: rotateSweep 8s linear infinite;
-    pointer-events: none;
-}
-
-@keyframes rotateSweep {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes cardAppear {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* ===== INPUTS ===== */
-.form-control {
-    background: rgba(3, 0, 26, 0.8) !important;
-    color: var(--white) !important;
-    border: 1px solid rgba(240, 165, 0, 0.4) !important;
-    border-radius: 10px !important;
-    padding: 12px 16px !important;
-    font-family: 'Exo 2', sans-serif !important;
-    font-size: 0.95rem !important;
-    transition: all 0.3s ease !important;
-}
-
-.form-control:focus {
-    background: rgba(8, 8, 56, 0.9) !important;
-    border-color: var(--gold) !important;
-    box-shadow:
-        0 0 0 0.2rem rgba(240,165,0,0.15),
-        0 0 20px rgba(240,165,0,0.2) !important;
-    outline: none !important;
-}
-
-.form-control::placeholder {
-    color: rgba(255,255,255,0.35) !important;
-    font-weight: 300 !important;
-}
-
-/* ===== BOTONES ===== */
-.btn-warning {
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
+.tabla-inazuma thead th {
+    background: linear-gradient(135deg, var(--blue-light), var(--blue-deep)) !important;
+    color: var(--gold) !important;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    padding: 15px !important;
     border: none !important;
-    color: var(--blue-deep) !important;
-    font-family: 'Bebas Neue', sans-serif !important;
-    font-size: 1.1rem !important;
-    letter-spacing: 2px !important;
-    border-radius: 10px !important;
-    padding: 12px 24px !important;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease !important;
+    text-transform: uppercase;
 }
 
-.btn-warning::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.4s ease;
+.tabla-inazuma tbody tr {
+    background: rgba(255, 255, 255, 0.05) !important;
+    transition: transform 0.3s, background 0.3s;
 }
 
-.btn-warning:hover::before {
-    left: 100%;
+.tabla-inazuma tbody tr:hover {
+    background: rgba(240, 165, 0, 0.1) !important;
+    transform: scale(1.01);
 }
 
-.btn-warning:hover {
-    background: linear-gradient(135deg, var(--gold-bright), var(--gold)) !important;
-    transform: translateY(-3px) !important;
-    box-shadow: 0 8px 25px rgba(240,165,0,0.5) !important;
-    color: var(--blue-deep) !important;
+.tabla-inazuma td {
+    padding: 15px !important;
+    vertical-align: middle !important;
+    border: none !important;
+    color: var(--white);
+}
+
+/* ===== FILA CAMPEÓN (TOP 1) ===== */
+.top-1 {
+    background: linear-gradient(90deg, rgba(240, 165, 0, 0.25), rgba(240, 165, 0, 0.05)) !important;
+    border: 1px solid var(--gold) !important;
+    box-shadow: 0 0 15px rgba(240, 165, 0, 0.2);
+}
+
+.top-1 .gold-text, .top-1 td:first-child {
+    color: var(--gold-bright) !important;
+    font-weight: 800;
+}
+
+/* ===== ELEMENTOS DE DISEÑO ===== */
+.puntos-destacados {
+    color: var(--electric) !important;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+}
+
+.badge-stat {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.ataque { background: #007bff; color: white; }
+.defensa { background: #17a2b8; color: white; }
+
+.divider-gold {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 2rem auto;
+    width: 80%;
 }
 
 .btn-outline-warning {
     border: 1px solid var(--gold) !important;
     color: var(--gold) !important;
-    font-family: 'Bebas Neue', sans-serif !important;
-    font-size: 1rem !important;
-    letter-spacing: 2px !important;
-    border-radius: 10px !important;
-    padding: 10px 22px !important;
-    background: transparent !important;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease !important;
-}
-
-.btn-outline-warning::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.btn-outline-warning:hover::before {
-    opacity: 1;
+    font-family: 'Bebas Neue', sans-serif;
+    transition: 0.3s;
+    background: transparent;
+    padding: 8px 20px;
 }
 
 .btn-outline-warning:hover {
+    background: var(--gold) !important;
     color: var(--blue-deep) !important;
-    transform: translateY(-3px) !important;
-    box-shadow: 0 8px 25px rgba(240,165,0,0.4) !important;
+    box-shadow: 0 0 15px var(--gold);
 }
 
-.btn-outline-warning span {
-    position: relative;
-    z-index: 1;
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #ff3a3a, #cc0000) !important;
-    border: none !important;
-    font-family: 'Bebas Neue', sans-serif !important;
-    font-size: 1rem !important;
-    letter-spacing: 2px !important;
-    border-radius: 10px !important;
-    transition: all 0.3s ease !important;
-}
-
-.btn-danger:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 8px 25px rgba(255,58,58,0.5) !important;
-}
-
-/* ===== TABLA ===== */
-.table-dark {
-    background: transparent !important;
-}
-
-.table-dark thead.table-warning th {
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
-    color: var(--blue-deep) !important;
-    font-family: 'Bebas Neue', sans-serif !important;
-    font-size: 1.1rem !important;
-    letter-spacing: 3px !important;
-    border: none !important;
-    padding: 16px !important;
-}
-
-.table-dark tbody tr {
-    border-bottom: 1px solid rgba(240,165,0,0.1) !important;
-    transition: all 0.3s ease !important;
-    animation: rowAppear 0.5s ease-out both;
-}
-
-.table-dark tbody tr:nth-child(1) { animation-delay: 0.05s; }
-.table-dark tbody tr:nth-child(2) { animation-delay: 0.1s; }
-.table-dark tbody tr:nth-child(3) { animation-delay: 0.15s; }
-.table-dark tbody tr:nth-child(4) { animation-delay: 0.2s; }
-.table-dark tbody tr:nth-child(5) { animation-delay: 0.25s; }
-.table-dark tbody tr:nth-child(6) { animation-delay: 0.3s; }
-.table-dark tbody tr:nth-child(7) { animation-delay: 0.35s; }
-.table-dark tbody tr:nth-child(8) { animation-delay: 0.4s; }
-.table-dark tbody tr:nth-child(9) { animation-delay: 0.45s; }
-.table-dark tbody tr:nth-child(10) { animation-delay: 0.5s; }
-
-@keyframes rowAppear {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.table-dark tbody tr:hover {
-    background: linear-gradient(90deg, rgba(240,165,0,0.1), rgba(240,165,0,0.05)) !important;
-    transform: translateX(6px) !important;
-    box-shadow: inset 4px 0 0 var(--gold) !important;
-}
-
-.table-dark td {
-    border: none !important;
-    padding: 14px 16px !important;
-    font-size: 0.95rem !important;
-    color: rgba(255,255,255,0.85) !important;
-    vertical-align: middle !important;
-}
-
-/* Borde de la tabla */
-.table-responsive {
-    border: 1px solid rgba(240,165,0,0.2);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 0 40px rgba(240,165,0,0.1), 0 20px 60px rgba(0,0,0,0.4);
-}
-
-/* ===== LINKS ===== */
-a.text-warning {
-    color: var(--gold) !important;
-    text-decoration: none !important;
-    font-weight: 600;
-    position: relative;
-    transition: all 0.3s ease !important;
-}
-
-a.text-warning::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0; right: 100%;
-    height: 1px;
-    background: var(--gold);
-    transition: right 0.3s ease;
-}
-
-a.text-warning:hover::after {
-    right: 0;
-}
-
-a.text-warning:hover {
-    color: var(--gold-bright) !important;
-    text-shadow: 0 0 10px rgba(240,165,0,0.5) !important;
-}
-
-/* ===== ANIMACIONES DE ENTRADA ===== */
+/* Animación de entrada */
 .fade-in-up {
-    animation: fadeInUp 0.7s ease-out both;
+    animation: fadeInUp 0.8s ease-out forwards;
 }
 
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ===== BADGE DE TEMPORADA ===== */
-.badge-temporada {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-    color: var(--blue-deep);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 2px;
-    padding: 4px 14px;
-    border-radius: 20px;
-    margin-left: 10px;
-    vertical-align: middle;
-}
-
-/* ===== LÍNEA DECORATIVA ===== */
-.divider-gold {
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: 20px 0;
-    border: none;
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
 }

@@ -6,57 +6,113 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
     <style>
         :root {
-            --neon: #ff6a00;
-            --blue: #00e5ff;
-            --bg: #020812;
-            --glass: rgba(10, 25, 47, 0.8);
+            --gold: #f0a500;
+            --gold-bright: #ffe566;
+            --blue-electric: #00e5ff;
+            --bg: #03001a;
+            --glass: rgba(8, 8, 56, 0.7);
+            --text-main: #ffffff;
         }
-        * { cursor: crosshair; }
+
+        * { cursor: crosshair; box-sizing: border-box; }
+
         body {
-            background: var(--bg); color: white; font-family: 'Rajdhani', sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0;
+            background-color: var(--bg);
+            background-image:
+                    radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.1) 0%, transparent 40%),
+                    radial-gradient(circle at 80% 70%, rgba(240, 165, 0, 0.05) 0%, transparent 40%);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0;
+            overflow-x: hidden;
         }
-        .cyber-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(255,106,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,106,0,0.05) 1px, transparent 1px); background-size: 50px 50px; z-index: -1; }
 
-        .nav-header { position: fixed; top: 20px; display: flex; gap: 15px; z-index: 100; }
+        /* Grid lines del campo de fútbol */
+        .cyber-grid {
+            position: fixed; inset: 0;
+            background-image: linear-gradient(rgba(240, 165, 0, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(240, 165, 0, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: -1;
+        }
+
+        /* HEADER / NAVBAR */
+        .nav-header {
+            position: fixed; top: 20px;
+            display: flex; gap: 15px; z-index: 100;
+        }
         .nav-btn {
-            text-decoration: none; color: var(--blue); border: 1px solid var(--blue);
-            padding: 8px 15px; font-family: 'Orbitron'; font-size: 0.7rem; transition: 0.3s;
+            text-decoration: none; color: var(--gold); border: 1px solid var(--gold);
+            padding: 8px 18px; font-family: 'Orbitron'; font-size: 0.7rem;
+            transition: 0.3s; background: rgba(0,0,0,0.3);
+            letter-spacing: 1px;
         }
-        .nav-btn:hover { background: var(--blue); color: black; box-shadow: 0 0 15px var(--blue); }
+        .nav-btn:hover {
+            background: var(--gold); color: var(--bg);
+            box-shadow: 0 0 15px var(--gold);
+        }
+        .nav-btn.active { border-color: var(--blue-electric); color: var(--blue-electric); }
 
-        .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; width: 95%; max-width: 1000px; margin-top: 50px; }
+        /* LAYOUT */
+        .layout {
+            display: grid; grid-template-columns: 320px 1fr; gap: 25px;
+            width: 95%; max-width: 1100px; margin-top: 60px;
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .module {
-            background: var(--glass); border: 1px solid var(--neon); padding: 25px;
+            background: var(--glass);
+            border: 1px solid rgba(240, 165, 0, 0.3);
+            padding: 30px;
+            backdrop-filter: blur(10px);
             clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .avatar-placeholder {
-            width: 140px; height: 140px; border: 2px solid var(--blue); margin: 0 auto 15px;
+            width: 130px; height: 130px; border: 2px solid var(--gold); margin: 0 auto 15px;
             display: flex; align-items: center; justify-content: center;
-            font-family: 'Orbitron'; font-size: 3rem; color: var(--blue);
-            background: rgba(0, 229, 255, 0.1);
+            font-family: 'Orbitron'; font-size: 3rem; color: var(--gold-bright);
+            background: rgba(240, 165, 0, 0.1);
             clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
+            box-shadow: 0 0 20px rgba(240, 165, 0, 0.2);
         }
 
-        label { font-family: 'Orbitron'; font-size: 0.65rem; color: var(--neon); display: block; margin-top: 15px; letter-spacing: 1px; }
+        label { font-family: 'Orbitron'; font-size: 0.65rem; color: var(--gold); display: block; margin-top: 20px; letter-spacing: 2px; font-weight: bold; }
+
         input, textarea {
-            width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(0, 229, 255, 0.3);
-            padding: 12px; color: white; margin-top: 5px; font-family: 'Rajdhani'; outline: none;
+            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(0, 229, 255, 0.2);
+            padding: 12px; color: white; margin-top: 8px; font-family: 'Rajdhani'; outline: none;
+            transition: 0.3s; font-size: 1rem;
         }
-        input:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+        input:focus, textarea:focus {
+            border-color: var(--blue-electric);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+            background: rgba(0,0,0,0.6);
+        }
 
         .btn-sync {
-            width: 100%; padding: 15px; background: transparent; border: 1px solid var(--neon);
-            color: var(--neon); font-family: 'Orbitron'; cursor: pointer; margin-top: 25px;
-            transition: 0.3s; font-weight: bold;
+            width: 100%; padding: 15px; background: transparent; border: 2px solid var(--gold);
+            color: var(--gold); font-family: 'Bebas Neue'; cursor: pointer; margin-top: 30px;
+            transition: 0.3s; font-size: 1.4rem; letter-spacing: 2px;
             clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
         }
-        .btn-sync:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
+        .btn-sync:hover {
+            background: var(--gold); color: var(--bg);
+            box-shadow: 0 0 25px var(--gold);
+            transform: translateY(-2px);
+        }
 
-        .success-msg { color: #00ff88; font-family: 'Orbitron'; text-align: center; font-size: 0.8rem; margin-bottom: 15px; text-shadow: 0 0 10px #00ff88; }
-        .preview-data { font-size: 0.8rem; color: var(--blue); margin-top: 10px; font-family: 'Orbitron'; }
+        .success-msg {
+            color: #00ff88; font-family: 'Orbitron'; text-align: center;
+            font-size: 0.8rem; margin-bottom: 20px; text-shadow: 0 0 10px #00ff88;
+            background: rgba(0, 255, 136, 0.1); padding: 10px; border-radius: 5px;
+        }
+
+        .preview-data { font-size: 0.75rem; color: var(--blue-electric); margin-top: 10px; font-family: 'Orbitron'; letter-spacing: 1px; }
+
+        h1 { font-family: 'Bebas Neue'; color: white; letter-spacing: 2px; }
     </style>
 </head>
 <body>
@@ -64,26 +120,27 @@
 <div class="cyber-grid"></div>
 
 <nav class="nav-header">
-    <a th:href="@{/inicio}" class="nav-btn">CENTRO DE MANDO</a>
-    <a th:href="@{/perfil}" class="nav-btn" style="border-color: var(--neon); color: var(--neon);">ID_PERFIL</a>
+    <a href="/inicio" class="nav-btn">CENTRO DE MANDO</a>
+    <a href="/ranking" class="nav-btn">RANKING GLOBAL</a>
+    <a href="/perfil" class="nav-btn active">ID_PERFIL</a>
 </nav>
 
 <div class="layout" th:if="${user != null}">
     <div class="module" style="text-align: center;">
-        <span style="font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon);">IDENT_PREVIEW</span>
+        <span class="label" style="margin-top: 0; opacity: 0.6;">IDENT_PREVIEW</span>
         <div class="avatar-placeholder">
             <span id="previewChar" th:text="${user.nombre != null ? #strings.toUpperCase(#strings.substring(user.nombre,0,1)) : 'U'}">V</span>
         </div>
-        <h2 id="previewNombre" style="font-family: 'Orbitron'; margin-bottom: 10px;" th:text="${user.nombre}">AGENTE</h2>
+        <h2 id="previewNombre" style="font-family: 'Bebas Neue'; font-size: 2.2rem; margin-bottom: 5px; color: var(--gold-bright);" th:text="${user.nombre}">AGENTE</h2>
 
-        <div style="border-top: 1px solid rgba(0,229,255,0.2); margin-top: 10px; padding-top: 10px;">
+        <div style="border-top: 1px solid rgba(0, 212, 255, 0.2); margin-top: 15px; padding-top: 15px;">
             <p class="preview-data" id="previewRango" th:text="${user.rango != null ? #strings.toUpperCase(user.rango) : 'SIN_RANGO'}">CAPTAIN</p>
-            <p style="font-size: 0.6rem; color: white;" id="previewAfiliacion" th:text="${user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'SIN_AFILIACION'}">RAIMON_HIGH</p>
+            <p style="font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-top: 5px; font-family: 'Orbitron';" id="previewAfiliacion" th:text="${user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'SIN_AFILIACION'}">RAIMON_HIGH</p>
         </div>
     </div>
 
     <div class="module">
-        <h1 style="font-family: 'Bebas Neue'; font-size: 2.2rem; border-bottom: 1px solid var(--neon); margin-bottom: 15px; letter-spacing: 2px;">MODIFICAR_DATOS_AGENTE</h1>
+        <h1 style="font-size: 2.5rem; border-bottom: 2px solid var(--gold); padding-bottom: 10px; margin-bottom: 20px;">MODIFICAR_DATOS_AGENTE</h1>
 
         <div th:if="${param.success}" class="success-msg">>> BASE_DE_DATOS_ACTUALIZADA_CON_ÉXITO_</div>
 
@@ -96,7 +153,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div>
                     <label>RANGO / POSICIÓN</label>
-                    <input type="text" id="inRango" name="rango" th:value="${user.rango}" placeholder="Ej: PORTERO">
+                    <input type="text" id="inRango" name="rango" th:value="${user.rango}" placeholder="Ej: DELANTERO">
                 </div>
                 <div>
                     <label>AFILIACIÓN (EQUIPO)</label>
@@ -112,9 +169,9 @@
     </div>
 </div>
 
-<div th:unless="${user != null}" class="module">
-    <p class="success-msg" style="color: #ff4444;">>> ERROR: SESIÓN_NO_IDENTIFICADA. RECONECTANDO...</p>
-    <a href="/login" class="nav-btn">VOLVER AL LOGIN</a>
+<div th:unless="${user != null}" class="module" style="text-align: center; max-width: 400px;">
+    <p class="success-msg" style="color: #ff4444; background: rgba(255,0,0,0.1); border: 1px solid #ff4444;">>> ERROR: SESIÓN_NO_IDENTIFICADA_</p>
+    <a href="/login" class="nav-btn" style="display: block; margin-top: 20px;">VOLVER AL ACCESO</a>
 </div>
 
 <script>

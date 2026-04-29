@@ -17,10 +17,19 @@ public class Usuario {
     private String email;
 
     private String password;
-
     private String descripcion;
     private String afiliacion;
     private String rango;
+
+    // --- NUEVOS CAMPOS DE STATS Y RANKING ---
+    @Column(name = "puntos_inazuma")
+    private Integer puntosInazuma = 0;
+
+    private Integer ataque = 10;
+    private Integer defensa = 10;
+    private Integer rapidez = 10;
+    private Integer victorias = 0;
+    // ---------------------------------------
 
     @Column(name = "reset_token")
     private String resetToken;
@@ -28,6 +37,7 @@ public class Usuario {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
+    // Getters y Setters existentes
     public Long getId() { return id; }
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -45,4 +55,16 @@ public class Usuario {
     public void setResetToken(String resetToken) { this.resetToken = resetToken; }
     public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
     public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
+
+    // --- NUEVOS GETTERS Y SETTERS ---
+    public Integer getPuntosInazuma() { return puntosInazuma; }
+    public void setPuntosInazuma(Integer puntosInazuma) { this.puntosInazuma = puntosInazuma; }
+    public Integer getAtaque() { return ataque; }
+    public void setAtaque(Integer ataque) { this.ataque = ataque; }
+    public Integer getDefensa() { return defensa; }
+    public void setDefensa(Integer defensa) { this.defensa = defensa; }
+    public Integer getRapidez() { return rapidez; }
+    public void setRapidez(Integer rapidez) { this.rapidez = rapidez; }
+    public Integer getVictorias() { return victorias; }
+    public void setVictorias(Integer victorias) { this.victorias = victorias; }
 }
