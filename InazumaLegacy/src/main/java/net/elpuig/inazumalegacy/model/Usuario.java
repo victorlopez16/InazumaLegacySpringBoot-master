@@ -21,7 +21,8 @@ public class Usuario {
     private String afiliacion;
     private String rango;
 
-    // --- NUEVOS CAMPOS DE STATS Y RANKING ---
+    private boolean online = false;
+
     @Column(name = "puntos_inazuma")
     private Integer puntosInazuma = 0;
 
@@ -29,7 +30,6 @@ public class Usuario {
     private Integer defensa = 10;
     private Integer rapidez = 10;
     private Integer victorias = 0;
-    // ---------------------------------------
 
     @Column(name = "reset_token")
     private String resetToken;
@@ -37,7 +37,7 @@ public class Usuario {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
-    // Getters y Setters existentes
+    // Getters y Setters
     public Long getId() { return id; }
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -51,12 +51,14 @@ public class Usuario {
     public void setAfiliacion(String afiliacion) { this.afiliacion = afiliacion; }
     public String getRango() { return rango; }
     public void setRango(String rango) { this.rango = rango; }
+
+    public boolean isOnline() { return online; }
+    public void setOnline(boolean online) { this.online = online; }
+
     public String getResetToken() { return resetToken; }
     public void setResetToken(String resetToken) { this.resetToken = resetToken; }
     public LocalDateTime getResetTokenExpiry() { return resetTokenExpiry; }
     public void setResetTokenExpiry(LocalDateTime resetTokenExpiry) { this.resetTokenExpiry = resetTokenExpiry; }
-
-    // --- NUEVOS GETTERS Y SETTERS ---
     public Integer getPuntosInazuma() { return puntosInazuma; }
     public void setPuntosInazuma(Integer puntosInazuma) { this.puntosInazuma = puntosInazuma; }
     public Integer getAtaque() { return ataque; }

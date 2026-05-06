@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface JugadorRepository extends JpaRepository<Jugador, Long> {
 
+    List<Jugador> findByTemporada(int temporada);
+
     List<Jugador> findAllByOrderByPuntosInazumaDesc();
 
     @Query(value = "SELECT * FROM jugadores_raimon_s1 WHERE id != :idJugador ORDER BY RANDOM() LIMIT 1", nativeQuery = true)

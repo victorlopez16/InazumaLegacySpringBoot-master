@@ -135,7 +135,8 @@
 <div class="main">
 
     <div class="page-header">
-        <h1 class="page-title">SEASON_PHASE_<span th:text="${temporada}">1</span></h1>
+        <!-- CORRECCIÓN 1: Usar temporadaActual -->
+        <h1 class="page-title">SEASON_PHASE_<span th:text="${temporadaActual}">1</span></h1>
         <div class="page-sub">REGISTRO TÁCTICO DE JUGADORES // RAIMON_LEGACY</div>
     </div>
 
@@ -162,8 +163,9 @@
                 </tr>
                 </thead>
                 <tbody id="jugadoresTbody">
+                <!-- CORRECCIÓN 2: Usar temporadaActual en la URL del onclick -->
                 <tr th:each="j : ${jugadores}"
-                    th:onclick="|window.location='/jugador/' + ${j.id} + '?temporada=' + ${temporada}|"
+                    th:onclick="|window.location='/jugador/' + ${j.id} + '?temporada=' + ${temporadaActual}|"
                     th:data-nombre="${j.nombre}"
                     th:data-posicion="${j.posicion}"
                     th:data-equipo="${j.equipo}">
@@ -223,7 +225,6 @@
     searchInput.addEventListener('input', filterRows);
     filterPos.addEventListener('change', filterRows);
 
-    // Inicializar contador al cargar
     updateCounter();
 </script>
 </body>

@@ -1,7 +1,11 @@
 package net.elpuig.inazumalegacy.controller;
 
 import net.elpuig.inazumalegacy.model.Jugador;
+import net.elpuig.inazumalegacy.model.JugadorS2;
+import net.elpuig.inazumalegacy.model.JugadorS3;
 import net.elpuig.inazumalegacy.repository.JugadorRepository;
+import net.elpuig.inazumalegacy.repository.JugadorS2Repository;
+import net.elpuig.inazumalegacy.repository.JugadorS3Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +18,45 @@ public class JugadorController {
 
     @Autowired
     private JugadorRepository jugadorRepo;
+
+    @Autowired
+    private JugadorS2Repository jugadorS2Repo;
+
+    @Autowired
+    private JugadorS3Repository jugadorS3Repo;
+
+    @GetMapping("/jugadores")
+    public String listarJugadores(@RequestParam(name = "temporada", required = false, defaultValue = "1") int temporada, Model model) {
+        if (temporada == 2) {
+            model.addAttribute("jugadores", jugadorS2Repo.findAll());
+        } else if (temporada == 3) {
+            model.addAttribute("jugadores", jugadorS3Repo.findAll());
+        } else {
+            model.addAttribute("jugadores", jugadorRepo.findAll());
+        }
+
+        model.addAttribute("temporadaActual", temporada);
+        return "jugadores";
+    }
+
+    @GetMapping("/jugador/{id}")
+    public String verFicha(@PathVariable Long id, @RequestParam(name = "temporada", defaultValue = "1") int temporada, Model model) {
+
+        if (temporada == 2) {
+            JugadorS2 j2 = jugadorS2Repo.findById(id).orElseThrow();
+            model.addAttribute("jugador", j2);
+        } else if (temporada == 3) {
+            JugadorS3 j3 = jugadorS3Repo.findById(id).orElseThrow();
+            model.addAttribute("jugador", j3);
+        } else {
+            Jugador j1 = jugadorRepo.findById(id).orElseThrow();
+            model.addAttribute("jugador", j1);
+        }
+
+        model.addAttribute("temporada", temporada);
+
+        return "jugador-detalle";
+    }
 
     @GetMapping("/pachanga")
     public String mostrarMenuPachanga(Model model) {

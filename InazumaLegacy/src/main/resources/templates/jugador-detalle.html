@@ -141,6 +141,7 @@
 
 <nav class="navbar">
     <div class="brand">FILE_ACCESS // TACTICAL_DASHBOARD</div>
+    <!-- CORRECCIÓN: Asegurar que el retorno use la variable de temporada correcta -->
     <a th:href="@{/jugadores(temporada=${temporada})}" class="back-link">← RETURN_TO_SQUAD</a>
 </nav>
 
@@ -152,7 +153,8 @@
                 <span class="id-label">PLAYER_IDENTIFICATION</span>
                 <div class="player-photo-wrap">
                     <div class="scan-line"></div>
-                    <img class="player-photo" th:src="${jugador.fotoUrl}" th:alt="${jugador.nombre}"/>
+                    <!-- CORRECCIÓN CLAVE: th:src con la ruta a la carpeta images -->
+                    <img class="player-photo" th:src="@{'/images/' + ${jugador.fotoUrl}}" th:alt="${jugador.nombre}"/>
                 </div>
 
                 <h1 class="player-name" th:text="${jugador.nombre}">NOMBRE JUGADOR</h1>
