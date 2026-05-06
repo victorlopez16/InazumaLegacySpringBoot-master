@@ -12,12 +12,15 @@ public class Mensaje {
     private Long id;
 
     private String remitente;
-    private String destinatario; // "GLOBAL", "IA", o nombre de usuario
+    private String destinatario;
 
     @Column(columnDefinition = "TEXT")
-    private String contenido; // Aquí irá el texto o la cadena Base64 si es audio
+    private String contenido;
 
-    private String tipo; // "TEXTO", "AUDIO"
+    private String tipo;
+
+    private boolean leido = false;
+
     private LocalDateTime fechaEnvio;
 
     @PrePersist

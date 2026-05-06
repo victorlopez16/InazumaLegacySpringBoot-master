@@ -3,6 +3,7 @@ package net.elpuig.inazumalegacy.controller;
 import jakarta.servlet.http.HttpSession;
 import net.elpuig.inazumalegacy.model.Usuario;
 import net.elpuig.inazumalegacy.repository.UsuarioRepository;
+import net.elpuig.inazumalegacy.repository.MensajeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -18,15 +19,16 @@ public class AuthController {
     private UsuarioRepository repo;
 
     @Autowired
+    private MensajeRepository mensajeRepo;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // 1. PRIMERA PÁGINA: Al abrir la app (localhost:8080) sale el HTML de invitado
     @GetMapping("/")
     public String root() {
         return "inicio_invitado";
     }
 
-    // 2. FORMULARIOS DE ACCESO
     @GetMapping("/registro")
     public String registroForm() {
         return "registro";
@@ -37,7 +39,6 @@ public class AuthController {
         return "login";
     }
 
-    // 3. LÓGICA DE REGISTRO
     @PostMapping("/registro")
     public String registrar(@RequestParam String nombre,
                             @RequestParam String email,
@@ -46,12 +47,44 @@ public class AuthController {
         u.setNombre(nombre);
         u.setEmail(email);
         u.setPassword(passwordEncoder.encode(password));
+        u.setOnline(false);
         repo.save(u);
-        // Tras registrarse, lo mandamos al login para que entre oficialmente
         return "redirect:/login";
     }
 
-    // 4. LÓGICA DE LOGIN
+    // --- MÉTODO ACTUALIZADO PARA QUE FUNCIONEN TODOS LOS CAMPOS ---
+    @PostMapping("/perfil/actualizar")
+    public String actualizarPerfil(@RequestParam String nombre,
+                                   @RequestParam String rango,
+                                   @RequestParam String afiliacion,
+                                   @RequestParam String descripcion,
+                                   HttpSession session) {
+
+        // 1. Obtener el nombre actual de la sesión para buscar al usuario
+        String nombreActualSesion = (String) session.getAttribute("usuario");
+        if (nombreActualSesion == null) return "redirect:/login";
+
+        Optional<Usuario> oUsuario = repo.findByNombre(nombreActualSesion);
+
+        if (oUsuario.isPresent()) {
+            Usuario u = oUsuario.get();
+
+            // 2. Actualizar todos los campos con los @RequestParam
+            u.setNombre(nombre);
+            u.setRango(rango);
+            u.setAfiliacion(afiliacion);
+            u.setDescripcion(descripcion);
+
+            // 3. Guardar cambios en la base de datos
+            repo.save(u);
+
+            // 4. MUY IMPORTANTE: Actualizar el nombre en la sesión por si ha cambiado
+            session.setAttribute("usuario", nombre);
+        }
+
+        return "redirect:/perfil?success";
+    }
+
     @PostMapping("/login")
     public String loginPost(@RequestParam String username,
                             @RequestParam String password,
@@ -59,39 +92,51 @@ public class AuthController {
         Optional<Usuario> usuario = repo.findByNombre(username);
         if (usuario.isPresent() && passwordEncoder.matches(password, usuario.get().getPassword())) {
             session.setAttribute("usuario", usuario.get().getNombre());
-            // Si el login es correcto, entra al inicio real (el del video)
+
+            Usuario u = usuario.get();
+            u.setOnline(true);
+            repo.save(u);
+
             return "redirect:/inicio";
         }
         return "redirect:/login?error";
     }
 
-    // 5. PÁGINA DE INICIO (USUARIOS LOGUEADOS)
     @GetMapping("/inicio")
     public String inicio(HttpSession session, Model model) {
         String nombreUsuario = (String) session.getAttribute("usuario");
-        // Si no hay sesión, lo mandamos a REGISTRO como pediste
-        if (nombreUsuario == null) return "redirect:/registro";
+        if (nombreUsuario == null) return "redirect:/login";
 
-        repo.findByNombre(nombreUsuario).ifPresent(u -> model.addAttribute("user", u));
+        repo.findByNombre(nombreUsuario).ifPresent(u -> {
+            model.addAttribute("user", u);
+            model.addAttribute("nombreUsuario", u.getNombre());
+
+            long noLeidos = mensajeRepo.countByDestinatarioAndLeidoFalse(u.getNombre());
+            model.addAttribute("mensajesNuevos", noLeidos);
+        });
+
         return "inicio";
     }
 
-    // 6. PERFIL (USUARIOS LOGUEADOS)
     @GetMapping("/perfil")
     public String perfil(HttpSession session, Model model) {
         String nombreUsuario = (String) session.getAttribute("usuario");
-        // Si intenta entrar sin sesión, al registro
-        if (nombreUsuario == null) return "redirect:/registro";
+        if (nombreUsuario == null) return "redirect:/login";
 
         repo.findByNombre(nombreUsuario).ifPresent(u -> model.addAttribute("user", u));
         return "perfil";
     }
 
-    // 7. SALIR
     @GetMapping("/logout")
     public String logout(HttpSession session) {
+        String nombreUsuario = (String) session.getAttribute("usuario");
+        if (nombreUsuario != null) {
+            repo.findByNombre(nombreUsuario).ifPresent(u -> {
+                u.setOnline(false);
+                repo.save(u);
+            });
+        }
         session.invalidate();
-        // Al salir, volvemos a la pantalla de invitado
         return "redirect:/";
     }
 }

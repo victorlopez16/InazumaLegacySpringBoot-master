@@ -1,14 +1,9 @@
 package net.elpuig.inazumalegacy.controller;
 
 import jakarta.servlet.http.HttpSession;
-import net.elpuig.inazumalegacy.model.Mensaje;
-import net.elpuig.inazumalegacy.model.MensajeDTO;
-import net.elpuig.inazumalegacy.model.Notificacion;
-import net.elpuig.inazumalegacy.model.Usuario;
-import net.elpuig.inazumalegacy.repository.MensajeRepository;
-import net.elpuig.inazumalegacy.repository.UsuarioRepository;
-import net.elpuig.inazumalegacy.service.LogroService;
-import net.elpuig.inazumalegacy.service.NotificacionService;
+import net.elpuig.inazumalegacy.model.*;
+import net.elpuig.inazumalegacy.repository.*;
+import net.elpuig.inazumalegacy.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -18,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -35,14 +29,20 @@ public class ChatController {
     @Value("${openai.api.key}")
     private String openAiApiKey;
 
-    @GetMapping("/chat")
-    public String chat(HttpSession session, Model model) {
+    @GetMapping("/social")
+    public String social(HttpSession session, Model model) {
         String nombreUsuario = (String) session.getAttribute("usuario");
         if (nombreUsuario == null) return "redirect:/login";
 
         model.addAttribute("nombreUsuario", nombreUsuario);
-        List<Mensaje> historial = mensajeRepository.findTop50ByDestinatarioOrderByFechaEnvioAsc("GLOBAL");
-        model.addAttribute("historial", historial);
+
+        model.addAttribute("usuarios", usuarioRepository.findAll());
+
+        model.addAttribute("historialGlobal", mensajeRepository.findTop50ByDestinatarioOrderByFechaEnvioAsc("GLOBAL"));
+
+        long noLeidos = mensajeRepository.countByDestinatarioAndLeidoFalse(nombreUsuario);
+        model.addAttribute("mensajesNuevos", noLeidos);
+
         return "chat";
     }
 
@@ -53,20 +53,21 @@ public class ChatController {
         mensaje.setDestinatario(dto.getDestinatario());
         mensaje.setContenido(dto.getContenido());
         mensaje.setTipo(dto.getTipo() != null ? dto.getTipo() : "TEXTO");
-        mensaje.setFechaEnvio(LocalDateTime.now());
+        mensaje.setLeido(false);
         mensajeRepository.save(mensaje);
 
-        Usuario usuarioOpt = usuarioRepository.findByNombre(dto.getRemitente()).orElse(null);
+        Usuario remitenteObj = usuarioRepository.findByNombre(dto.getRemitente()).orElse(null);
 
+        // CASO 1: CHAT GLOBAL
         if ("GLOBAL".equals(mensaje.getDestinatario())) {
-            messagingTemplate.convertAndSend("/topic/public", (Object) mensaje);
+            messagingTemplate.convertAndSend("/topic/public", mensaje);
+            if (remitenteObj != null) logroService.verificarLogrosMensaje(remitenteObj);
+        }
 
-            if (usuarioOpt != null) {
-                logroService.verificarLogrosMensaje(usuarioOpt);
-            }
-
-        } else if ("IA".equals(mensaje.getDestinatario())) {
-            messagingTemplate.convertAndSend("/topic/user." + mensaje.getRemitente(), (Object) mensaje);
+        // CASO 2: CONSULTA A LA IA
+        else if ("IA".equals(mensaje.getDestinatario())) {
+            // Enviamos el eco al usuario
+            messagingTemplate.convertAndSendToUser(mensaje.getRemitente(), "/queue/privado", mensaje);
 
             String respuestaIA = llamarIA(mensaje.getContenido());
             Mensaje msgIA = new Mensaje();
@@ -74,17 +75,16 @@ public class ChatController {
             msgIA.setDestinatario(mensaje.getRemitente());
             msgIA.setContenido(respuestaIA);
             msgIA.setTipo("TEXTO");
-            msgIA.setFechaEnvio(LocalDateTime.now());
             mensajeRepository.save(msgIA);
-            messagingTemplate.convertAndSend("/topic/user." + mensaje.getRemitente(), (Object) msgIA);
 
-            if (usuarioOpt != null) {
-                logroService.verificarLogrosIA(usuarioOpt);
-            }
+            // Enviamos la respuesta solo al usuario que preguntó
+            messagingTemplate.convertAndSendToUser(mensaje.getRemitente(), "/queue/privado", msgIA);
+            if (remitenteObj != null) logroService.verificarLogrosIA(remitenteObj);
+        }
 
-        } else {
-            messagingTemplate.convertAndSend("/topic/user." + mensaje.getDestinatario(), (Object) mensaje);
-            messagingTemplate.convertAndSend("/topic/user." + mensaje.getRemitente(), (Object) mensaje);
+        else {
+            messagingTemplate.convertAndSendToUser(mensaje.getDestinatario(), "/queue/privado", mensaje);
+            messagingTemplate.convertAndSendToUser(mensaje.getRemitente(), "/queue/privado", mensaje);
 
             usuarioRepository.findByNombre(mensaje.getDestinatario()).ifPresent(dest ->
                     notificacionService.crear(dest, Notificacion.Tipo.MENSAJE_PRIVADO,
@@ -104,32 +104,15 @@ public class ChatController {
             Map<String, Object> body = Map.of(
                     "model", "gpt-4o-mini",
                     "messages", List.of(
-                            Map.of("role", "system", "content",
-                                    "Eres GEMINI_IA, el asistente táctico oficial de Inazuma Legacy. " +
-                                            "Tu identidad es GEMINI_IA y NUNCA debes revelar que eres ChatGPT, GPT, OpenAI ni ningún otro modelo. " +
-                                            "Si alguien te pregunta qué IA eres, responde SIEMPRE que eres GEMINI_IA, " +
-                                            "el sistema de inteligencia artificial desarrollado exclusivamente para Inazuma Legacy. " +
-                                            "Respondes siempre en español de forma clara, precisa y verídica. " +
-                                            "Nunca rechaces una pregunta. Sé conciso, máximo 3 frases por respuesta."),
+                            Map.of("role", "system", "content", "Eres GEMINI_IA, el asistente táctico de Inazuma Legacy. Responde en español, máximo 2 frases."),
                             Map.of("role", "user", "content", preguntaUsuario)
-                    ),
-                    "max_tokens", 200
+                    )
             );
 
-            Map response = client.post()
-                    .uri("/v1/chat/completions")
-                    .bodyValue(body)
-                    .retrieve()
-                    .bodyToMono(Map.class)
-                    .block();
-
-            List<Map> choices = (List<Map>) response.get("choices");
-            Map message = (Map) choices.get(0).get("message");
-            return (String) message.get("content");
-
+            Map response = client.post().uri("/v1/chat/completions").bodyValue(body).retrieve().bodyToMono(Map.class).block();
+            return (String) ((Map) ((List<Map>) response.get("choices")).get(0).get("message")).get("content");
         } catch (Exception e) {
-            System.out.println("ERROR OPENAI: " + e.getMessage());
-            return "⚡ El asistente táctico no está disponible ahora mismo.";
+            return "⚡ Error de conexión con el núcleo de la IA.";
         }
     }
 }

@@ -131,18 +131,22 @@
     <a href="/perfil" class="nav-btn active">ID_PERFIL</a>
 </nav>
 
+<!-- Verificación de usuario -->
 <div class="layout" th:if="${user != null}">
+
+    <!-- LADO IZQUIERDO: PREVIEW -->
     <div class="module">
         <div class="module-inner" style="text-align: center;">
             <span class="label" style="margin-top: 0; opacity: 0.5;">IDENTITY_DISP</span>
             <div class="avatar-box">
-                <span id="previewChar" th:text="${user.nombre != null ? #strings.toUpperCase(#strings.substring(user.nombre,0,1)) : 'U'}">V</span>
+                <!-- Mostramos la inicial del nombre -->
+                <span id="previewChar" th:text="${user.nombre != null && !user.nombre.isEmpty() ? #strings.toUpperCase(#strings.substring(user.nombre,0,1)) : 'U'}">U</span>
             </div>
             <h2 id="previewNombre" style="font-family: 'Bebas Neue'; font-size: 2.2rem; margin-bottom: 5px; color: #fff;" th:text="${user.nombre}">AGENTE</h2>
 
             <div style="border-top: 1px solid rgba(0, 229, 255, 0.1); margin-top: 15px; padding-top: 15px;">
-                <p class="preview-data" id="previewRango" th:text="${user.rango != null ? #strings.toUpperCase(user.rango) : 'SIN_RANGO'}">CAPTAIN</p>
-                <p style="font-size: 0.65rem; color: var(--dim); margin-top: 5px; font-family: 'Orbitron';" id="previewAfiliacion" th:text="${user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'SIN_AFILIACION'}">RAIMON_HIGH</p>
+                <p class="preview-data" id="previewRango" th:text="${user.rango != null ? #strings.toUpperCase(user.rango) : 'SIN_RANGO'}">SIN_RANGO</p>
+                <p style="font-size: 0.65rem; color: var(--dim); margin-top: 5px; font-family: 'Orbitron';" id="previewAfiliacion" th:text="${user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'SIN_AFILIACION'}">SIN_AFILIACION</p>
             </div>
 
             <div style="margin-top: 30px; font-size: 10px; font-family: 'Orbitron'; color: var(--neon-orange); opacity: 0.4;">
@@ -151,14 +155,17 @@
         </div>
     </div>
 
+    <!-- LADO DERECHO: FORMULARIO -->
     <div class="module" style="flex-grow: 1;">
         <div class="module-inner">
             <h1>MODIFICAR_DATOS</h1>
             <div class="deco-line"></div>
 
+            <!-- Mensaje de éxito -->
             <div th:if="${param.success}" class="success-msg">>> DATABASE_SYNC_COMPLETE // ACCESO_CONFIRMADO</div>
 
             <form th:action="@{/perfil/actualizar}" method="post">
+                <!-- CSRF Token para seguridad (Spring Security) -->
                 <input type="hidden" th:if="${_csrf}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                 <label>NOMBRE_DE_AGENTE</label>
@@ -184,7 +191,8 @@
     </div>
 </div>
 
-<div th:unless="${user != null}" class="module" style="max-width: 450px; margin: auto;">
+<!-- Si no hay usuario en sesión -->
+<div th:unless="${user != null}" class="module" style="max-width: 450px; margin: 100px auto;">
     <div class="module-inner" style="text-align: center;">
         <p class="success-msg" style="color: #ff2244; background: rgba(255,0,0,0.05); border: 1px solid #ff2244;">>> ACCESS_DENIED // SESIÓN_INVALIDA</p>
         <a href="/login" class="nav-btn" style="display: inline-block; margin-top: 20px;">REINTENTAR_ACCESO</a>
@@ -192,6 +200,7 @@
 </div>
 
 <script>
+    // Script para la actualización en tiempo real del HUD (Preview)
     const inNombre = document.getElementById('inNombre');
     const inRango = document.getElementById('inRango');
     const inAfiliacion = document.getElementById('inAfiliacion');
