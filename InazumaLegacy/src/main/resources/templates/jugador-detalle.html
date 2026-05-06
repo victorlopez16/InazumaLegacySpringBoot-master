@@ -3,308 +3,214 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${jugador.nombre} + ' – Inazuma Legacy'">Jugador – Inazuma Legacy</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <title th:text="${jugador.nombre} + ' – Tactical File'">Jugador – Inazuma Legacy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
     <style>
         :root {
-            --navy:     #04101e;
-            --blue:     #071830;
-            --orange:   #ff6a00;
-            --orange2:  #ff8c00;
-            --electric: #00e5ff;
-            --white:    #f0f4ff;
-            --gold:     #ffd700;
-            --dim:      rgba(240,244,255,.38);
+            --core-bg: #020812;
+            --neon-orange: #ff6a00;
+            --neon-blue: #00e5ff;
+            --glass: rgba(10, 25, 47, 0.75);
+            --text-main: #e0f2fe;
+            --dim: rgba(224, 242, 254, 0.3);
         }
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
 
         body {
-            min-height: 100vh;
-            background: var(--navy);
+            min-height: 100vh; background: var(--core-bg);
             font-family: 'Rajdhani', sans-serif;
-            color: var(--white);
-            overflow-x: hidden;
+            color: var(--text-main); overflow-x: hidden;
+            display: flex; flex-direction: column;
         }
 
-        body::before {
-            content: ''; position: fixed; inset: 0; z-index: 0;
-            background:
-                radial-gradient(ellipse at 20% 40%, rgba(255,106,0,.15) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 20%, rgba(0,229,255,.08) 0%, transparent 45%),
-                radial-gradient(ellipse at 50% 90%, rgba(255,140,0,.08) 0%, transparent 40%),
-                linear-gradient(180deg, #04101e 0%, #071830 60%, #04101e 100%);
-        }
-
-        .hex-bg {
-            position: fixed; inset: 0; z-index: 0; opacity: 0.035;
+        /* --- FONDO HUD --- */
+        .cyber-grid {
+            position: fixed; inset: 0;
             background-image:
-                repeating-linear-gradient(60deg,  var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%),
-                repeating-linear-gradient(120deg, var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%),
-                repeating-linear-gradient(0deg,   var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%);
-            background-size: 58px 100px;
-            animation: hexDrift 30s linear infinite;
-        }
-        @keyframes hexDrift { 0% { transform: translateY(0); } 100% { transform: translateY(58px); } }
-
-        .scanline {
-            position: fixed; inset: 0; z-index: 1; pointer-events: none;
-            background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,.06) 3px, rgba(0,0,0,.06) 4px);
+                    linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px; z-index: -1;
         }
 
-        .deco-number {
-            position: fixed; right: -30px; bottom: -40px;
-            font-family: 'Bebas Neue', sans-serif; font-size: 420px; line-height: 1;
-            color: rgba(255,106,0,.028); user-select: none; z-index: 1;
-        }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, #000 140%); pointer-events: none; z-index: 1; }
 
-        /* NAVBAR */
+        /* --- NAVBAR HUD --- */
         .navbar {
-            position: relative; z-index: 10;
-            background: linear-gradient(90deg, var(--navy), var(--blue), var(--navy));
-            border-bottom: 1px solid rgba(255,106,0,.25);
-            box-shadow: 0 4px 30px rgba(255,106,0,.15);
-            padding: 14px 0;
-        }
-        .navbar::after {
-            content: ''; position: absolute; bottom: -3px; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--electric), transparent);
-            animation: scanLine 4s linear infinite;
-        }
-        @keyframes scanLine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        .navbar-inner {
-            max-width: 1000px; margin: 0 auto; padding: 0 24px;
+            position: relative; z-index: 100;
+            padding: 20px 40px;
+            background: linear-gradient(to bottom, rgba(2,8,18,0.9), transparent);
             display: flex; justify-content: space-between; align-items: center;
         }
-        .navbar-brand { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--orange); letter-spacing: 4px; text-shadow: 0 0 20px rgba(255,106,0,.4); }
-        .navbar-back {
-            font-family: 'Bebas Neue', sans-serif; font-size: .9rem;
-            letter-spacing: 3px; color: var(--orange);
-            text-decoration: none; border: 1px solid rgba(255,106,0,.35);
-            padding: 7px 18px; border-radius: 3px; transition: all .3s;
-            position: relative; overflow: hidden;
+        .brand { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--neon-blue); letter-spacing: 4px; }
+        .back-link {
+            font-family: 'Bebas Neue', sans-serif; color: var(--neon-orange);
+            text-decoration: none; font-size: 1.2rem; letter-spacing: 2px;
+            padding: 5px 15px; border: 1px solid var(--neon-orange);
+            transition: 0.3s;
         }
-        .navbar-back::before { content: ''; position: absolute; inset: 0; background: rgba(255,106,0,.1); opacity: 0; transition: opacity .3s; }
-        .navbar-back:hover::before { opacity: 1; }
-        .navbar-back:hover { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 16px rgba(255,106,0,.3); }
+        .back-link:hover { background: var(--neon-orange); color: #000; box-shadow: 0 0 15px var(--neon-orange); }
 
-        /* MAIN */
-        .main { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto; padding: 50px 24px 80px; }
-
-        /* FICHA */
-        .ficha {
-            display: grid; grid-template-columns: 300px 1fr; gap: 30px;
-            animation: riseUp .9s cubic-bezier(.16,1,.3,1) both;
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .main-container {
+            position: relative; z-index: 10;
+            max-width: 1100px; margin: 40px auto;
+            width: 90%; display: grid;
+            grid-template-columns: 350px 1fr; gap: 30px;
+            animation: dossierIn 0.8s cubic-bezier(0.19, 1, 0.22, 1);
         }
-        @keyframes riseUp { from { opacity: 0; transform: translateY(36px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @media (max-width: 700px) { .ficha { grid-template-columns: 1fr; } }
+        @keyframes dossierIn { from { opacity: 0; transform: scale(0.95) translateY(30px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        /* COLUMNA IZQUIERDA */
-        .ficha-left { display: flex; flex-direction: column; gap: 20px; }
+        @media (max-width: 850px) { .main-container { grid-template-columns: 1fr; } }
 
-        .avatar-card {
-            background: linear-gradient(155deg, rgba(10,34,72,.95), rgba(4,16,30,.98));
-            border: 1px solid rgba(255,106,0,.25);
-            border-radius: 8px; padding: 28px 24px;
-            text-align: center; position: relative; overflow: hidden;
-            box-shadow: 0 0 40px rgba(255,106,0,.1), 0 20px 60px rgba(0,0,0,.4);
+        /* --- MÓDULOS --- */
+        .module {
+            background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue));
+            padding: 1px;
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
         }
-        .avatar-card::before {
-            content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--orange), rgba(255,215,0,.5), var(--orange), transparent);
-            animation: borderSweep 4s ease-in-out infinite;
+
+        .module-inner {
+            background: var(--core-bg);
+            height: 100%; width: 100%; padding: 30px;
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+            position: relative;
         }
-        @keyframes borderSweep { 0%,100% { opacity: .6; } 50% { opacity: 1; } }
 
-        .corner { position: absolute; width: 16px; height: 16px; border-color: var(--orange); border-style: solid; }
-        .corner.tl { top: -1px; left: -1px;    border-width: 2px 0 0 2px; }
-        .corner.tr { top: -1px; right: -1px;   border-width: 2px 2px 0 0; }
-        .corner.bl { bottom: -1px; left: -1px;  border-width: 0 0 2px 2px; }
-        .corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-
+        /* --- AVATAR CARD --- */
         .player-photo-wrap {
-            width: 160px; height: 160px; margin: 0 auto 18px;
-            border-radius: 50%; overflow: hidden;
-            border: 3px solid rgba(255,106,0,.4);
-            box-shadow: 0 0 30px rgba(255,106,0,.3), 0 0 60px rgba(255,106,0,.1);
-            animation: floatAnim 4s ease-in-out infinite, glowPulse 3s ease-in-out infinite;
-            background: rgba(255,106,0,.05);
+            width: 100%; aspect-ratio: 1; margin-bottom: 20px;
+            border: 1px solid var(--neon-blue);
+            background: rgba(0, 229, 255, 0.05);
+            clip-path: polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%);
+            overflow: hidden; position: relative;
         }
-        @keyframes floatAnim { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        @keyframes glowPulse {
-            0%,100% { box-shadow: 0 0 20px rgba(255,106,0,.3), 0 0 50px rgba(255,106,0,.1); }
-            50%      { box-shadow: 0 0 35px rgba(255,106,0,.6), 0 0 80px rgba(255,106,0,.25); }
-        }
-        .player-photo {
-            width: 100%; height: 100%; object-fit: cover;
-            transition: transform .4s ease;
-        }
-        .player-photo-wrap:hover .player-photo { transform: scale(1.08); }
+        .player-photo { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.3) contrast(1.1); }
 
-        .player-name {
-            font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem;
-            letter-spacing: 4px; color: var(--white);
-            text-shadow: 0 0 20px rgba(255,106,0,.3);
-            line-height: 1.1; margin-bottom: 8px;
+        /* Efecto de escaneo sobre la foto */
+        .scan-line {
+            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--neon-blue); box-shadow: 0 0 15px var(--neon-blue);
+            animation: scan 3s linear infinite; z-index: 2;
         }
-        .season-badge {
-            display: inline-block; margin-top: 10px;
-            background: rgba(255,106,0,.1); border: 1px solid rgba(255,106,0,.3);
-            border-radius: 2px; padding: 4px 14px;
-            font-size: .68rem; letter-spacing: 4px; color: var(--orange);
-            text-transform: uppercase; font-weight: 700;
-        }
-        .player-number {
-            font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem;
-            color: rgba(255,106,0,.12); letter-spacing: -4px; line-height: 1;
-            position: absolute; bottom: 10px; right: 16px;
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+
+        .id-label { font-family: 'Orbitron'; font-size: 0.6rem; color: var(--neon-orange); letter-spacing: 2px; margin-bottom: 5px; display: block;}
+        .player-name { font-family: 'Bebas Neue'; font-size: 2.5rem; color: #fff; line-height: 1; margin-bottom: 10px; }
+
+        /* --- INFO CARD --- */
+        .section-title {
+            font-family: 'Orbitron'; font-size: 0.75rem; color: var(--neon-blue);
+            border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+            padding-bottom: 10px; margin-bottom: 20px; letter-spacing: 3px;
         }
 
-        /* COLUMNA DERECHA */
-        .ficha-right { display: flex; flex-direction: column; gap: 20px; }
-
-        .info-card {
-            background: linear-gradient(155deg, rgba(10,34,72,.9), rgba(4,16,30,.95));
-            border: 1px solid rgba(255,106,0,.18);
-            border-radius: 8px; padding: 28px 30px;
-            position: relative; overflow: hidden;
-            box-shadow: 0 0 30px rgba(255,106,0,.06), 0 16px 50px rgba(0,0,0,.35);
+        .data-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .info-card::before {
-            content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,106,0,.4), transparent);
-        }
+        .data-label { font-size: 0.7rem; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+        .data-value { font-weight: 700; color: #fff; letter-spacing: 1px; }
 
-        .info-card-title {
-            font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
-            letter-spacing: 4px; color: var(--orange); margin-bottom: 20px;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .info-card-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,106,0,.3), transparent); }
-
-        .info-row {
-            display: flex; align-items: center; gap: 16px;
-            padding: 12px 0; border-bottom: 1px solid rgba(255,106,0,.07);
-            transition: all .25s;
-        }
-        .info-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .info-row:hover { padding-left: 6px; }
-
-        .info-label {
-            font-size: .68rem; letter-spacing: 3px; color: rgba(255,106,0,.6);
-            text-transform: uppercase; font-weight: 700; min-width: 110px;
-        }
-        .info-value { font-size: 1.05rem; font-weight: 700; letter-spacing: 1px; color: var(--white); }
-
+        /* --- BADGES POSICIÓN --- */
         .badge-pos {
-            display: inline-block; padding: 4px 12px;
-            border-radius: 2px; font-size: .75rem;
-            font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+            padding: 4px 12px; font-family: 'Orbitron'; font-size: 0.65rem;
+            border-radius: 2px; text-transform: uppercase;
         }
-        .badge-pos.portero        { background: rgba(0,229,255,.12); color: var(--electric); border: 1px solid rgba(0,229,255,.3); }
-        .badge-pos.defensa        { background: rgba(0,200,100,.12); color: #00cc66;          border: 1px solid rgba(0,200,100,.3); }
-        .badge-pos.centrocampista { background: rgba(255,215,0,.12); color: var(--gold);      border: 1px solid rgba(255,215,0,.3); }
-        .badge-pos.delantero      { background: rgba(255,106,0,.12); color: var(--orange);    border: 1px solid rgba(255,106,0,.3); }
-        .badge-pos.default        { background: rgba(255,255,255,.06); color: var(--dim);     border: 1px solid rgba(255,255,255,.1); }
+        .portero { background: rgba(0, 229, 255, 0.1); color: var(--neon-blue); border: 1px solid var(--neon-blue); }
+        .defensa { background: rgba(0, 255, 136, 0.1); color: #00ff88; border: 1px solid #00ff88; }
+        .centrocampista { background: rgba(255, 215, 0, 0.1); color: #ffd700; border: 1px solid #ffd700; }
+        .delantero { background: rgba(255, 106, 0, 0.1); color: var(--neon-orange); border: 1px solid var(--neon-orange); }
 
-        .descripcion-card {
-            background: linear-gradient(155deg, rgba(10,34,72,.9), rgba(4,16,30,.95));
-            border: 1px solid rgba(255,106,0,.18);
-            border-radius: 8px; padding: 28px 30px;
-            position: relative; overflow: hidden;
-            box-shadow: 0 0 30px rgba(255,106,0,.06), 0 16px 50px rgba(0,0,0,.35);
+        .trajectory-text {
+            font-size: 1rem; line-height: 1.8; color: var(--text-main); opacity: 0.8;
+            font-weight: 300; text-align: justify;
         }
-        .descripcion-card::before {
-            content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,106,0,.4), transparent);
-        }
-        .descripcion-text {
-            font-size: 1rem; font-weight: 600; letter-spacing: .5px;
-            color: rgba(240,244,255,.75); line-height: 1.7;
+
+        .deco-id {
+            position: absolute; bottom: 20px; right: 30px;
+            font-family: 'Bebas Neue'; font-size: 5rem;
+            color: rgba(255, 106, 0, 0.05); line-height: 0.8; pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-<div class="hex-bg"></div>
-<div class="scanline"></div>
-<div class="deco-number" th:text="${jugador.id}">1</div>
+<div class="vignette"></div>
+<div class="cyber-grid"></div>
 
-<!-- NAVBAR -->
 <nav class="navbar">
-    <div class="navbar-inner">
-        <span class="navbar-brand">⚡ INAZUMA LEGACY</span>
-        <a th:href="@{/jugadores(temporada=${temporada})}" class="navbar-back">← Plantilla</a>
-    </div>
+    <div class="brand">FILE_ACCESS // TACTICAL_DASHBOARD</div>
+    <a th:href="@{/jugadores(temporada=${temporada})}" class="back-link">← RETURN_TO_SQUAD</a>
 </nav>
 
-<!-- MAIN -->
-<div class="main">
-    <div class="ficha">
+<div class="main-container">
 
-        <!-- COLUMNA IZQUIERDA -->
-        <div class="ficha-left">
-            <div class="avatar-card">
-                <div class="corner tl"></div>
-                <div class="corner tr"></div>
-                <div class="corner bl"></div>
-                <div class="corner br"></div>
-
+    <div class="col">
+        <div class="module">
+            <div class="module-inner">
+                <span class="id-label">PLAYER_IDENTIFICATION</span>
                 <div class="player-photo-wrap">
-                    <img class="player-photo"
-                         th:src="${jugador.fotoUrl}"
-                         th:alt="${jugador.nombre}"/>
+                    <div class="scan-line"></div>
+                    <img class="player-photo" th:src="${jugador.fotoUrl}" th:alt="${jugador.nombre}"/>
                 </div>
 
-                <div class="player-name" th:text="${jugador.nombre}">Nombre</div>
-                <div class="season-badge">⚡ Temporada <span th:text="${temporada}">1</span></div>
-                <div class="player-number" th:text="${jugador.id}">0</div>
+                <h1 class="player-name" th:text="${jugador.nombre}">NOMBRE JUGADOR</h1>
+
+                <div style="margin-top: 20px;">
+                    <span class="id-label">CURRENT_ASSIGNMENT</span>
+                    <div style="font-family:'Bebas Neue'; font-size: 1.5rem; color: var(--neon-blue);" th:text="${jugador.equipo}">EQUIPO</div>
+                </div>
+
+                <div class="deco-id" th:text="${jugador.id}">00</div>
             </div>
         </div>
+    </div>
 
-        <!-- COLUMNA DERECHA -->
-        <div class="ficha-right">
+    <div class="col" style="display: flex; flex-direction: column; gap: 30px;">
 
-            <!-- INFO PRINCIPAL -->
-            <div class="info-card">
-                <div class="info-card-title">Ficha del Jugador</div>
-                <div class="info-row">
-                    <span class="info-label">Nombre</span>
-                    <span class="info-value" th:text="${jugador.nombre}">—</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Posicion</span>
-                    <span class="info-value">
-                        <span class="badge-pos default" th:text="${jugador.posicion}"
+        <div class="module">
+            <div class="module-inner">
+                <h3 class="section-title">NEURAL_STATISTICS</h3>
+
+                <div class="data-row">
+                    <span class="data-label">Posición en Campo</span>
+                    <span class="data-value">
+                        <span class="badge-pos" th:text="${jugador.posicion}"
                               th:classappend="${#strings.containsIgnoreCase(jugador.posicion,'portero')} ? 'portero' :
                                               (${#strings.containsIgnoreCase(jugador.posicion,'defensa')} ? 'defensa' :
                                               (${#strings.containsIgnoreCase(jugador.posicion,'centrocampista')} ? 'centrocampista' :
-                                              (${#strings.containsIgnoreCase(jugador.posicion,'delantero')} ? 'delantero' : 'default')))">
+                                              (${#strings.containsIgnoreCase(jugador.posicion,'delantero')} ? 'delantero' : '')))">
                         </span>
                     </span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Equipo</span>
-                    <span class="info-value" th:text="${jugador.equipo}">—</span>
+
+                <div class="data-row">
+                    <span class="data-label">Protocolo de Temporada</span>
+                    <span class="data-value" style="color: var(--neon-orange);">PHASE_<span th:text="${temporada}">1</span></span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Temporada</span>
-                    <span class="info-value">Temporada <span th:text="${temporada}">1</span></span>
+
+                <div class="data-row">
+                    <span class="data-label">ID de Registro</span>
+                    <span class="data-value" th:text="'#IDX-' + ${jugador.id}">—</span>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">ID Ficha</span>
-                    <span class="info-value" style="color: rgba(255,106,0,.5); font-size: .85rem;" th:text="'#' + ${jugador.id}">—</span>
+
+                <div class="data-row">
+                    <span class="data-label">Estado de Conexión</span>
+                    <span class="data-value" style="color: #00ff88;">SYNC_COMPLETE</span>
                 </div>
             </div>
-
-            <!-- TRAYECTORIA -->
-            <div class="descripcion-card">
-                <div class="info-card-title">Trayectoria</div>
-                <p class="descripcion-text" th:text="${jugador.descripcion}"></p>
-            </div>
-
         </div>
+
+        <div class="module">
+            <div class="module-inner">
+                <h3 class="section-title">HISTORICAL_LOGS</h3>
+                <p class="trajectory-text" th:text="${jugador.descripcion}">
+                    Cargando registros tácticos...
+                </p>
+            </div>
+        </div>
+
     </div>
 </div>
 

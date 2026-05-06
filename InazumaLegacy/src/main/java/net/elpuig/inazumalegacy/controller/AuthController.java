@@ -8,7 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -21,12 +20,24 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @GetMapping("/login")
-    public String login() { return "login"; }
+    // 1. PRIMERA PÁGINA: Al abrir la app (localhost:8080) sale el HTML de invitado
+    @GetMapping("/")
+    public String root() {
+        return "inicio_invitado";
+    }
 
+    // 2. FORMULARIOS DE ACCESO
     @GetMapping("/registro")
-    public String registroForm() { return "registro"; }
+    public String registroForm() {
+        return "registro";
+    }
 
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    // 3. LÓGICA DE REGISTRO
     @PostMapping("/registro")
     public String registrar(@RequestParam String nombre,
                             @RequestParam String email,
@@ -36,9 +47,11 @@ public class AuthController {
         u.setEmail(email);
         u.setPassword(passwordEncoder.encode(password));
         repo.save(u);
+        // Tras registrarse, lo mandamos al login para que entre oficialmente
         return "redirect:/login";
     }
 
+    // 4. LÓGICA DE LOGIN
     @PostMapping("/login")
     public String loginPost(@RequestParam String username,
                             @RequestParam String password,
@@ -46,64 +59,39 @@ public class AuthController {
         Optional<Usuario> usuario = repo.findByNombre(username);
         if (usuario.isPresent() && passwordEncoder.matches(password, usuario.get().getPassword())) {
             session.setAttribute("usuario", usuario.get().getNombre());
+            // Si el login es correcto, entra al inicio real (el del video)
             return "redirect:/inicio";
         }
         return "redirect:/login?error";
     }
 
+    // 5. PÁGINA DE INICIO (USUARIOS LOGUEADOS)
     @GetMapping("/inicio")
     public String inicio(HttpSession session, Model model) {
         String nombreUsuario = (String) session.getAttribute("usuario");
-        if (nombreUsuario == null) return "redirect:/login";
+        // Si no hay sesión, lo mandamos a REGISTRO como pediste
+        if (nombreUsuario == null) return "redirect:/registro";
 
         repo.findByNombre(nombreUsuario).ifPresent(u -> model.addAttribute("user", u));
-
         return "inicio";
     }
 
+    // 6. PERFIL (USUARIOS LOGUEADOS)
     @GetMapping("/perfil")
     public String perfil(HttpSession session, Model model) {
         String nombreUsuario = (String) session.getAttribute("usuario");
-        if (nombreUsuario == null) return "redirect:/login";
+        // Si intenta entrar sin sesión, al registro
+        if (nombreUsuario == null) return "redirect:/registro";
 
         repo.findByNombre(nombreUsuario).ifPresent(u -> model.addAttribute("user", u));
         return "perfil";
     }
 
-    @PostMapping("/perfil/actualizar")
-    public String actualizarPerfil(@RequestParam String nombre,
-                                   @RequestParam String descripcion,
-                                   @RequestParam String afiliacion,
-                                   @RequestParam String rango,
-                                   @RequestParam(required = false) MultipartFile foto,
-                                   HttpSession session) {
-
-        String nombreActual = (String) session.getAttribute("usuario");
-        if (nombreActual == null) return "redirect:/login";
-
-        Optional<Usuario> usuarioOpt = repo.findByNombre(nombreActual);
-
-        if (usuarioOpt.isPresent()) {
-            Usuario u = usuarioOpt.get();
-            u.setNombre(nombre);
-            u.setDescripcion(descripcion);
-            u.setAfiliacion(afiliacion);
-            u.setRango(rango);
-
-            repo.save(u);
-
-            session.setAttribute("usuario", nombre);
-        }
-
-        return "redirect:/perfil?success";
-    }
-
-    @GetMapping("/")
-    public String root() { return "redirect:/login"; }
-
+    // 7. SALIR
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login";
+        // Al salir, volvemos a la pantalla de invitado
+        return "redirect:/";
     }
 }

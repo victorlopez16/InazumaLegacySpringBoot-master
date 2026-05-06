@@ -7,131 +7,138 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
     <style>
         :root {
-            /* Paleta unificada con el Ranking */
-            --core-bg: #03001a;
-            --gold: #f0a500;
-            --gold-bright: #ffe566;
-            --blue-electric: #00d4ff;
-            --blue-mid: #080838;
-            --glass: rgba(8, 8, 56, 0.7);
-            --text-main: #ffffff;
-            --dim: rgba(255, 255, 255, 0.5);
+            --core-bg: #020812;
+            --neon-orange: #ff6a00;
+            --neon-blue: #00e5ff;
+            --glass: rgba(10, 25, 47, 0.75);
+            --text-main: #e0f2fe;
+            --dim: rgba(224, 242, 254, 0.4);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
 
         body {
-            height: 100vh;
-            background-color: var(--core-bg);
-            background-image:
-                    radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.1) 0%, transparent 40%),
-                    radial-gradient(circle at 80% 70%, rgba(240, 165, 0, 0.05) 0%, transparent 40%);
+            height: 100vh; background: var(--core-bg);
             font-family: 'Rajdhani', sans-serif;
             display: flex; align-items: center; justify-content: center;
             overflow: hidden; color: var(--text-main);
         }
 
-        /* Grid lines estilo campo de fútbol del ranking */
+        /* --- FONDO HUD (Igual que Login/Registro) --- */
         .cyber-grid {
             position: fixed; inset: 0;
             background-image:
-                    linear-gradient(rgba(240, 165, 0, 0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(240, 165, 0, 0.05) 1px, transparent 1px);
+                    linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px);
             background-size: 60px 60px;
-            z-index: -1; animation: gridMove 20s linear infinite;
+            perspective: 1000px; transform: rotateX(20deg);
+            z-index: -1; animation: gridMove 15s linear infinite;
         }
         @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 60px; } }
 
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, #000 120%); pointer-events: none; z-index: 1; }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, #000 130%); pointer-events: none; z-index: 1; }
 
         .layout {
             position: relative; z-index: 10;
-            width: 100%; max-width: 1550px; height: 90vh;
+            width: 100%; max-width: 1500px; height: 90vh;
             padding: 20px; display: grid;
-            grid-template-columns: 320px 1fr 320px;
-            gap: 20px;
-            animation: fadeIn 0.8s ease-out;
+            grid-template-columns: 340px 1fr 340px;
+            gap: 25px;
+            animation: fadeIn 1s cubic-bezier(0.19, 1, 0.22, 1);
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Módulos con el borde dorado del ranking */
+        /* --- MÓDULOS HUD --- */
         .module {
-            background: linear-gradient(135deg, var(--gold), var(--blue-electric));
+            background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue));
             padding: 1px;
-            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
         }
 
         .module-inner {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
+            background: var(--core-bg);
             height: 100%; width: 100%;
-            padding: 20px;
-            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            padding: 30px;
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+            display: flex; flex-direction: column;
+            position: relative;
         }
 
-        .video-module-inner { padding: 0 !important; overflow: hidden; border: 1px solid var(--blue-electric); }
-        video { width: 100%; height: 100%; object-fit: cover; }
-
-        .header-module { border-left: 5px solid var(--gold); padding-left: 20px; margin-bottom: 5px; }
-        .sys-status { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--blue-electric); letter-spacing: 3px; }
-        .sys-welcome { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; letter-spacing: 2px; line-height: 0.9; margin-top: 5px; text-shadow: 2px 2px black; }
-
+        /* --- COLUMNA PERFIL --- */
         .avatar-box {
-            width: 100px; height: 100px; margin: 0 auto 15px;
-            border: 2px solid var(--gold);
+            width: 110px; height: 110px; margin: 0 auto 20px;
+            border: 1px solid var(--neon-blue);
             clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
             display: flex; align-items: center; justify-content: center;
-            background: rgba(240, 165, 0, 0.1);
-            font-family: 'Orbitron'; font-size: 2.5rem; color: var(--gold-bright);
+            background: rgba(0, 229, 255, 0.05);
+            font-family: 'Orbitron'; font-size: 2.5rem; color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+        }
+
+        .label { color: var(--neon-orange); font-size: 0.65rem; letter-spacing: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; opacity: 0.9; }
+
+        .affiliation-box {
+            margin-top: 20px; padding: 15px;
+            border: 1px solid rgba(255,106,0,0.2);
+            background: rgba(255, 106, 0, 0.03);
+            text-align: center;
         }
 
         .bio-text {
-            font-size: 0.85rem; line-height: 1.5; color: var(--text-main);
-            max-height: 120px; overflow-y: auto; padding-right: 5px;
-            text-align: center; margin-top: 10px;
+            font-size: 0.85rem; color: var(--text-main); opacity: 0.7;
+            line-height: 1.6; text-align: center; margin-top: 15px;
+            font-style: italic;
         }
 
-        .btn-tech {
-            display: block; width: 100%; padding: 12px; margin-top: 15px;
-            background: transparent; border: 1px solid var(--gold);
-            color: var(--gold); font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.1rem; text-align: center; text-decoration: none;
-            transition: 0.3s; letter-spacing: 1px;
-        }
-        .btn-tech:hover { background: var(--gold); color: var(--core-bg); box-shadow: 0 0 15px var(--gold); }
+        /* --- COLUMNA CENTRAL (FEED) --- */
+        .header-module { border-left: 4px solid var(--neon-orange); padding-left: 20px; margin-bottom: 20px; }
+        .sys-status { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--neon-blue); letter-spacing: 5px; }
+        .sys-welcome { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 3px; line-height: 1; margin-top: 8px; }
 
+        .video-container {
+            flex-grow: 1; background: #000;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            position: relative; overflow: hidden;
+        }
+        video { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+
+        /* --- COLUMNA DERECHA (ARCHIVOS) --- */
         .season-link {
-            display: flex; align-items: center; gap: 15px; padding: 12px; margin-bottom: 10px;
-            border: 1px solid rgba(0, 212, 255, 0.2); background: rgba(255,255,255,0.02);
-            text-decoration: none; color: white; transition: 0.3s;
+            display: flex; align-items: center; gap: 20px; padding: 15px; margin-bottom: 12px;
+            border: 1px solid rgba(0, 229, 255, 0.1); background: rgba(0, 229, 255, 0.02);
+            text-decoration: none; color: white; transition: 0.4s;
         }
-        .season-link:hover { border-color: var(--blue-electric); background: rgba(0,229,255,0.1); transform: translateX(5px); }
-        .season-link span { font-family: 'Bebas Neue'; font-size: 2rem; color: var(--gold); }
+        .season-link:hover { border-color: var(--neon-blue); background: rgba(0,229,255,0.1); transform: translateX(10px); }
+        .season-link span { font-family: 'Bebas Neue'; font-size: 2.2rem; color: var(--neon-orange); }
 
-        /* Estilo para el botón de Ranking */
-        .btn-ranking {
-            background: linear-gradient(90deg, var(--gold), var(--gold-dark));
-            border: 1px solid var(--gold-bright);
-            color: var(--core-bg) !important;
-            box-shadow: 0 0 15px rgba(240, 165, 0, 0.4);
-            margin-bottom: 10px;
-        }
-        .btn-ranking:hover { transform: scale(1.02); box-shadow: 0 0 25px var(--gold); }
-
+        /* --- BOTONES HUD --- */
         .btn-action {
-            display: block; width: 100%; padding: 15px;
+            display: block; width: 100%; padding: 15px; margin-bottom: 12px;
             text-align: center; text-decoration: none;
-            font-family: 'Bebas Neue'; font-size: 1.2rem; transition: 0.3s;
-            letter-spacing: 1px;
+            font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: bold;
+            letter-spacing: 2px; transition: 0.4s;
         }
-        .btn-chat { border: 1px solid var(--blue-electric); color: var(--blue-electric); margin-bottom: 10px; }
-        .btn-chat:hover { background: var(--blue-electric); color: var(--core-bg); box-shadow: 0 0 20px var(--blue-electric); }
+        .btn-ranking { background: var(--neon-orange); color: #000; border: none; box-shadow: 0 0 20px rgba(255,106,0,0.3); }
+        .btn-ranking:hover { transform: scale(1.02); box-shadow: 0 0 35px rgba(255,106,0,0.5); }
 
-        .btn-logout { border: 1px solid #ff4444; color: #ff4444; margin-top: 10px; opacity: 0.7; }
+        .btn-chat { border: 1px solid var(--neon-blue); color: var(--neon-blue); }
+        .btn-chat:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 25px rgba(0,229,255,0.4); }
+
+        .btn-logout { border: 1px solid #ff4444; color: #ff4444; margin-top: 15px; opacity: 0.6; }
         .btn-logout:hover { background: #ff4444; color: white; opacity: 1; }
 
-        .label { color: var(--gold); font-size: 0.7rem; letter-spacing: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; opacity: 0.8; }
+        .btn-tech {
+            margin-top: auto; padding: 12px;
+            border: 1px solid var(--neon-blue); color: var(--neon-blue);
+            text-decoration: none; font-size: 0.75rem; text-align: center;
+            font-family: 'Orbitron'; letter-spacing: 2px;
+        }
+        .btn-tech:hover { background: rgba(0, 229, 255, 0.1); }
+
+        .latency-meter {
+            position: absolute; bottom: 15px; right: 20px;
+            font-size: 0.55rem; color: rgba(255,255,255,0.2); text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -141,76 +148,80 @@
 
 <div class="layout">
 
-    <div class="col" style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="col" style="display: flex; flex-direction: column;">
         <div class="module" style="height: 100%;">
-            <div class="module-inner" style="text-align: center; display: flex; flex-direction: column;">
-                <span class="label">User_Profile</span>
+            <div class="module-inner">
+                <span class="label">AGENT_PROFILE</span>
                 <div class="avatar-box">
                     <span th:text="${user != null ? #strings.toUpperCase(#strings.substring(user.nombre,0,1)) : 'U'}">V</span>
                 </div>
 
-                <h2 style="font-family:'Bebas Neue'; font-size: 2rem; color: var(--gold-bright);" th:text="${user != null ? user.nombre : 'UNKNOWN'}">VICTOR</h2>
+                <h2 style="font-family:'Orbitron'; font-size: 1.5rem; color: #fff; text-align: center;"
+                    th:text="${user != null ? #strings.toUpperCase(user.nombre) : 'UNKNOWN'}">VICTOR</h2>
 
-                <p style="color:var(--blue-electric); font-family:'Orbitron'; font-size: 0.65rem; letter-spacing: 2px; margin-bottom: 20px;">
-                    RANK: <span th:text="${user != null && user.rango != null ? #strings.toUpperCase(user.rango) : 'UNASSIGNED'}">CAPTAIN</span>
+                <p style="color:var(--neon-blue); font-family:'Orbitron'; font-size: 0.6rem; letter-spacing: 3px; text-align: center; margin-top: 5px;">
+                    LVL_RANK: <span th:text="${user != null && user.rango != null ? #strings.toUpperCase(user.rango) : 'UNASSIGNED'}">CAPTAIN</span>
                 </p>
 
-                <div style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                    <img th:src="@{/images/escudo_raimon.webp}" style="width: 75px; filter: drop-shadow(0 0 10px var(--gold)); margin-bottom: 10px;">
+                <div class="affiliation-box">
+                    <img th:src="@{/images/escudo_raimon.webp}" style="width: 60px; filter: drop-shadow(0 0 10px var(--neon-orange)); margin-bottom: 10px;">
                     <span class="label">Affiliation</span>
-                    <div style="font-family:'Bebas Neue'; font-size: 1.3rem; color: #fff;"
+                    <div style="font-family:'Bebas Neue'; font-size: 1.4rem; color: #fff;"
                          th:text="${user != null && user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'NO_AFFILIATION'}">
                         RAIMON_HIGH_SCHOOL
                     </div>
                 </div>
 
-                <span class="label">Tactical_Bio</span>
+                <span class="label" style="margin-top: 25px;">TACTICAL_DATA</span>
                 <div class="bio-text" th:text="${user != null && user.descripcion != null ? user.descripcion : 'No tactical data available for this agent.'}">
                     Estratega táctico del equipo.
                 </div>
 
-                <div style="margin-top: auto;">
-                    <a href="/perfil" class="btn-tech">EDIT_DATABASE</a>
+                <a href="/perfil" class="btn-tech">UPDATE_DATABASE</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col" style="display: flex; flex-direction: column;">
+        <div class="header-module">
+            <div class="sys-status">LIVE_FEED // ENCRYPTED_STREAM</div>
+            <h1 class="sys-welcome">WELCOME, <span style="color:var(--neon-orange);" th:text="${user != null ? #strings.toUpperCase(user.nombre) : 'AGENT'}">VICTOR</span></h1>
+        </div>
+
+        <div class="module" style="flex-grow: 1;">
+            <div class="module-inner" style="padding: 0;">
+                <div class="video-container">
+                    <video autoplay muted loop playsinline>
+                        <source th:src="@{/Videos/peli-ogro-inazuma.mp4}" type="video/mp4">
+                    </video>
+                    <div class="latency-meter">
+                        STREAM_QUALITY: 4K_ENHANCED<br>
+                        SIGNAL_STRENGTH: 100%
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col" style="display: flex; flex-direction: column; gap: 20px;">
-        <div class="header-module">
-            <div class="sys-status">LIVE_FEED // ENCRYPTED_CONNECTION</div>
-            <h1 class="sys-welcome">WELCOME, <span style="color:var(--gold);" th:text="${user != null ? user.nombre : 'AGENT'}">VICTOR</span></h1>
-        </div>
-
-        <div class="module" style="flex-grow: 1;">
-            <div class="module-inner video-module-inner">
-                <video controls loop playsinline>
-                    <source th:src="@{/Videos/peli-ogro-inazuma.mp4}" type="video/mp4">
-                </video>
-            </div>
-        </div>
-    </div>
-
-    <div class="col" style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="col" style="display: flex; flex-direction: column; gap: 25px;">
         <div class="module" style="flex-grow: 1;">
             <div class="module-inner">
-                <span class="label">Season_Archives</span>
+                <span class="label">SEASON_ARCHIVES</span>
                 <a th:href="@{/jugadores(temporada=1)}" class="season-link">
-                    <span>01</span> <div><strong>FUTBOL FRONTIER</strong><br><small style="color:var(--dim)">DATA_CORE</small></div>
+                    <span>01</span> <div><strong style="letter-spacing:1px">FUTBOL FRONTIER</strong><br><small style="color:var(--dim)">LOG_ALPHA</small></div>
                 </a>
                 <a th:href="@{/jugadores(temporada=2)}" class="season-link">
-                    <span>02</span> <div><strong>ALIUS ACADEMY</strong><br><small style="color:var(--dim)">DATA_CORE</small></div>
+                    <span>02</span> <div><strong style="letter-spacing:1px">ALIUS ACADEMY</strong><br><small style="color:var(--dim)">LOG_BETA</small></div>
                 </a>
                 <a th:href="@{/jugadores(temporada=3)}" class="season-link">
-                    <span>03</span> <div><strong>F.F. INTERNATIONAL</strong><br><small style="color:var(--dim)">DATA_CORE</small></div>
+                    <span>03</span> <div><strong style="letter-spacing:1px">F.F. INTERNATIONAL</strong><br><small style="color:var(--dim)">LOG_GAMMA</small></div>
                 </a>
             </div>
         </div>
 
         <div class="actions">
-            <a href="/ranking" class="btn-action btn-ranking">🏆 VIEW_GLOBAL_RANKING</a>
-
-            <a href="/chat" class="btn-action btn-chat">⚡ ACCESS_CHAT_CHANNEL</a>
+            <a href="/ranking" class="btn-action btn-ranking">GLOBAL_RANKING</a>
+            <a href="/chat" class="btn-action btn-chat">NEURAL_CHAT</a>
             <a href="/logout" class="btn-action btn-logout">TERMINATE_SESSION</a>
         </div>
     </div>

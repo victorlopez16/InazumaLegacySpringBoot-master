@@ -19,13 +19,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // Desactivamos CSRF para evitar bloqueos en formularios
                 .authorizeHttpRequests(auth -> auth
+                        // ESTO ES LO IMPORTANTE: Permitir la raíz y las páginas de acceso
+                        .requestMatchers("/", "/registro", "/login", "/css/**", "/js/**").permitAll()
                         .anyRequest().permitAll()
                 )
+                // Deshabilitamos el formulario automático de Spring que te está dando por saco
                 .formLogin(form -> form.disable())
-                .logout(logout -> logout.disable());
+                .httpBasic(basic -> basic.disable());
+
         return http.build();
     }
 }
-

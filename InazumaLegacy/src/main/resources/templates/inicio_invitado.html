@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Inazuma Legacy – Restricted Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --core-bg: #020812;
+            --neon-orange: #ff6a00;
+            --neon-blue: #00e5ff;
+            --err: #ff2244;
+            --text-main: #e0f2fe;
+            --dim: rgba(224, 242, 254, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
+
+        body {
+            height: 100vh; background: var(--core-bg);
+            font-family: 'Rajdhani', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; color: var(--text-main);
+        }
+
+        /* --- FONDO HUD --- */
+        .cyber-grid {
+            position: fixed; inset: 0;
+            background-image:
+                    linear-gradient(rgba(255,34,68,0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,34,68,0.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1; animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 60px; } }
+
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, #000 130%); pointer-events: none; z-index: 1; }
+
+        .layout {
+            position: relative; z-index: 10;
+            width: 100%; max-width: 1500px; height: 90vh;
+            padding: 20px; display: grid;
+            grid-template-columns: 340px 1fr 340px;
+            gap: 25px;
+            animation: fadeIn 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- MÓDULOS --- */
+        .module {
+            background: linear-gradient(135deg, var(--err), var(--neon-orange));
+            padding: 1px;
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+            position: relative;
+        }
+
+        .module-inner {
+            background: var(--core-bg);
+            height: 100%; width: 100%;
+            padding: 30px;
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+            display: flex; flex-direction: column;
+        }
+
+        /* --- OVERLAY DE BLOQUEO --- */
+        .restricted-overlay {
+            position: absolute; inset: 0;
+            background: rgba(2, 8, 18, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 30px;
+        }
+
+        .lock-icon {
+            font-size: 3rem; color: var(--err);
+            text-shadow: 0 0 20px var(--err);
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* --- TEXTOS --- */
+        .header-module { border-left: 4px solid var(--err); padding-left: 20px; margin-bottom: 20px; }
+        .sys-status { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--err); letter-spacing: 5px; }
+        .sys-welcome { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 3px; line-height: 1; margin-top: 8px; }
+
+        .label { color: var(--neon-orange); font-size: 0.65rem; letter-spacing: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; display: block; }
+
+        /* --- BOTONES --- */
+        .btn-action {
+            display: block; width: 100%; padding: 18px; margin-bottom: 12px;
+            text-align: center; text-decoration: none;
+            font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: bold;
+            letter-spacing: 2px; transition: 0.4s;
+            cursor: pointer;
+        }
+        .btn-register {
+            background: var(--err); color: #fff; border: none;
+            box-shadow: 0 0 20px rgba(255,34,68,0.3);
+        }
+        .btn-register:hover {
+            background: #fff; color: var(--err);
+            box-shadow: 0 0 35px rgba(255,255,255,0.5);
+        }
+
+        .btn-outline-err { border: 1px solid var(--err); color: var(--err); }
+
+        /* --- SEASON LINKS (ACCESO PÚBLICO) --- */
+        .season-link {
+            position: relative; z-index: 150;
+            display: flex; align-items: center; gap: 20px; padding: 15px; margin-bottom: 12px;
+            border: 1px solid rgba(0, 229, 255, 0.1); background: rgba(0, 229, 255, 0.02);
+            text-decoration: none; color: white; transition: 0.4s;
+        }
+        .season-link:hover { border-color: var(--neon-blue); background: rgba(0,229,255,0.1); transform: translateX(10px); }
+        .season-link span { font-family: 'Bebas Neue'; font-size: 2.2rem; color: var(--neon-blue); }
+
+        .glitch-bar {
+            height: 2px; width: 50px; background: var(--err);
+            margin-top: 10px; animation: glitch 2s steps(2) infinite;
+        }
+        @keyframes glitch { 0% { width: 10px; } 50% { width: 60px; opacity: 0.5; } 100% { width: 20px; } }
+
+        .footer-note {
+            margin-top: auto; padding: 15px;
+            border: 1px dashed var(--dim);
+            font-size: 0.65rem; color: var(--dim);
+            text-align: center; font-family: 'Orbitron';
+        }
+    </style>
+</head>
+<body>
+
+<div class="vignette"></div>
+<div class="cyber-grid"></div>
+
+<div class="layout">
+
+    <div class="col">
+        <div class="module" style="height: 100%;">
+            <div class="restricted-overlay">
+                <div class="lock-icon">🔒</div>
+                <p style="font-family:'Orbitron'; font-size: 0.7rem; color: var(--err); letter-spacing: 2px;">IDENTITY_ENCRYPTED</p>
+                <p style="font-size: 0.8rem; margin: 15px 0; color: var(--dim);">Se requiere autorización para ver datos del agente.</p>
+                <a th:href="@{/registro}" class="btn-action btn-register" style="font-size: 0.7rem; padding: 12px;">CREAR_CUENTA</a>
+            </div>
+            <div class="module-inner">
+            </div>
+        </div>
+    </div>
+
+    <div class="col" style="display: flex; flex-direction: column;">
+        <div class="header-module">
+            <div class="sys-status">SISTEMA_RESTRINGIDO // MODO_INVITADO</div>
+            <h1 class="sys-welcome">ACCESS <span style="color:var(--err);">DENIED</span></h1>
+            <div class="glitch-bar"></div>
+        </div>
+
+        <div class="module" style="flex-grow: 1;">
+            <div class="restricted-overlay">
+                <div class="lock-icon" style="font-size: 4rem;">🚫</div>
+                <p style="font-family:'Orbitron'; font-size: 0.9rem; color: #fff; letter-spacing: 3px;">VIDEO_FEED_LOCKED</p>
+                <p style="font-size: 0.8rem; margin: 20px 0; max-width: 250px; color: var(--dim);">
+                    El núcleo multimedia solo es accesible para personal fichado por el Raimon.
+                </p>
+                <a th:href="@{/registro}" class="btn-action btn-register" style="width: 250px;">FICHAR_POR_EL_EQUIPO</a>
+            </div>
+            <div class="module-inner" style="background: #000;"></div>
+        </div>
+    </div>
+
+    <div class="col" style="display: flex; flex-direction: column; gap: 25px;">
+        <div class="module" style="flex-grow: 1;">
+            <div class="module-inner">
+                <span class="label">PUBLIC_ARCHIVES</span>
+
+                <a th:href="@{/jugadores(temporada=1)}" class="season-link">
+                    <span>01</span> <div><strong>FUTBOL FRONTIER</strong><br><small style="color:var(--neon-blue)">OPEN_ACCESS</small></div>
+                </a>
+                <a th:href="@{/jugadores(temporada=2)}" class="season-link">
+                    <span>02</span> <div><strong>ALIUS ACADEMY</strong><br><small style="color:var(--neon-blue)">OPEN_ACCESS</small></div>
+                </a>
+                <a th:href="@{/jugadores(temporada=3)}" class="season-link">
+                    <span>03</span> <div><strong>F.F. INTERNATIONAL</strong><br><small style="color:var(--neon-blue)">OPEN_ACCESS</small></div>
+                </a>
+
+                <div class="footer-note">
+                    ESTADO: CONEXIÓN PÚBLICA LIMITADA.<br>
+                    DATABASE_VERSION: 4.0.1
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a th:href="@{/registro}" class="btn-action btn-outline-err">🏆 RANKING_BLOQUEADO</a>
+            <a th:href="@{/registro}" class="btn-action btn-register">ACCEDER_AL_NÚCLEO</a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
