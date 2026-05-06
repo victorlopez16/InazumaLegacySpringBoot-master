@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Inazuma Legacy – Restricted Access</title>
+    <title>Inazuma Legacy – Intelligence Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
     <style>
         :root {
@@ -13,15 +13,17 @@
             --err: #ff2244;
             --text-main: #e0f2fe;
             --dim: rgba(224, 242, 254, 0.2);
+            --glass: rgba(10, 25, 47, 0.8);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
 
         body {
-            height: 100vh; background: var(--core-bg);
+            min-height: 100vh; background: var(--core-bg);
             font-family: 'Rajdhani', sans-serif;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; color: var(--text-main);
+            display: flex; flex-direction: column; align-items: center;
+            overflow-x: hidden; color: var(--text-main);
+            padding-bottom: 50px;
         }
 
         /* --- FONDO HUD --- */
@@ -34,102 +36,88 @@
             z-index: -1; animation: gridMove 20s linear infinite;
         }
         @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 60px; } }
-
         .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, #000 130%); pointer-events: none; z-index: 1; }
 
         .layout {
             position: relative; z-index: 10;
-            width: 100%; max-width: 1500px; height: 90vh;
-            padding: 20px; display: grid;
-            grid-template-columns: 340px 1fr 340px;
-            gap: 25px;
-            animation: fadeIn 1s cubic-bezier(0.19, 1, 0.22, 1);
+            width: 95%; max-width: 1400px;
+            margin-top: 30px; display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            gap: 20px;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* --- MÓDULOS --- */
         .module {
-            background: linear-gradient(135deg, var(--err), var(--neon-orange));
+            background: var(--glass);
             padding: 1px;
-            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
             position: relative;
         }
-
+        .module::before {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(135deg, var(--err), transparent, var(--neon-blue));
+            z-index: -1;
+        }
         .module-inner {
-            background: var(--core-bg);
-            height: 100%; width: 100%;
-            padding: 30px;
-            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+            background: var(--core-bg); height: 100%; width: 100%; padding: 25px;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
             display: flex; flex-direction: column;
         }
 
-        /* --- OVERLAY DE BLOQUEO --- */
-        .restricted-overlay {
-            position: absolute; inset: 0;
-            background: rgba(2, 8, 18, 0.85);
-            backdrop-filter: blur(6px);
-            z-index: 100;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            text-align: center; padding: 30px;
+        .sys-status { font-family: 'Orbitron'; font-size: 0.65rem; color: var(--err); letter-spacing: 4px; margin-bottom: 5px; }
+        .sys-title { font-family: 'Bebas Neue'; font-size: 4rem; line-height: 0.8; margin-bottom: 20px; }
+        .label { color: var(--neon-orange); font-size: 0.65rem; letter-spacing: 3px; font-weight: bold; margin-bottom: 15px; display: block; border-bottom: 1px solid var(--dim); padding-bottom: 5px; }
+
+        .btn-action {
+            display: block; width: 100%; padding: 15px; margin-bottom: 10px;
+            text-align: center; text-decoration: none;
+            font-family: 'Orbitron'; font-size: 0.75rem; font-weight: bold;
+            letter-spacing: 2px; transition: 0.4s;
+        }
+        .btn-login { background: var(--neon-blue); color: #000; }
+        .btn-login:hover { background: #fff; box-shadow: 0 0 30px var(--neon-blue); }
+        .btn-register { background: var(--err); color: #fff; }
+        .btn-register:hover { background: #fff; color: var(--err); box-shadow: 0 0 30px var(--err); }
+
+        .season-link {
+            display: flex; align-items: center; gap: 15px; padding: 12px; margin-bottom: 10px;
+            border: 1px solid rgba(0, 229, 255, 0.1); background: rgba(0, 229, 255, 0.02);
+            text-decoration: none; color: white; transition: 0.3s;
+        }
+        .season-link:hover { border-color: var(--neon-blue); transform: translateX(5px); }
+        .season-link span { font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--neon-blue); }
+
+        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .img-frame { border: 1px solid var(--dim); padding: 4px; }
+        .img-frame img { width: 100%; height: 100px; object-fit: cover; }
+
+        /* --- VIDEO CON CONTROLES --- */
+        .video-container {
+            flex-grow: 1;
+            background: #000;
+            border: 1px solid var(--neon-blue);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.2);
+        }
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Cambiado a contain para que se vea el video completo al usar controles */
+            background: #000;
         }
 
-        .lock-icon {
-            font-size: 3rem; color: var(--err);
-            text-shadow: 0 0 20px var(--err);
-            margin-bottom: 15px;
-            animation: pulse 2s infinite;
+        .restricted-tag {
+            font-family: 'Orbitron'; font-size: 0.6rem; color: var(--err);
+            background: rgba(255,34,68,0.1); padding: 5px; border: 1px solid var(--err);
+            text-align: center; margin-top: 10px; animation: pulse 2s infinite;
         }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        /* --- TEXTOS --- */
-        .header-module { border-left: 4px solid var(--err); padding-left: 20px; margin-bottom: 20px; }
-        .sys-status { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--err); letter-spacing: 5px; }
-        .sys-welcome { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 3px; line-height: 1; margin-top: 8px; }
-
-        .label { color: var(--neon-orange); font-size: 0.65rem; letter-spacing: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; display: block; }
-
-        /* --- BOTONES --- */
-        .btn-action {
-            display: block; width: 100%; padding: 18px; margin-bottom: 12px;
-            text-align: center; text-decoration: none;
-            font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: bold;
-            letter-spacing: 2px; transition: 0.4s;
-            cursor: pointer;
-        }
-        .btn-register {
-            background: var(--err); color: #fff; border: none;
-            box-shadow: 0 0 20px rgba(255,34,68,0.3);
-        }
-        .btn-register:hover {
-            background: #fff; color: var(--err);
-            box-shadow: 0 0 35px rgba(255,255,255,0.5);
-        }
-
-        .btn-outline-err { border: 1px solid var(--err); color: var(--err); }
-
-        /* --- SEASON LINKS (ACCESO PÚBLICO) --- */
-        .season-link {
-            position: relative; z-index: 150;
-            display: flex; align-items: center; gap: 20px; padding: 15px; margin-bottom: 12px;
-            border: 1px solid rgba(0, 229, 255, 0.1); background: rgba(0, 229, 255, 0.02);
-            text-decoration: none; color: white; transition: 0.4s;
-        }
-        .season-link:hover { border-color: var(--neon-blue); background: rgba(0,229,255,0.1); transform: translateX(10px); }
-        .season-link span { font-family: 'Bebas Neue'; font-size: 2.2rem; color: var(--neon-blue); }
-
-        .glitch-bar {
-            height: 2px; width: 50px; background: var(--err);
-            margin-top: 10px; animation: glitch 2s steps(2) infinite;
-        }
-        @keyframes glitch { 0% { width: 10px; } 50% { width: 60px; opacity: 0.5; } 100% { width: 20px; } }
-
-        .footer-note {
-            margin-top: auto; padding: 15px;
-            border: 1px dashed var(--dim);
-            font-size: 0.65rem; color: var(--dim);
-            text-align: center; font-family: 'Orbitron';
-        }
+        @media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -137,70 +125,79 @@
 <div class="vignette"></div>
 <div class="cyber-grid"></div>
 
+<header style="width: 95%; max-width: 1400px; padding: 40px 0 10px; z-index: 10;">
+    <div class="sys-status">SISTEMA_OPERATIVO // PROTOCOLO_INVITADO</div>
+    <h1 class="sys-title">INAZUMA <span style="color:var(--err);">LEGACY</span></h1>
+</header>
+
 <div class="layout">
 
     <div class="col">
-        <div class="module" style="height: 100%;">
-            <div class="restricted-overlay">
-                <div class="lock-icon">🔒</div>
-                <p style="font-family:'Orbitron'; font-size: 0.7rem; color: var(--err); letter-spacing: 2px;">IDENTITY_ENCRYPTED</p>
-                <p style="font-size: 0.8rem; margin: 15px 0; color: var(--dim);">Se requiere autorización para ver datos del agente.</p>
-                <a th:href="@{/registro}" class="btn-action btn-register" style="font-size: 0.7rem; padding: 12px;">CREAR_CUENTA</a>
-            </div>
+        <div class="module" style="margin-bottom: 20px;">
             <div class="module-inner">
+                <span class="label">USER_AUTH</span>
+                <p style="font-size: 0.8rem; color: var(--dim); margin-bottom: 20px;">Acceso restringido a agentes de nivel 4.</p>
+                <a th:href="@{/login}" class="btn-action btn-login">INICIAR_SESIÓN</a>
+                <a th:href="@{/registro}" class="btn-action btn-register">CREAR_CUENTA</a>
+                <div class="restricted-tag">🔒 IDENTITY_ENCRYPTED</div>
             </div>
         </div>
-    </div>
 
-    <div class="col" style="display: flex; flex-direction: column;">
-        <div class="header-module">
-            <div class="sys-status">SISTEMA_RESTRINGIDO // MODO_INVITADO</div>
-            <h1 class="sys-welcome">ACCESS <span style="color:var(--err);">DENIED</span></h1>
-            <div class="glitch-bar"></div>
-        </div>
-
-        <div class="module" style="flex-grow: 1;">
-            <div class="restricted-overlay">
-                <div class="lock-icon" style="font-size: 4rem;">🚫</div>
-                <p style="font-family:'Orbitron'; font-size: 0.9rem; color: #fff; letter-spacing: 3px;">VIDEO_FEED_LOCKED</p>
-                <p style="font-size: 0.8rem; margin: 20px 0; max-width: 250px; color: var(--dim);">
-                    El núcleo multimedia solo es accesible para personal fichado por el Raimon.
-                </p>
-                <a th:href="@{/registro}" class="btn-action btn-register" style="width: 250px;">FICHAR_POR_EL_EQUIPO</a>
-            </div>
-            <div class="module-inner" style="background: #000;"></div>
-        </div>
-    </div>
-
-    <div class="col" style="display: flex; flex-direction: column; gap: 25px;">
-        <div class="module" style="flex-grow: 1;">
+        <div class="module">
             <div class="module-inner">
                 <span class="label">PUBLIC_ARCHIVES</span>
+                <a th:href="@{/jugadores(temporada=1)}" class="season-link"><span>01</span> <div><strong>FUTBOL FRONTIER</strong></div></a>
+                <a th:href="@{/jugadores(temporada=2)}" class="season-link"><span>02</span> <div><strong>ALIUS ACADEMY</strong></div></a>
+                <a th:href="@{/jugadores(temporada=3)}" class="season-link"><span>03</span> <div><strong>F.F. INTERNATIONAL</strong></div></a>
+            </div>
+        </div>
+    </div>
 
-                <a th:href="@{/jugadores(temporada=1)}" class="season-link">
-                    <span>01</span> <div><strong>FUTBOL FRONTIER</strong><br><small style="color:var(--neon-blue)">OPEN_ACCESS</small></div>
-                </a>
-                <a th:href="@{/jugadores(temporada=2)}" class="season-link">
-                    <span>02</span> <div><strong>ALIUS ACADEMY</strong><br><small style="color:var(--neon-blue)">OPEN_ACCESS</small></div>
-                </a>
-                <a th:href="@{/jugadores(temporada=3)}" class="season-link">
-                    <span>03</span> <div><strong>F.F. INTERNATIONAL</strong><br><small style="color:var(--neon-blue)">OPEN_ACCESS</small></div>
-                </a>
+    <div class="col">
+        <div class="module" style="height: 100%;">
+            <div class="module-inner">
+                <span class="label">PROJECT_OVERVIEW</span>
+                <h2 style="font-family: 'Orbitron'; margin-bottom: 15px; font-size: 1.4rem;">Inazuma Eleven</h2>
+                <p style="line-height: 1.6; color: #a5b4fc; font-size: 1rem; margin-bottom: 20px;">Inazuma Legacy es la enciclopedia definitiva donde puedes consultar la información y estadísticas de todos los jugadores que han pasado por el raimon de las 3 primeras temporadas. En esta plataforma podrás crear tu propio perfil de usuario, gestionar tus fichas personalizadas y conectar con otros fans. Es tu centro de mando para seguir de cerca el ranking y toda la historia del universo Inazuma.</p>
 
-                <div class="footer-note">
-                    ESTADO: CONEXIÓN PÚBLICA LIMITADA.<br>
-                    DATABASE_VERSION: 4.0.1
+                <div class="video-container">
+                    <!-- VIDEO CON CONTROLES ACTIVADOS -->
+                    <!-- Se quita 'muted' para que el usuario pueda subir el volumen,
+                         aunque algunos navegadores podrían bloquear el autoplay si tiene sonido -->
+                    <video controls loop playsinline poster="/images/foto_inazuma.webp">
+                        <source src="/Videos/momento_epico.mp4" type="video/mp4">
+                        Tu navegador no soporta videos.
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="module" style="margin-bottom: 20px;">
+            <div class="module-inner">
+                <span class="label">VISUAL_FEED</span>
+                <div class="gallery-grid">
+                    <div class="img-frame"><img src="/images/foto_inazuma.webp" alt="Inazuma 1"></div>
+                    <div class="img-frame"><img src="https://images3.alphacoders.com/203/203251.jpg" alt="Inazuma 2"></div>
+                    <div class="img-frame"><img src="https://images.alphacoders.com/264/264624.jpg" alt="Inazuma 3"></div>
+                    <div class="img-frame"><img src="https://i.pinimg.com/originals/74/61/52/7461523497d3e69f8303f88f00030588.jpg" alt="Inazuma 4"></div>
                 </div>
             </div>
         </div>
 
-        <div class="actions">
-            <a th:href="@{/registro}" class="btn-action btn-outline-err">🏆 RANKING_BLOQUEADO</a>
-            <a th:href="@{/registro}" class="btn-action btn-register">ACCEDER_AL_NÚCLEO</a>
+        <div class="module">
+            <div class="module-inner">
+                <span class="label">RESTRICTED_AREAS</span>
+                <a th:href="@{/login}" class="btn-action" style="border: 1px solid var(--err); color: var(--err); font-size: 0.6rem;">🏆 RANKING_BLOQUEADO</a>
+                <a th:href="@{/login}" class="btn-action" style="border: 1px solid var(--neon-blue); color: var(--neon-blue); font-size: 0.6rem;">💬 CHAT_GLOBAL_LOCKED</a>
+            </div>
         </div>
     </div>
 
 </div>
+
+<footer class="footer-line">TERMINAL_ID: 1994-2026 // END_OF_TRANSMISSION</footer>
 
 </body>
 </html>
