@@ -24,7 +24,6 @@
             overflow: hidden; color: var(--text-main);
         }
 
-        /* --- FONDO HUD (Igual que Login/Registro) --- */
         .cyber-grid {
             position: fixed; inset: 0;
             background-image:
@@ -48,7 +47,6 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- MÓDULOS HUD --- */
         .module {
             background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue));
             padding: 1px;
@@ -64,7 +62,6 @@
             position: relative;
         }
 
-        /* --- COLUMNA PERFIL --- */
         .avatar-box {
             width: 110px; height: 110px; margin: 0 auto 20px;
             border: 1px solid var(--neon-blue);
@@ -90,7 +87,6 @@
             font-style: italic;
         }
 
-        /* --- COLUMNA CENTRAL (FEED) --- */
         .header-module { border-left: 4px solid var(--neon-orange); padding-left: 20px; margin-bottom: 20px; }
         .sys-status { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--neon-blue); letter-spacing: 5px; }
         .sys-welcome { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 3px; line-height: 1; margin-top: 8px; }
@@ -102,16 +98,14 @@
         }
         video { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
 
-        /* --- COLUMNA DERECHA (ARCHIVOS) --- */
         .season-link {
-            display: flex; align-items: center; gap: 20px; padding: 15px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 20px; padding: 12px; margin-bottom: 8px;
             border: 1px solid rgba(0, 229, 255, 0.1); background: rgba(0, 229, 255, 0.02);
             text-decoration: none; color: white; transition: 0.4s;
         }
         .season-link:hover { border-color: var(--neon-blue); background: rgba(0,229,255,0.1); transform: translateX(10px); }
-        .season-link span { font-family: 'Bebas Neue'; font-size: 2.2rem; color: var(--neon-orange); }
+        .season-link span { font-family: 'Bebas Neue'; font-size: 2rem; color: var(--neon-orange); }
 
-        /* --- BOTONES HUD --- */
         .btn-action {
             display: block; width: 100%; padding: 15px; margin-bottom: 12px;
             text-align: center; text-decoration: none;
@@ -148,6 +142,7 @@
 
 <div class="layout">
 
+    <!-- COLUMNA IZQUIERDA: PERFIL -->
     <div class="col" style="display: flex; flex-direction: column;">
         <div class="module" style="height: 100%;">
             <div class="module-inner">
@@ -167,7 +162,7 @@
                     <img th:src="@{/images/escudo_raimon.webp}" style="width: 60px; filter: drop-shadow(0 0 10px var(--neon-orange)); margin-bottom: 10px;">
                     <span class="label">Affiliation</span>
                     <div style="font-family:'Bebas Neue'; font-size: 1.4rem; color: #fff;"
-                         th:text="${user != null && user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'NO_AFFILIATION'}">
+                         th:text="${user != null && user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'RAIMON_HIGH'}">
                         RAIMON_HIGH_SCHOOL
                     </div>
                 </div>
@@ -182,6 +177,7 @@
         </div>
     </div>
 
+    <!-- COLUMNA CENTRAL: FEED VIDEO -->
     <div class="col" style="display: flex; flex-direction: column;">
         <div class="header-module">
             <div class="sys-status">LIVE_FEED // ENCRYPTED_STREAM</div>
@@ -203,8 +199,11 @@
         </div>
     </div>
 
-    <div class="col" style="display: flex; flex-direction: column; gap: 25px;">
-        <div class="module" style="flex-grow: 1;">
+    <!-- COLUMNA DERECHA: ARCHIVOS Y COMBATE -->
+    <div class="col" style="display: flex; flex-direction: column; gap: 20px;">
+
+        <!-- ARCHIVOS -->
+        <div class="module" style="flex: 1;">
             <div class="module-inner">
                 <span class="label">SEASON_ARCHIVES</span>
                 <a th:href="@{/jugadores(temporada=1)}" class="season-link">
@@ -219,6 +218,25 @@
             </div>
         </div>
 
+        <!-- PACHANGAS (NUEVO) -->
+        <div class="module" style="flex: 0.7;">
+            <div class="module-inner" style="justify-content: center; align-items: center; background: radial-gradient(circle at center, rgba(0, 229, 255, 0.05) 0%, transparent 70%);">
+                <span class="label">COMBAT_ZONE</span>
+                <div style="text-align: center; margin: 5px 0;">
+                    <h3 style="font-family: 'Orbitron'; font-size: 1.1rem; color: var(--neon-blue); letter-spacing: 2px;">PACHANGAS</h3>
+                </div>
+
+                <a href="/pachanga" class="btn-action" style="background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); box-shadow: inset 0 0 10px rgba(0,229,255,0.2); margin-top: 10px;">
+                    ENTER_SIMULATION
+                </a>
+
+                <div style="margin-top: 10px; font-size: 0.55rem; color: var(--neon-orange); font-family: 'Orbitron';">
+                    [ STATUS: READY_TO_BATTLE ]
+                </div>
+            </div>
+        </div>
+
+        <!-- ACCIONES -->
         <div class="actions">
             <a href="/ranking" class="btn-action btn-ranking">GLOBAL_RANKING</a>
             <a href="/chat" class="btn-action btn-chat">NEURAL_CHAT</a>
