@@ -1,186 +1,99 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranking Legendario - Inazuma Legacy</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
-
+    <meta charset="UTF-8"/>
+    <title>Inazuma Legacy – Global Ranking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
     <style>
-        :root {
-            --core-bg: #020812;
-            --neon-orange: #ff6a00;
-            --neon-blue: #00e5ff;
-            --glass: rgba(10, 25, 47, 0.7);
-            --text-main: #e0f2fe;
-            --dim: rgba(224, 242, 254, 0.15);
+        :root { --core-bg: #020812; --neon-orange: #ff6a00; --neon-blue: #00e5ff; --text-main: #e0f2fe; }
+        body { background: var(--core-bg); font-family: 'Rajdhani', sans-serif; color: var(--text-main); padding: 40px; height: 100vh; overflow: hidden; }
+        .cyber-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px); background-size: 60px 60px; z-index: -1; }
+
+        .container { max-width: 1100px; margin: 0 auto; height: 85vh; display: flex; flex-direction: column; }
+
+        .header-box { border-left: 5px solid var(--neon-orange); padding-left: 25px; margin-bottom: 20px; flex-shrink: 0; }
+        .sys-welcome { font-family: 'Bebas Neue'; font-size: 3.5rem; letter-spacing: 5px; }
+
+        /* CONTENEDOR CON SCROLL PARA VER A TODOS LOS JUGADORES */
+        .ranking-scroll {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-orange) transparent;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
+        /* Estilo del scroll para navegadores modernos */
+        .ranking-scroll::-webkit-scrollbar { width: 4px; }
+        .ranking-scroll::-webkit-scrollbar-track { background: rgba(0, 229, 255, 0.05); }
+        .ranking-scroll::-webkit-scrollbar-thumb { background: var(--neon-orange); box-shadow: 0 0 10px var(--neon-orange); }
 
-        body {
-            font-family: 'Rajdhani', sans-serif;
-            background-color: var(--core-bg);
-            color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
+        .rank-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        .rank-row { background: rgba(0, 229, 255, 0.03); border: 1px solid rgba(0, 229, 255, 0.1); transition: 0.3s; }
+        .rank-row:hover { background: rgba(0, 229, 255, 0.08); transform: scale(1.005); }
+
+        .rank-cell { padding: 15px 20px; font-family: 'Orbitron'; font-size: 0.85rem; border-top: 1px solid rgba(0,229,255,0.1); border-bottom: 1px solid rgba(0,229,255,0.1); }
+        .rank-id { font-family: 'Bebas Neue'; font-size: 1.8rem; color: var(--neon-orange); width: 60px; }
+
+        .power-badge {
+            background: var(--neon-orange); color: #000; padding: 4px 12px; font-weight: bold;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); display: inline-block;
         }
 
-        /* --- FONDO HUD --- */
-        .cyber-grid {
-            position: fixed; inset: 0;
-            background-image:
-                    linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px; z-index: -1;
-        }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 40%, #000 140%); pointer-events: none; z-index: 1; }
-
-        /* --- NAVBAR HUD --- */
-        .navbar {
-            position: relative; z-index: 100; padding: 20px 40px;
-            background: linear-gradient(to bottom, rgba(2,8,18,0.9), transparent);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .logo {
-            font-family: 'Orbitron', sans-serif; font-size: 0.9rem;
-            color: var(--neon-blue); letter-spacing: 5px; text-decoration: none;
-        }
         .btn-back {
-            text-decoration: none; color: var(--neon-orange); border: 1px solid var(--neon-orange);
-            padding: 8px 25px; font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.1rem; letter-spacing: 2px; transition: 0.3s;
+            display: inline-block; margin-top: 20px; padding: 12px 35px; border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); text-decoration: none; font-family: 'Orbitron'; letter-spacing: 2px;
+            transition: 0.4s; flex-shrink: 0; width: fit-content;
         }
-        .btn-back:hover { background: var(--neon-orange); color: #000; box-shadow: 0 0 20px var(--neon-orange); }
-
-        /* --- CONTENEDOR --- */
-        .container {
-            position: relative; z-index: 10;
-            width: 95%; max-width: 1100px; margin: 40px auto;
-            animation: dossierIn 0.8s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        @keyframes dossierIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        .header-box { border-left: 4px solid var(--neon-orange); padding-left: 20px; margin-bottom: 40px; }
-        .main-title { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 3px; line-height: 0.9; }
-        .sub-title { font-family: 'Orbitron'; font-size: 0.7rem; color: var(--neon-blue); letter-spacing: 5px; margin-top: 10px; }
-
-        /* --- TABLA TÁCTICA --- */
-        .ranking-module {
-            background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue));
-            padding: 1px;
-            clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
-        }
-
-        .ranking-inner {
-            background: var(--core-bg);
-            padding: 20px;
-            clip-path: polygon(30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px);
-        }
-
-        table { width: 100%; border-collapse: collapse; }
-        th {
-            font-family: 'Orbitron'; font-size: 0.65rem; color: var(--neon-blue);
-            padding: 20px 15px; text-align: center; letter-spacing: 2px;
-            border-bottom: 1px solid var(--dim);
-        }
-
-        tr.row-player {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            transition: 0.3s;
-        }
-        tr.row-player:hover { background: rgba(0, 229, 255, 0.05); }
-
-        td { padding: 15px; vertical-align: middle; }
-
-        /* --- PUESTOS ESPECIALES --- */
-        .top-1 {
-            background: linear-gradient(90deg, rgba(255, 106, 0, 0.15), transparent) !important;
-        }
-        .top-1 .rank-num { color: var(--neon-orange); text-shadow: 0 0 10px var(--neon-orange); font-size: 2rem !important; }
-
-        .player-name { font-family: 'Bebas Neue'; font-size: 1.5rem; color: #fff; letter-spacing: 1px; }
-        .player-aff { font-family: 'Orbitron'; font-size: 0.6rem; color: var(--dim); letter-spacing: 1px; }
-
-        .pt-val {
-            color: var(--neon-blue); font-family: 'Bebas Neue', sans-serif;
-            font-size: 2.2rem; text-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-        }
-
-        .stat-badge {
-            padding: 4px 10px; font-family: 'Orbitron'; font-size: 0.65rem;
-            border-radius: 2px; display: inline-block; min-width: 45px;
-            text-align: center;
-        }
-        .bg-ataque { border: 1px solid var(--neon-blue); color: var(--neon-blue); background: rgba(0, 229, 255, 0.1); }
-        .bg-defensa { border: 1px solid #00ff88; color: #00ff88; background: rgba(0, 255, 136, 0.1); }
-
-        .rank-num { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--dim); }
-        .medal-icon { font-size: 1.5rem; }
-
-        .footer-note {
-            text-align: center; margin-top: 30px; font-family: 'Orbitron';
-            font-size: 0.6rem; color: var(--dim); letter-spacing: 2px;
-        }
+        .btn-back:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
     </style>
 </head>
 <body>
-
-<div class="vignette"></div>
 <div class="cyber-grid"></div>
-
-<nav class="navbar">
-    <a href="/inicio" class="logo">⚡ DATABASE_RANKING</a>
-    <a href="/inicio" class="btn-back">RETURN_TO_BASE</a>
-</nav>
-
 <div class="container">
     <div class="header-box">
-        <h1 class="main-title">FÚTBOL_FRONTIER_ELITE</h1>
-        <div class="sub-title">REGISTRO GLOBAL DE AGENTES // PROTOCOLO DE PUNTUACIÓN</div>
+        <div style="color:var(--neon-blue); letter-spacing: 8px; font-size: 0.6rem; font-family: 'Orbitron';">DATABASE // FULL_SYNCHRONIZATION</div>
+        <h1 class="sys-welcome">GLOBAL <span style="color:var(--neon-orange)">RANKING</span></h1>
     </div>
 
-    <div class="ranking-module">
-        <div class="ranking-inner">
-            <table>
-                <thead>
-                <tr>
-                    <th>RANK</th>
-                    <th style="text-align: left;">IDENTITY_LOG</th>
-                    <th>PUNTOS_PT</th>
-                    <th>ATK</th>
-                    <th>DEF</th>
-                    <th>WINS</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="jugador, i : ${jugadores}" class="row-player" th:classappend="${i.index == 0} ? 'top-1' : ''">
-                    <td style="text-align: center;">
-                        <span th:if="${i.index == 0}" class="medal-icon">🥇</span>
-                        <span th:if="${i.index == 1}" class="medal-icon">🥈</span>
-                        <span th:if="${i.index == 2}" class="medal-icon">🥉</span>
-                        <span th:if="${i.index > 2}" class="rank-num" th:text="${i.count}">04</span>
-                    </td>
-                    <td style="text-align: left;">
-                        <div style="display: flex; flex-direction: column;">
-                            <span class="player-name" th:text="${jugador.nombre}">MARK EVANS</span>
-                            <span class="player-aff" th:text="${#strings.toUpperCase(jugador.afiliacion)}">RAIMON_HIGH</span>
-                        </div>
-                    </td>
-                    <td class="pt-val" style="text-align: center;" th:text="${jugador.puntosInazuma}">000</td>
-                    <td style="text-align: center;"><span class="stat-badge bg-ataque" th:text="${jugador.ataque}">00</span></td>
-                    <td style="text-align: center;"><span class="stat-badge bg-defensa" th:text="${jugador.defensa}">00</span></td>
-                    <td style="text-align: center; font-size: 1.8rem; font-family: 'Bebas Neue'; color: #fff;" th:text="${jugador.victorias}">0</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="ranking-scroll">
+        <table class="rank-table">
+            <!-- Iteramos sobre 'ranking', que contiene la lista completa enviada por el controlador -->
+            <tr class="rank-row" th:each="j, stat : ${ranking}">
+                <!-- Contador de posición en el ranking -->
+                <td class="rank-cell rank-id" th:text="${stat.count < 10 ? '0' + stat.count : stat.count}">01</td>
+
+                <td class="rank-cell">
+                    <!-- Nombre del jugador en mayúsculas -->
+                    <div style="font-size: 1.1rem; color: #fff; line-height: 1;" th:text="${#strings.toUpperCase(j.nombre)}">NOMBRE</div>
+                    <!-- Posición y Equipo del modelo Jugador -->
+                    <div style="font-size: 0.55rem; color: var(--neon-blue); margin-top: 5px;"
+                         th:text="${j.posicion + ' // ' + j.equipo}">POSICIÓN // EQUIPO</div>
+                </td>
+
+                <td class="rank-cell text-center">
+                    <span style="color:var(--neon-orange); font-size: 0.7rem;">PTS:</span> <br>
+                    <!-- Puntos Inazuma del modelo Jugador -->
+                    <span th:text="${j.puntosInazuma}">0</span>
+                </td>
+
+                <td class="rank-cell text-center">
+                    <span style="color:var(--neon-orange); font-size: 0.7rem;">VIC:</span> <br>
+                    <!-- Victorias del modelo Jugador -->
+                    <span th:text="${j.victorias}">0</span>
+                </td>
+
+                <td class="rank-cell text-end">
+                    <!-- Invocamos al método getScoreTotal() de tu clase Jugador -->
+                    <span class="power-badge" th:text="${#numbers.formatDecimal(j.getScoreTotal(), 1, 0)}">
+                        0
+                    </span>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <p class="footer-note">
-        >> SYSTEM_NOTICE: LOS DATOS SE SINCRONIZAN TRAS CADA ENCUENTRO OFICIAL_
-    </p>
+    <a href="/pachanga" class="btn-back">TERMINATE_SESSION // BACK</a>
 </div>
-
 </body>
 </html>

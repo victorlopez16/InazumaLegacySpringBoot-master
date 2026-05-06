@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Inazuma Legacy – Tactical Selection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root { --core-bg: #020812; --neon-orange: #ff6a00; --neon-blue: #00e5ff; --text-main: #e0f2fe; }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
+        body { height: 100vh; background: var(--core-bg); font-family: 'Rajdhani', sans-serif; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--text-main); }
+        .cyber-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px); background-size: 60px 60px; perspective: 1000px; transform: rotateX(20deg); z-index: -1; animation: gridMove 15s linear infinite; }
+        @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 60px; } }
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, #000 130%); pointer-events: none; z-index: 1; }
+        .layout { position: relative; z-index: 10; width: 100%; max-width: 1200px; display: grid; grid-template-columns: 1fr; gap: 25px; animation: fadeIn 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .module { background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue)); padding: 1px; clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%); }
+        .module-inner { background: var(--core-bg); padding: 40px; clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%); }
+        .sys-welcome { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; letter-spacing: 2px; line-height: 1; margin-bottom: 30px; border-left: 4px solid var(--neon-orange); padding-left: 20px; }
+        .label { color: var(--neon-orange); font-size: 0.7rem; letter-spacing: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
+
+        select {
+            width: 100%; background: rgba(0, 229, 255, 0.05); border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); padding: 15px; font-family: 'Orbitron'; font-size: 1rem;
+            margin-bottom: 25px; outline: none; cursor: pointer;
+        }
+        select option { background: #05161d; color: var(--neon-blue); }
+
+        .btn-action {
+            display: block; width: 100%; padding: 20px; text-align: center; text-decoration: none;
+            font-family: 'Orbitron'; font-weight: bold; letter-spacing: 3px; transition: 0.4s;
+            background: var(--neon-orange); color: #000; border: none;
+            box-shadow: 0 0 20px rgba(255,106,0,0.3);
+            clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
+        }
+        .btn-action:hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(255,106,0,0.6); background: #fff; }
+    </style>
+</head>
+<body>
+<div class="vignette"></div>
+<div class="cyber-grid"></div>
+<div class="layout">
+    <div class="module">
+        <div class="module-inner">
+            <span class="label">BATTLE_SIMULATOR // GLOBAL_ACCESS</span>
+            <h1 class="sys-welcome">SELECCIONAR <span style="color:var(--neon-blue);">CAMPEÓN</span></h1>
+
+            <form action="/pachanga/jugar" method="post">
+                <span class="label" style="color:var(--neon-blue)">DATABASE_TOTAL_PLAYERS_CONNECTED</span>
+                <select name="idJugador" class="cyber-select" required>
+                    <option th:each="j : ${misJugadores}"
+                            th:value="${j.id}"
+                            th:text="${j.nombre +
+                     (j.posicion != null ? ' [' + j.posicion + ']' : '') +
+                     (j.equipo != null ? ' - ' + j.equipo : '')}">
+                    </option>
+                </select>
+
+                <button type="submit" class="btn-action">INICIAR_SIMULACIÓN</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

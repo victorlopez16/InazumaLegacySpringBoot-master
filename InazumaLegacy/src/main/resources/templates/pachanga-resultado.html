@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Inazuma Legacy – Battle Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root { --core-bg: #020812; --neon-orange: #ff6a00; --neon-blue: #00e5ff; --text-main: #e0f2fe; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { height: 100vh; background: var(--core-bg); font-family: 'Rajdhani', sans-serif; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--text-main); }
+        .cyber-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px); background-size: 60px 60px; z-index: -1; }
+        .module { background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue)); padding: 1px; width: 90%; max-width: 1000px; clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%); }
+        .module-inner { background: var(--core-bg); padding: 40px; text-align: center; clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%); }
+        .battle-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 30px; margin: 40px 0; }
+        .stat-card { border: 1px solid rgba(0, 229, 255, 0.2); padding: 20px; background: rgba(0, 229, 255, 0.02); }
+        .stat-card.rival { border-color: #ff4444; }
+        .power-val { font-family: 'Orbitron'; font-size: 3.5rem; display: block; margin: 10px 0; color: var(--neon-blue); text-shadow: 0 0 15px rgba(0,229,255,0.5); }
+        .vs-text { font-family: 'Bebas Neue'; font-size: 4rem; color: var(--neon-orange); }
+        .result-msg { font-family: 'Bebas Neue'; font-size: 3rem; letter-spacing: 5px; margin: 20px 0; padding: 10px; background: rgba(255,106,0,0.1); border-top: 1px solid var(--neon-orange); border-bottom: 1px solid var(--neon-orange); }
+        .actions { display: flex; gap: 20px; justify-content: center; }
+        .btn-h { padding: 15px 30px; text-decoration: none; font-family: 'Orbitron'; font-size: 0.8rem; letter-spacing: 2px; border: 1px solid var(--neon-blue); color: var(--neon-blue); transition: 0.4s; }
+        .btn-h:hover { background: var(--neon-blue); color: #000; }
+        .btn-h.primary { background: var(--neon-orange); color: #000; border: none; }
+    </style>
+</head>
+<body>
+<div class="cyber-grid"></div>
+<div class="module">
+    <div class="module-inner">
+        <span style="color:var(--neon-orange); letter-spacing: 5px;">BATTLE_RESULT // ANALYSIS_COMPLETE</span>
+
+        <div class="battle-grid">
+            <div class="stat-card">
+                <span th:text="${#strings.toUpperCase(jugador.nombre)}">PLAYER</span>
+                <span class="power-val" th:text="${miPoder}">0</span>
+                <small style="color:var(--neon-blue)">ATK_POWER</small>
+            </div>
+            <div class="vs-text">VS</div>
+            <div class="stat-card rival">
+                <span th:text="${#strings.toUpperCase(rival.nombre)}">RIVAL</span>
+                <span class="power-val" style="color:#ff4444; text-shadow: 0 0 15px rgba(255,0,0,0.5);" th:text="${rivalPoder}">0</span>
+                <small style="color:#ff4444">DEF_POWER</small>
+            </div>
+        </div>
+
+        <div class="result-msg" th:text="${mensaje}">VICTORIA</div>
+
+        <div class="actions">
+            <a href="/pachanga" class="btn-h">NUEVO_DUELO</a>
+            <a href="/ranking" class="btn-h primary">UPDATE_RANKING</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
