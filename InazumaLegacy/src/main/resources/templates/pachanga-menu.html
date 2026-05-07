@@ -3,62 +3,168 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Inazuma Legacy – Tactical Selection</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet"/>
     <style>
-        :root { --core-bg: #020812; --neon-orange: #ff6a00; --neon-blue: #00e5ff; --text-main: #e0f2fe; }
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
-        body { height: 100vh; background: var(--core-bg); font-family: 'Rajdhani', sans-serif; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--text-main); }
-        .cyber-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px); background-size: 60px 60px; perspective: 1000px; transform: rotateX(20deg); z-index: -1; animation: gridMove 15s linear infinite; }
-        @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 60px; } }
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, #000 130%); pointer-events: none; z-index: 1; }
-        .layout { position: relative; z-index: 10; width: 100%; max-width: 1200px; display: grid; grid-template-columns: 1fr; gap: 25px; animation: fadeIn 1s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .module { background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue)); padding: 1px; clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%); }
-        .module-inner { background: var(--core-bg); padding: 40px; clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%); }
-        .sys-welcome { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; letter-spacing: 2px; line-height: 1; margin-bottom: 30px; border-left: 4px solid var(--neon-orange); padding-left: 20px; }
-        .label { color: var(--neon-orange); font-size: 0.7rem; letter-spacing: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
+        /* ===== VARIABLES INTEGRADAS ===== */
+        :root {
+            --gold: #f0a500;
+            --gold-bright: #ffe566;
+            --core-bg: #03001a;
+            --neon-blue: #00d4ff;
+            --text-main: #e0f2fe;
+            --danger: #ff3a3a;
+        }
 
+        /* ===== RESET & ANIMATED BACKGROUND ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
+
+        body {
+            height: 100vh;
+            background: var(--core-bg);
+            font-family: 'Exo 2', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--text-main);
+            position: relative;
+        }
+
+        /* Grid animado de fondo */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                    linear-gradient(rgba(240, 165, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(240, 165, 0, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 50px; } }
+
+        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, #000 130%); pointer-events: none; z-index: 1; }
+
+        /* ===== LAYOUT & MODULES ===== */
+        .layout { position: relative; z-index: 10; width: 100%; max-width: 600px; animation: fadeIn 1s ease-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .module {
+            background: linear-gradient(135deg, var(--gold), var(--neon-blue));
+            padding: 2px;
+            clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%);
+            box-shadow: 0 0 30px rgba(240, 165, 0, 0.2);
+        }
+
+        .module-inner {
+            background: rgba(3, 0, 26, 0.95);
+            padding: 40px;
+            clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%);
+        }
+
+        .sys-welcome {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3.5rem;
+            letter-spacing: 2px;
+            line-height: 1;
+            margin-bottom: 30px;
+            color: var(--gold);
+            border-left: 4px solid var(--gold);
+            padding-left: 20px;
+        }
+
+        .label { color: var(--gold); font-size: 0.7rem; letter-spacing: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; }
+
+        /* ===== FORM ELEMENTS ===== */
         select {
-            width: 100%; background: rgba(0, 229, 255, 0.05); border: 1px solid var(--neon-blue);
-            color: var(--neon-blue); padding: 15px; font-family: 'Orbitron'; font-size: 1rem;
+            width: 100%; background: rgba(0, 212, 255, 0.05); border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); padding: 15px; font-family: 'Orbitron'; font-size: 0.9rem;
             margin-bottom: 25px; outline: none; cursor: pointer;
         }
-        select option { background: #05161d; color: var(--neon-blue); }
+        select option { background: #03001a; color: var(--neon-blue); }
 
         .btn-action {
-            display: block; width: 100%; padding: 20px; text-align: center; text-decoration: none;
+            display: block; width: 100%; padding: 20px; text-align: center; border: none;
             font-family: 'Orbitron'; font-weight: bold; letter-spacing: 3px; transition: 0.4s;
-            background: var(--neon-orange); color: #000; border: none;
-            box-shadow: 0 0 20px rgba(255,106,0,0.3);
+            background: var(--gold); color: #000;
+            box-shadow: 0 0 20px rgba(240, 165, 0, 0.3);
             clip-path: polygon(0 0, 95% 0, 100% 30%, 100% 100%, 5% 100%, 0 70%);
+            cursor: pointer; margin-bottom: 15px;
         }
-        .btn-action:hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(255,106,0,0.6); background: #fff; }
+        .btn-action:hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(240, 165, 0, 0.6); background: var(--gold-bright); }
+
+        .btn-back {
+            display: block; width: 100%; padding: 12px; text-align: center; text-decoration: none;
+            font-family: 'Orbitron'; font-size: 0.8rem; letter-spacing: 2px; transition: 0.3s;
+            background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue);
+            clip-path: polygon(0 0, 100% 0, 100% 70%, 95% 100%, 0 100%, 0 30%);
+        }
+        .btn-back:hover { background: rgba(0, 212, 255, 0.1); color: #fff; }
+
+        /* LOADING OVERLAY */
+        #overlay-carga {
+            display: none; position: fixed; inset: 0; background: rgba(3, 0, 26, 0.98);
+            z-index: 9999; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .loading-text { font-family: 'Orbitron'; color: var(--gold); font-size: 2.5rem; letter-spacing: 8px; text-shadow: 0 0 20px var(--gold); animation: pulse 1s infinite alternate; }
+        .scanner-bar { width: 400px; height: 2px; background: rgba(240, 165, 0, 0.1); margin-top: 30px; position: relative; overflow: hidden; }
+        .scanner-bar::after { content: ''; position: absolute; width: 150px; height: 100%; background: var(--gold); box-shadow: 0 0 20px var(--gold); animation: scan 1.5s infinite ease-in-out; }
+        @keyframes pulse { from { opacity: 0.3; } to { opacity: 1; } }
+        @keyframes scan { from { left: -150px; } to { left: 400px; } }
     </style>
 </head>
 <body>
+
+<div id="overlay-carga">
+    <div class="loading-text">⚔️ LUCHANDO ⚔️</div>
+    <div class="scanner-bar"></div>
+    <p style="margin-top: 20px; color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.8rem; letter-spacing: 2px;">
+        GENERANDO SIMULACIÓN TÁCTICA...
+    </p>
+</div>
+
 <div class="vignette"></div>
-<div class="cyber-grid"></div>
+
 <div class="layout">
     <div class="module">
         <div class="module-inner">
-            <span class="label">BATTLE_SIMULATOR // GLOBAL_ACCESS</span>
+            <span class="label">BATTLE_SIMULATOR // SYSTEM_ACCESS</span>
             <h1 class="sys-welcome">SELECCIONAR <span style="color:var(--neon-blue);">CAMPEÓN</span></h1>
 
-            <form action="/pachanga/jugar" method="post">
-                <span class="label" style="color:var(--neon-blue)">DATABASE_TOTAL_PLAYERS_CONNECTED</span>
+            <form id="formDuelo" th:action="@{/pachanga/jugar}" method="post">
+                <span class="label" style="color:var(--neon-blue)">READY_FOR_DEPLOYMENT</span>
+
                 <select name="idJugador" class="cyber-select" required>
                     <option th:each="j : ${misJugadores}"
                             th:value="${j.id}"
-                            th:text="${j.nombre +
-                     (j.posicion != null ? ' [' + j.posicion + ']' : '') +
-                     (j.equipo != null ? ' - ' + j.equipo : '')}">
+                            th:text="${j.nombre + ' [ATK: ' + j.ataque + ']'}">
                     </option>
                 </select>
 
-                <button type="submit" class="btn-action">INICIAR_SIMULACIÓN</button>
+                <button type="button" onclick="iniciarDuelo()" class="btn-action">
+                    INICIAR_SIMULACIÓN
+                </button>
+
+                <a th:href="@{/inicio}" class="btn-back">VOLVER AL MENÚ</a>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    function iniciarDuelo() {
+        // Activamos animación de carga
+        document.getElementById('overlay-carga').style.display = 'flex';
+
+        // 3 segundos de delay antes del envío al controlador
+        setTimeout(function() {
+            document.getElementById('formDuelo').submit();
+        }, 3000);
+    }
+</script>
+
 </body>
 </html>
