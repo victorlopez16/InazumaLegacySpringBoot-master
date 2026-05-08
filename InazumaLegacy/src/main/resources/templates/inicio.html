@@ -2,248 +2,299 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Inazuma Legacy – Tactical Command</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"/>
+    <title>Inazuma Legacy | Tactical Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
     <style>
         :root {
-            --core-bg: #020812;
-            --neon-orange: #ff6a00;
-            --neon-blue: #00e5ff;
-            --glass: rgba(10, 25, 47, 0.75);
-            --text-main: #e0f2fe;
-            --dim: rgba(224, 242, 254, 0.4);
+            --cyan: #00f2ff;
+            --cyan-glow: rgba(0, 242, 255, 0.3);
+            --orange: #ff9d00;
+            --orange-glow: rgba(255, 157, 0, 0.3);
+            --red: #ff3c3c;
+            --bg: #03070f;
+            --panel: rgba(10, 20, 35, 0.8);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: crosshair; }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            height: 100vh; background: var(--core-bg);
-            font-family: 'Rajdhani', sans-serif;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; color: var(--text-main);
-        }
-
-        .cyber-grid {
-            position: fixed; inset: 0;
+            background-color: var(--bg);
             background-image:
-                    linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px);
-            background-size: 60px 60px;
-            perspective: 1000px; transform: rotateX(20deg);
-            z-index: -1; animation: gridMove 15s linear infinite;
-        }
-        @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 60px; } }
-
-        .vignette { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, #000 130%); pointer-events: none; z-index: 1; }
-
-        .layout {
-            position: relative; z-index: 10;
-            width: 100%; max-width: 1500px; height: 90vh;
-            padding: 20px; display: grid;
-            grid-template-columns: 340px 1fr 340px;
-            gap: 25px;
-            animation: fadeIn 1s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        .module {
-            background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue));
-            padding: 1px;
-            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+                    radial-gradient(circle at 50% 50%, #0a1a30 0%, #03070f 100%),
+                    linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: 100% 100%, 30px 30px, 30px 30px;
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .module-inner {
-            background: var(--core-bg);
-            height: 100%; width: 100%;
-            padding: 30px;
-            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
-            display: flex; flex-direction: column;
+        .ui-frame {
+            display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            grid-template-rows: 60px 1fr 180px;
+            gap: 20px;
+            width: 95vw;
+            height: 90vh;
+            max-width: 1600px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px; width: 20px; height: 20px;
+            border-top: 2px solid var(--cyan); border-left: 2px solid var(--cyan);
+        }
+
+        /* HEADER */
+        .header {
+            grid-column: 1 / 4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 2px solid var(--cyan);
+        }
+
+        .sys-info { font-family: 'Orbitron'; font-size: 0.7rem; color: var(--cyan); letter-spacing: 2px; }
+
+        /* PERFIL IZQUIERDA */
+        .sidebar-left {
+            grid-row: 2 / 4;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+        }
+
+        .profile-hex {
+            width: 120px; height: 120px;
+            margin: 0 auto 20px;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            background: var(--cyan);
+            display: flex; align-items: center; justify-content: center;
             position: relative;
         }
 
-        .avatar-box {
-            width: 110px; height: 110px; margin: 0 auto 20px;
-            border: 1px solid var(--neon-blue);
-            clip-path: polygon(20% 0, 100% 0, 100% 80%, 80% 100%, 0 100%, 0 20%);
+        .profile-hex div {
+            width: 110px; height: 110px;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            background: var(--bg);
             display: flex; align-items: center; justify-content: center;
-            background: rgba(0, 229, 255, 0.05);
-            font-family: 'Orbitron'; font-size: 2.5rem; color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+            font-size: 3rem; font-family: 'Orbitron'; color: var(--cyan);
         }
 
-        .label { color: var(--neon-orange); font-size: 0.65rem; letter-spacing: 3px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; display: block; opacity: 0.9; }
-
-        .affiliation-box {
-            margin-top: 20px; padding: 15px;
-            border: 1px solid rgba(255,106,0,0.2);
-            background: rgba(255, 106, 0, 0.03);
+        .rank-tag {
+            color: var(--orange);
+            font-family: 'Orbitron';
+            font-size: 0.8rem;
             text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px var(--orange-glow);
         }
 
-        .bio-text {
-            font-size: 0.85rem; color: var(--text-main); opacity: 0.7;
-            line-height: 1.6; text-align: center; margin-top: 15px;
-            font-style: italic;
+        .btn-profile-link {
+            margin-top: auto;
+            padding: 15px;
+            border: 1px solid var(--cyan);
+            background: rgba(0, 242, 255, 0.05);
+            color: var(--cyan);
+            text-decoration: none;
+            text-align: center;
+            font-family: 'Orbitron';
+            font-size: 0.8rem;
+            transition: 0.3s;
+            clip-path: polygon(0 0, 90% 0, 100% 30%, 100% 100%, 0 100%);
         }
 
-        .header-module { border-left: 4px solid var(--neon-orange); padding-left: 20px; margin-bottom: 20px; }
-        .sys-status { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--neon-blue); letter-spacing: 5px; }
-        .sys-welcome { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 3px; line-height: 1; margin-top: 8px; }
+        .btn-profile-link:hover { background: var(--cyan); color: black; }
 
-        .video-container {
-            flex-grow: 1; background: #000;
-            border: 1px solid rgba(0, 229, 255, 0.3);
-            position: relative; overflow: hidden;
+        /* VIDEO CENTRAL INTERACTIVO */
+        .main-display {
+            grid-row: 2 / 3;
+            display: flex;
+            flex-direction: column;
+            background: black;
+            border: 1px solid rgba(0, 242, 255, 0.4);
+            position: relative;
+            overflow: hidden;
         }
-        video { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
 
-        .season-link {
-            display: flex; align-items: center; gap: 20px; padding: 12px; margin-bottom: 8px;
-            border: 1px solid rgba(0, 229, 255, 0.1); background: rgba(0, 229, 255, 0.02);
-            text-decoration: none; color: white; transition: 0.4s;
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Cambiado a contain para que se vea completo el video */
+            background: #000;
         }
-        .season-link:hover { border-color: var(--neon-blue); background: rgba(0,229,255,0.1); transform: translateX(10px); }
-        .season-link span { font-family: 'Bebas Neue'; font-size: 2rem; color: var(--neon-orange); }
 
-        .btn-action {
-            display: block; width: 100%; padding: 15px; margin-bottom: 12px;
-            text-align: center; text-decoration: none;
-            font-family: 'Orbitron', sans-serif; font-size: 0.8rem; font-weight: bold;
-            letter-spacing: 2px; transition: 0.4s;
+        /* Estilo para los controles del video para que no desentonen */
+        video::-webkit-media-controls-panel { background-image: linear-gradient(transparent, rgba(0, 242, 255, 0.2)); }
+        video::-webkit-media-controls-play-button { background-color: var(--cyan); border-radius: 50%; }
+
+        .video-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
+            background-size: 100% 4px;
+            pointer-events: none; /* Importante para poder clicar el video debajo */
+            z-index: 1;
         }
-        .btn-ranking { background: var(--neon-orange); color: #000; border: none; box-shadow: 0 0 20px rgba(255,106,0,0.3); }
-        .btn-ranking:hover { transform: scale(1.02); box-shadow: 0 0 35px rgba(255,106,0,0.5); }
 
-        .btn-chat { border: 1px solid var(--neon-blue); color: var(--neon-blue); }
-        .btn-chat:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 25px rgba(0,229,255,0.4); }
-
-        .btn-logout { border: 1px solid #ff4444; color: #ff4444; margin-top: 15px; opacity: 0.6; }
-        .btn-logout:hover { background: #ff4444; color: white; opacity: 1; }
-
-        .btn-tech {
-            margin-top: auto; padding: 12px;
-            border: 1px solid var(--neon-blue); color: var(--neon-blue);
-            text-decoration: none; font-size: 0.75rem; text-align: center;
-            font-family: 'Orbitron'; letter-spacing: 2px;
+        /* COLUMNA DERECHA */
+        .sidebar-right {
+            grid-row: 2 / 4;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 15px;
         }
-        .btn-tech:hover { background: rgba(0, 229, 255, 0.1); }
 
-        .latency-meter {
-            position: absolute; bottom: 15px; right: 20px;
-            font-size: 0.55rem; color: rgba(255,255,255,0.2); text-align: right;
+        .season-card {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 3px solid var(--cyan);
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .season-card:hover { background: rgba(0, 242, 255, 0.1); transform: translateX(5px); }
+        .season-card h4 { color: var(--orange); font-family: 'Orbitron'; font-size: 0.8rem; }
+        .season-card p { font-size: 0.6rem; color: #888; }
+
+        /* BLOQUE USUARIOS */
+        .user-db-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0, 242, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .user-list { overflow-y: auto; padding: 10px; flex-grow: 1; }
+        .user-entry {
+            display: flex; align-items: center;
+            padding: 8px; border-bottom: 1px solid rgba(0, 242, 255, 0.05);
+            gap: 10px;
+        }
+
+        .user-avatar-mini {
+            width: 25px; height: 25px; border: 1px solid var(--cyan);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Orbitron'; font-size: 0.6rem; color: var(--cyan);
+        }
+
+        .user-info-mini h5 { font-size: 0.8rem; color: #fff; }
+        .user-info-mini p { font-size: 0.6rem; color: var(--orange); }
+
+        /* ACCIONES */
+        .actions-bar {
+            grid-column: 2 / 3;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .nav-btn {
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; font-family: 'Orbitron'; font-weight: bold;
+            font-size: 0.9rem; transition: 0.3s;
+            clip-path: polygon(5% 0, 100% 0, 100% 70%, 95% 100%, 0 100%, 0 30%);
+        }
+
+        .btn-orange { background: var(--orange); color: black; }
+        .btn-cyan { border: 1px solid var(--cyan); color: var(--cyan); }
+        .btn-red { border: 1px solid var(--red); color: var(--red); height: 60px; }
+
+        .chat-hub {
+            background: rgba(0, 242, 255, 0.1);
+            padding: 5px 15px; border-radius: 20px;
+            border: 1px solid var(--cyan); color: var(--cyan);
+            text-decoration: none; font-size: 0.8rem; font-family: 'Orbitron';
         }
     </style>
 </head>
 <body>
 
-<div class="vignette"></div>
-<div class="cyber-grid"></div>
+<div class="ui-frame">
+    <header class="panel header">
+        <div class="sys-info">LIVE_FEED // ENCRYPTED_STREAM</div>
+        <div style="font-family: 'Bebas Neue'; font-size: 2rem; letter-spacing: 4px;">
+            WELCOME, <span style="color: var(--orange);" th:text="${nombreUsuario}">VICTOR</span>
+        </div>
+        <a th:href="@{/social}" class="chat-hub">
+            NEURAL_CHAT <span th:if="${mensajesNuevos > 0}" style="color: white;">([(${mensajesNuevos})])</span>
+        </a>
+    </header>
 
-<div class="layout">
+    <aside class="panel sidebar-left">
+        <div class="sys-info" style="margin-bottom: 20px;">AGENT_DATA</div>
+        <div class="profile-hex">
+            <div th:text="${#strings.substring(nombreUsuario,0,1)}">V</div>
+        </div>
+        <h2 style="text-align: center; font-family: 'Bebas Neue'; font-size: 2.5rem;" th:text="${nombreUsuario}">VICTOR</h2>
+        <p class="rank-tag" th:text="'LVL_RANK: ' + ${user.rango}">LVL_RANK: DELANTERO</p>
+        <div style="background: rgba(0,0,0,0.3); padding: 15px; border: 1px solid rgba(255,157,0,0.2);">
+            <p style="color: var(--orange); font-size: 0.6rem; font-family: 'Orbitron';">TACTICAL_DATA</p>
+            <p style="font-size: 0.8rem; font-style: italic; margin-top: 5px;" th:text="${user.descripcion}">Soy el mejor delantero del raimon</p>
+        </div>
+        <a th:href="@{/perfil}" class="btn-profile-link">ACCESS_PROFILE_DATABASE</a>
+    </aside>
 
-    <!-- COLUMNA IZQUIERDA: PERFIL -->
-    <div class="col" style="display: flex; flex-direction: column;">
-        <div class="module" style="height: 100%;">
-            <div class="module-inner">
-                <span class="label">AGENT_PROFILE</span>
-                <div class="avatar-box">
-                    <span th:text="${user != null ? #strings.toUpperCase(#strings.substring(user.nombre,0,1)) : 'U'}">V</span>
-                </div>
+    <section class="main-display">
+        <div class="video-overlay"></div>
+        <video controls>
+            <source th:src="@{/video/momento_epico.mp4}" type="video/mp4">
+            SISTEMA NO SOPORTA VIDEO_FEED.
+        </video>
+    </section>
 
-                <h2 style="font-family:'Orbitron'; font-size: 1.5rem; color: #fff; text-align: center;"
-                    th:text="${user != null ? #strings.toUpperCase(user.nombre) : 'UNKNOWN'}">VICTOR</h2>
-
-                <p style="color:var(--neon-blue); font-family:'Orbitron'; font-size: 0.6rem; letter-spacing: 3px; text-align: center; margin-top: 5px;">
-                    LVL_RANK: <span th:text="${user != null && user.rango != null ? #strings.toUpperCase(user.rango) : 'UNASSIGNED'}">CAPTAIN</span>
-                </p>
-
-                <div class="affiliation-box">
-                    <img th:src="@{/images/escudo_raimon.webp}" style="width: 60px; filter: drop-shadow(0 0 10px var(--neon-orange)); margin-bottom: 10px;">
-                    <span class="label">Affiliation</span>
-                    <div style="font-family:'Bebas Neue'; font-size: 1.4rem; color: #fff;"
-                         th:text="${user != null && user.afiliacion != null ? #strings.toUpperCase(user.afiliacion) : 'RAIMON_HIGH'}">
-                        RAIMON_HIGH_SCHOOL
+    <aside class="panel sidebar-right">
+        <div class="sys-info">MISSION_ARCHIVES</div>
+        <div class="season-list">
+            <a th:href="@{/jugadores?temporada=1}" style="text-decoration: none;">
+                <div class="season-card"><h4>01 // FUTBOL FRONTIER</h4><p>STATUS: ARCHIVED</p></div>
+            </a>
+            <a th:href="@{/jugadores?temporada=2}" style="text-decoration: none;">
+                <div class="season-card"><h4>02 // ALIUS ACADEMY</h4><p>STATUS: ARCHIVED</p></div>
+            </a>
+            <a th:href="@{/jugadores?temporada=3}" style="text-decoration: none;">
+                <div class="season-card"><h4>03 // F.F. INTERNATIONAL</h4><p>STATUS: ARCHIVED</p></div>
+            </a>
+        </div>
+        <div class="sys-info" style="margin-top: 10px;">USER_DATABASE</div>
+        <div class="user-db-container">
+            <div class="user-list">
+                <div th:each="u : ${todosLosUsuarios}" class="user-entry">
+                    <div class="user-avatar-mini" th:text="${#strings.substring(u.nombre,0,1)}">U</div>
+                    <div class="user-info-mini">
+                        <h5 th:text="${u.nombre}">Usuario</h5>
+                        <p th:text="${u.afiliacion != null ? u.afiliacion : 'S/A'}">Instituto</p>
                     </div>
                 </div>
-
-                <span class="label" style="margin-top: 25px;">TACTICAL_DATA</span>
-                <div class="bio-text" th:text="${user != null && user.descripcion != null ? user.descripcion : 'No tactical data available for this agent.'}">
-                    Estratega táctico del equipo.
-                </div>
-
-                <a href="/perfil" class="btn-tech">UPDATE_DATABASE</a>
             </div>
         </div>
+    </aside>
+
+    <div class="actions-bar">
+        <a th:href="@{/ranking}" class="nav-btn btn-orange">GLOBAL_RANKING</a>
+        <a th:href="@{/pachanga}" class="nav-btn btn-cyan">PACHANGA_SIMULATOR</a>
     </div>
 
-    <!-- COLUMNA CENTRAL: FEED VIDEO -->
-    <div class="col" style="display: flex; flex-direction: column;">
-        <div class="header-module">
-            <div class="sys-status">LIVE_FEED // ENCRYPTED_STREAM</div>
-            <h1 class="sys-welcome">WELCOME, <span style="color:var(--neon-orange);" th:text="${user != null ? #strings.toUpperCase(user.nombre) : 'AGENT'}">VICTOR</span></h1>
-        </div>
-
-        <div class="module" style="flex-grow: 1;">
-            <div class="module-inner" style="padding: 0;">
-                <div class="video-container">
-                    <video autoplay muted loop playsinline>
-                        <source th:src="@{/Videos/peli-ogro-inazuma.mp4}" type="video/mp4">
-                    </video>
-                    <div class="latency-meter">
-                        STREAM_QUALITY: 4K_ENHANCED<br>
-                        SIGNAL_STRENGTH: 100%
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div style="padding: 20px; display: flex; align-items: center;">
+        <a th:href="@{/logout}" class="nav-btn btn-red" style="width: 100%;">TERMINATE_SESSION</a>
     </div>
-
-    <!-- COLUMNA DERECHA: ARCHIVOS Y COMBATE -->
-    <div class="col" style="display: flex; flex-direction: column; gap: 20px;">
-
-        <!-- ARCHIVOS -->
-        <div class="module" style="flex: 1;">
-            <div class="module-inner">
-                <span class="label">SEASON_ARCHIVES</span>
-                <a th:href="@{/jugadores(temporada=1)}" class="season-link">
-                    <span>01</span> <div><strong style="letter-spacing:1px">FUTBOL FRONTIER</strong><br><small style="color:var(--dim)">LOG_ALPHA</small></div>
-                </a>
-                <a th:href="@{/jugadores(temporada=2)}" class="season-link">
-                    <span>02</span> <div><strong style="letter-spacing:1px">ALIUS ACADEMY</strong><br><small style="color:var(--dim)">LOG_BETA</small></div>
-                </a>
-                <a th:href="@{/jugadores(temporada=3)}" class="season-link">
-                    <span>03</span> <div><strong style="letter-spacing:1px">F.F. INTERNATIONAL</strong><br><small style="color:var(--dim)">LOG_GAMMA</small></div>
-                </a>
-            </div>
-        </div>
-
-        <!-- PACHANGAS (NUEVO) -->
-        <div class="module" style="flex: 0.7;">
-            <div class="module-inner" style="justify-content: center; align-items: center; background: radial-gradient(circle at center, rgba(0, 229, 255, 0.05) 0%, transparent 70%);">
-                <span class="label">COMBAT_ZONE</span>
-                <div style="text-align: center; margin: 5px 0;">
-                    <h3 style="font-family: 'Orbitron'; font-size: 1.1rem; color: var(--neon-blue); letter-spacing: 2px;">PACHANGAS</h3>
-                </div>
-
-                <a href="/pachanga" class="btn-action" style="background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); box-shadow: inset 0 0 10px rgba(0,229,255,0.2); margin-top: 10px;">
-                    ENTER_SIMULATION
-                </a>
-
-                <div style="margin-top: 10px; font-size: 0.55rem; color: var(--neon-orange); font-family: 'Orbitron';">
-                    [ STATUS: READY_TO_BATTLE ]
-                </div>
-            </div>
-        </div>
-
-        <!-- ACCIONES -->
-        <div class="actions">
-            <a href="/ranking" class="btn-action btn-ranking">GLOBAL_RANKING</a>
-            <a href="/chat" class="btn-action btn-chat">NEURAL</a>
-            <a href="/logout" class="btn-action btn-logout">TERMINATE_SESSION</a>
-        </div>
-    </div>
-
 </div>
 
 </body>

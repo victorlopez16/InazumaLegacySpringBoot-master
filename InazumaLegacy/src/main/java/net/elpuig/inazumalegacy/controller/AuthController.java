@@ -105,15 +105,30 @@ public class AuthController {
     @GetMapping("/inicio")
     public String inicio(HttpSession session, Model model) {
         String nombreUsuario = (String) session.getAttribute("usuario");
+
+        // Seguridad: Si no hay sesión, fuera.
         if (nombreUsuario == null) return "redirect:/login";
 
-        repo.findByNombre(nombreUsuario).ifPresent(u -> {
+        // Buscamos al usuario logueado
+        Optional<Usuario> usuarioOpt = repo.findByNombre(nombreUsuario);
+
+        if (usuarioOpt.isPresent()) {
+            Usuario u = usuarioOpt.get();
             model.addAttribute("user", u);
             model.addAttribute("nombreUsuario", u.getNombre());
 
+            // Conteo de mensajes
             long noLeidos = mensajeRepo.countByDestinatarioAndLeidoFalse(u.getNombre());
             model.addAttribute("mensajesNuevos", noLeidos);
-        });
+        } else {
+            // Si por algún motivo el usuario de la sesión no existe en DB, limpiamos
+            session.invalidate();
+            return "redirect:/login";
+        }
+
+        // CARGA DE LA LISTA PARA EL SIDEBAR
+        // Importante: .findAll() nunca devuelve null, devuelve lista vacía si no hay nadie.
+        model.addAttribute("todosLosUsuarios", repo.findAll());
 
         return "inicio";
     }
