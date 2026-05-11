@@ -4,58 +4,50 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Chat Core – Inazuma Legacy</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
     <style>
         :root {
-            --navy:     #04101e; --blue:     #071830; --blue2:    #0a2248;
-            --orange:   #ff6a00; --orange2:  #ff8c00; --electric: #00e5ff;
-            --white:    #f0f4ff; --dim:      rgba(240,244,255,.38);
-            --glass:    rgba(10, 34, 72, 0.85); --gold:     #ffd700;
+            --navy: #04101e; --orange: #ff6a00; --electric: #00e5ff;
+            --white: #f0f4ff; --dim: rgba(240,244,255,.38);
+            --glass: rgba(10, 34, 72, 0.85); --gold: #ffd700;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             height: 100vh; background: var(--navy); font-family: 'Rajdhani', sans-serif;
             display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--white);
         }
-        body::before { content: ''; position: fixed; inset: 0; z-index: -1; background: radial-gradient(ellipse at 50% 50%, rgba(255,106,0,.1) 0%, transparent 80%), var(--navy); }
         .hex-bg { position: fixed; inset: 0; z-index: -1; opacity: 0.04; background-image: repeating-linear-gradient(60deg, var(--orange) 0, var(--orange) 1px, transparent 0, transparent 50%); background-size: 50px 80px; }
-        .chat-container { width: 95%; max-width: 1100px; height: 85vh; display: flex; background: var(--glass); border: 1px solid rgba(255,106,0,.2); border-radius: 8px; backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden; animation: fadeIn 0.6s ease-out; }
+
+        .chat-container { width: 95%; max-width: 1100px; height: 85vh; display: flex; background: var(--glass); border: 1px solid rgba(255,106,0,.2); border-radius: 8px; backdrop-filter: blur(20px); position: relative; overflow: hidden; }
+
         .chat-sidebar { width: 260px; background: rgba(4, 16, 30, 0.6); border-right: 1px solid rgba(255,106,0,.15); display: flex; flex-direction: column; }
-        .sidebar-header { padding: 25px; border-bottom: 1px solid rgba(255,106,0,.1); font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 2px; color: var(--orange); display: flex; align-items: center; justify-content: space-between; }
-        .chat-tabs { flex: 1; padding: 15px 0; overflow-y: auto; }
-        .tab-item { padding: 18px 25px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.3s; border-left: 3px solid transparent; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; color: var(--dim); }
-        .tab-item:hover { background: rgba(255,106,0,0.05); color: var(--white); }
-        .tab-item.active { background: rgba(255,106,0,0.1); border-left-color: var(--orange); color: var(--orange); }
-        .tab-item.ia-tab.active { border-left-color: var(--electric); color: var(--electric); background: rgba(0,229,255,.1); }
-        .chat-main { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.1); }
-        .chat-header { padding: 15px 25px; background: rgba(255,106,0,0.03); border-bottom: 1px solid rgba(255,106,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .status-info h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 1px; }
-        .chat-box { flex: 1; padding: 25px; overflow-y: auto; display: none; flex-direction: column; gap: 15px; }
+        .sidebar-header { padding: 25px; border-bottom: 1px solid rgba(255,106,0,.1); font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--orange); }
+
+        .tab-item, .user-item { padding: 15px 25px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; color: var(--dim); border-left: 3px solid transparent; text-transform: uppercase; font-weight: 600; font-size: 0.85rem; }
+        .tab-item.active, .user-item.active { background: rgba(255,106,0,0.1); border-left-color: var(--orange); color: var(--orange); }
+        .ia-tab.active { border-left-color: var(--electric); color: var(--electric); background: rgba(0,229,255,.1); }
+
+        .chat-main { flex: 1; display: flex; flex-direction: column; }
+        .chat-header { padding: 15px 25px; border-bottom: 1px solid rgba(255,106,0,0.1); background: rgba(0,0,0,0.2); }
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: none; flex-direction: column; gap: 15px; }
         .chat-box.active { display: flex; }
-        .msg-wrapper { display: flex; flex-direction: column; max-width: 70%; position: relative; }
-        .msg-wrapper.out { align-self: flex-end; align-items: flex-end; }
-        .msg-wrapper.in  { align-self: flex-start; align-items: flex-start; }
-        .msg { padding: 12px 18px; border-radius: 4px; font-size: 0.95rem; line-height: 1.4; position: relative; cursor: pointer; transition: background 0.2s; }
-        .msg-wrapper.in  .msg { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid var(--electric); }
-        .msg-wrapper.out .msg { background: rgba(255,106,0,0.1); border: 1px solid rgba(255,106,0,0.2); border-right: 3px solid var(--orange); }
-        .msg-ia { border-left: 3px solid gold !important; background: linear-gradient(90deg, rgba(255,215,0,.05), transparent) !important; }
-        .msg-info { font-size: 0.65rem; color: var(--dim); margin-bottom: 5px; text-transform: uppercase; }
-        .msg-time { font-size: 0.6rem; margin-top: 5px; display: block; text-align: right; opacity: 0.5; }
-        .emoji-picker { display: none; position: absolute; bottom: calc(100% + 6px); background: rgba(4,16,30,0.95); border: 1px solid rgba(255,106,0,.3); border-radius: 30px; padding: 6px 10px; gap: 6px; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-        .emoji-picker.visible { display: flex; }
-        .chat-input-area { padding: 20px 25px; background: rgba(4,16,30,0.8); border-top: 1px solid rgba(255,106,0,0.1); display: flex; gap: 15px; align-items: center; }
-        .input-wrapper { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,106,0,0.2); border-radius: 4px; display: flex; align-items: center; padding: 5px 15px; }
-        .input-wrapper input { flex: 1; background: transparent; border: none; color: white; padding: 10px; font-family: 'Rajdhani'; font-size: 1rem; outline: none; }
-        .btn-icon { background: transparent; border: none; color: var(--dim); cursor: pointer; font-size: 1.2rem; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
-        .btn-icon:hover { color: var(--orange); transform: scale(1.1); }
-        .btn-send { color: var(--orange) !important; padding-left: 10px; }
-        #panel-notif, #panel-logros { position: absolute; right: 0; top: 0; bottom: 0; width: 300px; background: rgba(4,16,30,0.97); z-index: 51; transform: translateX(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; overflow: hidden; }
-        #panel-notif.open, #panel-logros.open { transform: translateX(0); }
-        .notif-badge { position: absolute; top: -6px; right: -6px; background: var(--orange); color: white; font-size: 0.6rem; font-weight: 700; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; display: none; }
-        .user-item { padding: 10px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: 0.3s; font-size: 0.85rem; }
-        .user-item:hover { background: rgba(0, 229, 255, 0.05); }
+
+        .msg-wrapper { display: flex; flex-direction: column; max-width: 75%; }
+        .msg-wrapper.out { align-self: flex-end; }
+        .msg-wrapper.in  { align-self: flex-start; }
+        .msg { padding: 12px 16px; border-radius: 4px; font-size: 0.95rem; }
+        .msg-wrapper.in .msg { background: rgba(255,255,255,0.05); border-left: 3px solid var(--electric); }
+        .msg-wrapper.out .msg { background: rgba(255,106,0,0.1); border-right: 3px solid var(--orange); text-align: right; }
+        .msg-ia { border-left: 3px solid var(--gold) !important; background: rgba(255,215,0,0.05) !important; }
+        .msg-info { font-size: 0.65rem; color: var(--orange); margin-bottom: 4px; }
+
+        .chat-input-area { padding: 20px; display: flex; gap: 10px; background: rgba(4,16,30,0.8); }
+        .input-wrapper { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,106,0,0.3); border-radius: 4px; padding: 5px 15px; }
+        .input-wrapper input { width: 100%; background: transparent; border: none; color: white; padding: 10px; outline: none; font-family: 'Rajdhani'; }
+        .btn-send { background: var(--orange); color: black; border: none; padding: 0 20px; cursor: pointer; font-family: 'Bebas Neue'; font-size: 1.2rem; }
+
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 999; }
     </style>
 </head>
 <body>
@@ -64,59 +56,34 @@
 
 <div class="chat-container">
     <div class="chat-sidebar">
-        <div class="sidebar-header">
-            COMMS
-            <div class="notif-wrap" onclick="toggleNotif()" title="Notificaciones">
-                🔔 <span class="notif-badge" id="notif-badge">0</span>
-            </div>
-        </div>
+        <div class="sidebar-header">COMMS_CENTER</div>
         <div class="chat-tabs">
-            <div class="tab-item active" onclick="switchTab('global', 'GLOBAL', this)"><span>⚡</span> Global Chat</div>
-            <div class="tab-item ia-tab" onclick="switchTab('ia', 'IA', this)"><span>🤖</span> Inazuma IA</div>
-
-            <div style="padding: 15px 25px; font-size: 0.7rem; color: var(--orange); letter-spacing: 2px;">CONTACTOS_</div>
-            <div id="usuarios-lista">
-                <div th:each="u : ${usuarios}"
-                     th:if="${u.nombre != nombreUsuario}"
-                     class="user-item"
-                     th:onclick="switchTab('privado', [[${u.nombre}]], this)">
-                    <span th:text="${u.nombre}">Usuario</span>
-                </div>
+            <div class="tab-item active" onclick="switchTab('global', 'GLOBAL', this)"><span>⚡</span> GLOBAL</div>
+            <div class="tab-item ia-tab" onclick="switchTab('ia', 'IA', this)"><span>🤖</span> INAZUMA IA</div>
+            <div style="padding: 15px 25px; font-size: 0.7rem; color: var(--orange); opacity: 0.6;">CONTACTS</div>
+            <div th:each="u : ${usuarios}" th:if="${u.nombre != nombreUsuario}" class="user-item" th:onclick="switchTab('privado', [[${u.nombre}]], this)">
+                <span th:text="${u.nombre}">Usuario</span>
             </div>
-        </div>
-        <div style="padding: 20px; border-top: 1px solid rgba(255,106,0,0.1)">
-            <a href="/social" style="color: var(--dim); text-decoration: none; font-size: 0.8rem; letter-spacing: 2px;">← REFRESCAR</a>
         </div>
     </div>
 
-    <!-- MAIN -->
     <div class="chat-main">
-        <div class="chat-header">
-            <div class="status-info">
-                <h2 id="chat-title">CANAL GLOBAL</h2>
-            </div>
-            <div class="header-actions">
-                <span style="color: var(--orange); font-family: 'Bebas Neue';">SECURE LINE_</span>
-            </div>
-        </div>
+        <div class="chat-header"><h2 id="chat-title">CANAL GLOBAL</h2></div>
 
         <div class="chat-box active" id="box-global">
-            <!-- Historial global inicial -->
             <div th:each="m : ${historialGlobal}" th:class="'msg-wrapper ' + (${m.remitente == nombreUsuario} ? 'out' : 'in')">
                 <div th:class="'msg' + (${m.remitente == 'GEMINI_IA'} ? ' msg-ia' : '')">
                     <div class="msg-info" th:text="${m.remitente}">REMITENTE</div>
-                    <span th:text="${m.contenido}">Contenido</span>
+                    <div th:text="${m.contenido}">Contenido</div>
                 </div>
             </div>
         </div>
-        <div class="chat-box" id="box-privado"></div>
         <div class="chat-box" id="box-ia"></div>
+        <div class="chat-box" id="box-privado"></div>
 
         <div class="chat-input-area">
-            <div class="input-wrapper">
-                <input type="text" placeholder="Escribir comando..." id="user-input">
-            </div>
-            <button class="btn-icon btn-send" onclick="sendMessage()">⚡ ENVIAR</button>
+            <div class="input-wrapper"><input type="text" id="user-input" placeholder="Transmitir..." autocomplete="off"></div>
+            <button class="btn-send" onclick="sendMessage()">ENVIAR</button>
         </div>
     </div>
 </div>
@@ -124,31 +91,29 @@
 <script th:inline="javascript">
     const nombreUsuario = [[${nombreUsuario}]];
     let stompClient = null;
-    let tabUI = 'global';       // 'global', 'privado', 'ia'
+    let tabUI = 'global';
     let destinatarioActual = 'GLOBAL';
 
-    window.onload = function () {
+    window.onload = function() {
         const socket = new SockJS('/ws-inazuma');
         stompClient = Stomp.over(socket);
-        stompClient.debug = null;
+        stompClient.debug = function(str) {
+            console.log("STOMP_LOG: " + str);
+        };
 
-        stompClient.connect({}, function () {
-            stompClient.subscribe('/topic/public', function (msg) {
+        stompClient.connect({}, function() {
+            // Canal Global
+            stompClient.subscribe('/topic/public', (msg) => mostrarMensaje(JSON.parse(msg.body), 'global'));
+
+            // NUEVA Suscripción Dinámica para IA y Privados (Bypassing UserPrincipal)
+            stompClient.subscribe('/queue/mensajes-' + nombreUsuario, (msg) => {
                 const datos = JSON.parse(msg.body);
-                mostrarMensaje(datos, 'global');
-            });
-
-            stompClient.subscribe('/user/queue/privado', function (msg) {
-                const datos = JSON.parse(msg.body);
-                const esIA = datos.remitente === 'GEMINI_IA';
-                mostrarMensaje(datos, esIA ? 'ia' : 'privado');
-            });
-
-
-            stompClient.subscribe('/topic/notif.' + nombreUsuario, function (msg) {
-                const data = JSON.parse(msg.body);
-                mostrarToast(data.mensaje, data.tipo);
-                actualizarBadge(data.noLeidas);
+                // Si el mensaje es de la IA, va a la caja IA. Si no, a Privado.
+                if (datos.remitente === 'GEMINI_IA') {
+                    mostrarMensaje(datos, 'ia');
+                } else {
+                    mostrarMensaje(datos, 'privado');
+                }
             });
         });
     };
@@ -156,64 +121,70 @@
     function switchTab(ui, dest, el) {
         tabUI = ui;
         destinatarioActual = dest;
-
-        document.getElementById('chat-title').innerText = ui === 'ia' ? 'INAZUMA IA ASSISTANT' : (ui === 'global' ? 'CANAL GLOBAL' : 'PRIVADO: ' + dest);
-
+        document.getElementById('chat-title').innerText = ui === 'ia' ? 'INAZUMA IA' : (ui === 'global' ? 'CANAL GLOBAL' : 'PRIVADO: ' + dest);
         document.querySelectorAll('.tab-item, .user-item').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
-
         document.querySelectorAll('.chat-box').forEach(b => b.classList.remove('active'));
-        document.getElementById('box-' + ui).classList.add('active');
+        const box = document.getElementById('box-' + ui);
+        box.classList.add('active');
+        box.scrollTop = box.scrollHeight;
     }
 
     function sendMessage() {
         const input = document.getElementById('user-input');
-        if (!input.value.trim() || !stompClient) return;
-
-        stompClient.send('/app/chat.send', {}, JSON.stringify({
-            remitente: nombreUsuario,
-            destinatario: destinatarioActual,
-            contenido: input.value,
-            tipo: 'TEXTO'
-        }));
-        input.value = '';
+        if (input.value.trim() && stompClient) {
+            stompClient.send("/app/chat.send", {}, JSON.stringify({
+                remitente: nombreUsuario,
+                destinatario: destinatarioActual,
+                contenido: input.value,
+                tipo: 'TEXTO'
+            }));
+            input.value = '';
+        }
     }
 
-    function mostrarMensaje(msg, tab) {
-        const chatBox = document.getElementById('box-' + tab);
+    function mostrarMensaje(msg, canalSugerido) {
+        let targetId = 'box-global';
+
+        // Lógica de enrutamiento basada en el contenido del mensaje
+        if (msg.destinatario === 'GLOBAL') {
+            targetId = 'box-global';
+        } else if (msg.remitente === 'GEMINI_IA' || msg.destinatario === 'IA') {
+            targetId = 'box-ia';
+        } else {
+            targetId = 'box-privado';
+        }
+
+        const box = document.getElementById(targetId);
         const esPropio = msg.remitente === nombreUsuario;
         const esIA = msg.remitente === 'GEMINI_IA';
 
         const wrapper = document.createElement('div');
         wrapper.className = `msg-wrapper ${esPropio ? 'out' : 'in'}`;
-
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `msg${esIA ? ' msg-ia' : ''}`;
-        msgDiv.innerHTML = `
-            <div class="msg-info">${esIA ? '⚡ GEMINI IA' : msg.remitente}</div>
-            ${msg.contenido}
-            <span class="msg-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        wrapper.innerHTML = `
+            <div class="msg ${esIA ? 'msg-ia' : ''}">
+                <div class="msg-info">${esIA ? '⚡ AI_SYSTEM' : msg.remitente}</div>
+                <div>${msg.contenido}</div>
+            </div>
         `;
+        box.appendChild(wrapper);
+        box.scrollTop = box.scrollHeight;
 
-        wrapper.appendChild(msgDiv);
-        chatBox.appendChild(wrapper);
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        if(tab === 'privado' && tabUI !== 'privado') {
-            mostrarToast("Nuevo mensaje privado de " + msg.remitente, "MENSAJE");
+        // Feedback visual si recibimos algo en una pestaña que no tenemos abierta
+        if (tabUI !== targetId.replace('box-','') && !esPropio) {
+            showToast("NUEVO MENSAJE EN " + targetId.replace('box-','').toUpperCase());
         }
     }
 
-    function mostrarToast(mensaje, tipo) {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = `<div class="toast-body"><div class="toast-title">${tipo}</div><div class="toast-msg">${mensaje}</div></div>`;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
+    function showToast(txt) {
+        const t = document.createElement('div');
+        t.style = "background: var(--orange); color: black; padding: 10px; margin-top: 5px; font-weight: bold;";
+        t.innerText = txt;
+        document.getElementById('toast-container').appendChild(t);
+        setTimeout(() => t.remove(), 3000);
     }
 
-    document.getElementById('user-input').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+    document.getElementById('user-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendMessage(); });
 </script>
 </body>
 </html>
