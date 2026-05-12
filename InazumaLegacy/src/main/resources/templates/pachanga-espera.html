@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>INAZUMA LEGACY - RECOUP</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+    <style>
+        /* Estilos específicos para integrar con tu estilos.css */
+        .wrapper-espera {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .card-descanso {
+            background: rgba(8, 8, 56, 0.9) !important; /* Usando tu --blue-mid */
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 600px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(240, 165, 0, 0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decoración tipo HUD */
+        .card-descanso::before {
+            content: 'ENERGY DEPLETED';
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 0.7rem;
+            color: var(--danger);
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 2px;
+        }
+
+        .timer-display {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 5rem;
+            color: var(--gold-bright);
+            text-shadow: 0 0 20px var(--gold);
+            margin: 20px 0;
+        }
+
+        .aviso-texto {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .warning-label {
+            background: var(--danger);
+            color: white;
+            padding: 5px 15px;
+            font-family: 'Bebas Neue', sans-serif;
+            display: inline-block;
+            transform: skewX(-15deg);
+            margin-bottom: 20px;
+        }
+
+        .btn-regreso {
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="fade-in-up">
+
+<div class="wrapper-espera">
+    <div class="card-descanso">
+        <div class="warning-label">CRITICAL FATIGUE</div>
+
+        <h1 class="titulo-ranking" style="font-size: 2.5rem; margin-bottom: 10px;">JUGADORES AGOTADOS</h1>
+
+        <div class="divider-gold"></div>
+
+        <p class="aviso-texto">
+            Tus jugadores están recuperando el PT tras el último duelo. <br>
+            La Caravana Inazuma necesita tiempo para repostar.
+        </p>
+
+        <div id="countdown" class="timer-display">
+            <span id="segundos" th:text="${error.replaceAll('[^0-9]', '')}">60</span>s
+        </div>
+
+        <div class="divider-gold"></div>
+
+        <a th:href="@{/pachanga}" class="btn-regreso">
+            <button class="btn-outline-warning">VOLVER AL MENÚ DE SELECCIÓN</button>
+        </a>
+    </div>
+</div>
+
+<script>
+    // Script para bajar el contador automáticamente
+    let elementoSegundos = document.getElementById('segundos');
+    let tiempoRestante = parseInt(elementoSegundos.innerText);
+
+    if (isNaN(tiempoRestante)) tiempoRestante = 60; // Por si acaso
+
+    const cuentaAtras = setInterval(() => {
+        tiempoRestante--;
+        elementoSegundos.innerText = tiempoRestante;
+
+        if (tiempoRestante <= 0) {
+            clearInterval(cuentaAtras);
+            elementoSegundos.innerText = "0";
+            // Opcional: Redirigir automáticamente cuando acabe el tiempo
+            // window.location.href = "/pachanga";
+        }
+    }, 1000);
+</script>
+
+</body>
+</html>
