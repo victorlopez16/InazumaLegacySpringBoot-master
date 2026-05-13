@@ -8,5 +8,8 @@
     "startCommand": "java -jar target/*.jar",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE"
+  },
+  "variables": {
+    "NIXPACKS_PKGS": "openjdk17"
   }
 }
