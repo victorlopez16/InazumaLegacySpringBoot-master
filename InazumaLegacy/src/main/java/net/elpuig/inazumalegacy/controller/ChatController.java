@@ -18,7 +18,6 @@ public class ChatController {
     @Autowired private SimpMessagingTemplate messagingTemplate;
     @Autowired private MensajeRepository mensajeRepository;
     @Autowired private UsuarioRepository usuarioRepository;
-    @Autowired private LogroService logroService;
     @Autowired private NotificacionService notificacionService;
     @Autowired private OpenAiService openAiService;
 
@@ -48,22 +47,19 @@ public class ChatController {
         mensaje.setLeido(false);
         mensajeRepository.save(mensaje);
 
-        Usuario remitenteObj = usuarioRepository.findByNombre(dto.getRemitente()).orElse(null);
-
-        // --- ENRUTAMIENTO DINÁMICO (BYPASS DE SEGURIDAD) ---
+        // --- ENRUTAMIENTO DINÁMICO ---
 
         // 1. CHAT GLOBAL
         if ("GLOBAL".equals(mensaje.getDestinatario())) {
             messagingTemplate.convertAndSend("/topic/public", mensaje);
-            if (remitenteObj != null) logroService.verificarLogrosMensaje(remitenteObj);
         }
 
-        // 2. CONSULTA A LA IA
+        // 2. CONSULTA A LA IA (Bypassing de seguridad para Gemini)
         else if ("IA".equals(mensaje.getDestinatario())) {
             // Enviamos tu propio mensaje a tu cola personal para que aparezca en pantalla
             messagingTemplate.convertAndSend("/queue/mensajes-" + mensaje.getRemitente(), mensaje);
 
-            // Llamada al servicio de IA
+            // Llamada al servicio de IA (OpenAiService que gestiona Gemini)
             String respuestaIA = openAiService.obtenerRespuestaIA(mensaje.getContenido());
 
             Mensaje msgIA = new Mensaje();
@@ -75,11 +71,9 @@ public class ChatController {
 
             // Enviamos la respuesta de la IA a tu cola personal
             messagingTemplate.convertAndSend("/queue/mensajes-" + mensaje.getRemitente(), msgIA);
-
-            if (remitenteObj != null) logroService.verificarLogrosIA(remitenteObj);
         }
 
-        // 3. MENSAJES PRIVADOS (Carreño, etc.)
+        // 3. MENSAJES PRIVADOS
         else {
             // Enviamos el mensaje a la cola del destinatario y a la del remitente
             messagingTemplate.convertAndSend("/queue/mensajes-" + mensaje.getDestinatario(), mensaje);
