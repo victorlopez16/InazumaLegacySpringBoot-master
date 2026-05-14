@@ -52,7 +52,6 @@ public class AuthController {
         return "redirect:/login";
     }
 
-    // --- MÉTODO ACTUALIZADO PARA QUE FUNCIONEN TODOS LOS CAMPOS ---
     @PostMapping("/perfil/actualizar")
     public String actualizarPerfil(@RequestParam String nombre,
                                    @RequestParam String rango,
@@ -60,7 +59,6 @@ public class AuthController {
                                    @RequestParam String descripcion,
                                    HttpSession session) {
 
-        // 1. Obtener el nombre actual de la sesión para buscar al usuario
         String nombreActualSesion = (String) session.getAttribute("usuario");
         if (nombreActualSesion == null) return "redirect:/login";
 
@@ -69,16 +67,13 @@ public class AuthController {
         if (oUsuario.isPresent()) {
             Usuario u = oUsuario.get();
 
-            // 2. Actualizar todos los campos con los @RequestParam
             u.setNombre(nombre);
             u.setRango(rango);
             u.setAfiliacion(afiliacion);
             u.setDescripcion(descripcion);
 
-            // 3. Guardar cambios en la base de datos
             repo.save(u);
 
-            // 4. MUY IMPORTANTE: Actualizar el nombre en la sesión por si ha cambiado
             session.setAttribute("usuario", nombre);
         }
 
@@ -106,10 +101,8 @@ public class AuthController {
     public String inicio(HttpSession session, Model model) {
         String nombreUsuario = (String) session.getAttribute("usuario");
 
-        // Seguridad: Si no hay sesión, fuera.
         if (nombreUsuario == null) return "redirect:/login";
 
-        // Buscamos al usuario logueado
         Optional<Usuario> usuarioOpt = repo.findByNombre(nombreUsuario);
 
         if (usuarioOpt.isPresent()) {
@@ -117,17 +110,13 @@ public class AuthController {
             model.addAttribute("user", u);
             model.addAttribute("nombreUsuario", u.getNombre());
 
-            // Conteo de mensajes
             long noLeidos = mensajeRepo.countByDestinatarioAndLeidoFalse(u.getNombre());
             model.addAttribute("mensajesNuevos", noLeidos);
         } else {
-            // Si por algún motivo el usuario de la sesión no existe en DB, limpiamos
             session.invalidate();
             return "redirect:/login";
         }
 
-        // CARGA DE LA LISTA PARA EL SIDEBAR
-        // Importante: .findAll() nunca devuelve null, devuelve lista vacía si no hay nadie.
         model.addAttribute("todosLosUsuarios", repo.findAll());
 
         return "inicio";

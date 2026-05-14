@@ -18,7 +18,7 @@ public class PartidaConstancia {
     @Column(name = "rival_id")
     private Long rivalId;
 
-    private String resultado; // "VICTORIA" o "DERROTA"
+    private String resultado;
 
     @Column(name = "fecha_partida")
     private LocalDateTime fechaPartida;

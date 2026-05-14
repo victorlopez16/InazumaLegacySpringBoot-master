@@ -12,7 +12,6 @@ public class OpenAiService {
     @Value("${openai.api.key}")
     private String openAiApiKey;
 
-    // Prompt centrado en la VERDAD y la PRECISION
     private static final String SYSTEM_PROMPT =
             "Eres GEMINI_IA, un asistente de alta precisión. " +
                     "Tu objetivo es dar respuestas veraces, directas y basadas en hechos. " +
@@ -31,14 +30,13 @@ public class OpenAiService {
                     .defaultHeader("Authorization", "Bearer " + openAiApiKey)
                     .build();
 
-            // Configuramos el cuerpo con GPT-4o y temperatura baja para evitar inventos
             Map<String, Object> body = Map.of(
                     "model", "gpt-4o",
                     "messages", List.of(
                             Map.of("role", "system", "content", SYSTEM_PROMPT),
                             Map.of("role", "user", "content", preguntaUsuario)
                     ),
-                    "temperature", 0.3 // <--- CLAVE: Menos creatividad = más verdad
+                    "temperature", 0.3
             );
 
             Map response = client.post()

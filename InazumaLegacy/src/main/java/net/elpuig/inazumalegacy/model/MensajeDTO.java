@@ -7,7 +7,7 @@ public class MensajeDTO {
     private String destinatario;
     private String contenido;
     private String tipo;
-    private String fechaEnvio; // Se recibe como String, el controller la ignora y pone LocalDateTime.now()
+    private String fechaEnvio;
 
     public String getRemitente() { return remitente; }
     public void setRemitente(String remitente) { this.remitente = remitente; }

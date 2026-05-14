@@ -38,7 +38,6 @@ public class ChatController {
 
     @MessageMapping("/chat.send")
     public void procesarMensaje(@Payload MensajeDTO dto) {
-        // Persistencia en Base de Datos
         Mensaje mensaje = new Mensaje();
         mensaje.setRemitente(dto.getRemitente());
         mensaje.setDestinatario(dto.getDestinatario());
@@ -47,19 +46,14 @@ public class ChatController {
         mensaje.setLeido(false);
         mensajeRepository.save(mensaje);
 
-        // --- ENRUTAMIENTO DINÁMICO ---
 
-        // 1. CHAT GLOBAL
         if ("GLOBAL".equals(mensaje.getDestinatario())) {
             messagingTemplate.convertAndSend("/topic/public", mensaje);
         }
 
-        // 2. CONSULTA A LA IA (Bypassing de seguridad para Gemini)
         else if ("IA".equals(mensaje.getDestinatario())) {
-            // Enviamos tu propio mensaje a tu cola personal para que aparezca en pantalla
             messagingTemplate.convertAndSend("/queue/mensajes-" + mensaje.getRemitente(), mensaje);
 
-            // Llamada al servicio de IA (OpenAiService que gestiona Gemini)
             String respuestaIA = openAiService.obtenerRespuestaIA(mensaje.getContenido());
 
             Mensaje msgIA = new Mensaje();
@@ -69,13 +63,10 @@ public class ChatController {
             msgIA.setTipo("TEXTO");
             mensajeRepository.save(msgIA);
 
-            // Enviamos la respuesta de la IA a tu cola personal
             messagingTemplate.convertAndSend("/queue/mensajes-" + mensaje.getRemitente(), msgIA);
         }
 
-        // 3. MENSAJES PRIVADOS
         else {
-            // Enviamos el mensaje a la cola del destinatario y a la del remitente
             messagingTemplate.convertAndSend("/queue/mensajes-" + mensaje.getDestinatario(), mensaje);
             messagingTemplate.convertAndSend("/queue/mensajes-" + mensaje.getRemitente(), mensaje);
 

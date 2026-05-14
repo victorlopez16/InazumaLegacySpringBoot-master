@@ -83,7 +83,6 @@ public class SocialController {
         ));
     }
 
-    // Gestión de Notificaciones
     @GetMapping("/notificaciones")
     public ResponseEntity<?> obtenerNotificaciones(HttpSession session) {
         String miNombre = (String) session.getAttribute("usuario");

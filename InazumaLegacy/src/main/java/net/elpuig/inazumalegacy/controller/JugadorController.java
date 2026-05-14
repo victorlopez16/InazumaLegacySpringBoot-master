@@ -32,8 +32,7 @@ public class JugadorController {
     private JugadorS3Repository jugadorS3Repo;
 
     @Autowired
-    private PartidaConstanciaRepository constanciaRepo; // Repositorio para el guardado silencioso
-
+    private PartidaConstanciaRepository constanciaRepo;
     @GetMapping("/jugadores")
     public String listarJugadores(@RequestParam(name = "temporada", required = false, defaultValue = "1") int temporada, Model model) {
         if (temporada == 2) {
@@ -80,7 +79,6 @@ public class JugadorController {
     @Transactional
     public String jugarPachanga(@RequestParam Long idJugador, Model model, HttpSession session) {
 
-        // 1. Lógica de descanso (Cooldown de 1 minuto)
         LocalDateTime ahora = LocalDateTime.now();
         LocalDateTime ultimaPachanga = (LocalDateTime) session.getAttribute("ultima_pachanga_time");
 
@@ -89,7 +87,7 @@ public class JugadorController {
             if (segundosTranscurridos < 60) {
                 long falta = 60 - segundosTranscurridos;
                 model.addAttribute("error", "Tus jugadores están agotados. Debes esperar " + falta + " segundos.");
-                return "pachanga-espera"; // Redirige a la vista de espera
+                return "pachanga-espera";
             }
         }
 
@@ -109,17 +107,14 @@ public class JugadorController {
             model.addAttribute("mensaje", "DERROTA...");
         }
 
-        // Guardar progreso del jugador
         jugadorRepo.save(miJugador);
 
-        // 3. Guardado silencioso en la BD (Constancia)
         PartidaConstancia registro = new PartidaConstancia();
         registro.setJugadorId(idJugador);
         registro.setRivalId(rival.getId());
         registro.setResultado(victoria ? "VICTORIA" : "DERROTA");
-        constanciaRepo.save(registro); // Solo queda en la BD, no hay historial en la web
+        constanciaRepo.save(registro);
 
-        // 4. Actualizar el tiempo en la sesión
         session.setAttribute("ultima_pachanga_time", ahora);
 
         model.addAttribute("jugador", miJugador);
