@@ -102,7 +102,7 @@
             background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue);
             clip-path: polygon(0 0, 100% 0, 100% 70%, 95% 100%, 0 100%, 0 30%);
         }
-        .btn-back:hover { background: rgba(0, 212, 255, 0.1); color: #fff; }
+        .btn-back:hover { background: rgba(0, 212, 255, 0.1); color: #fff; border-color: #fff; }
 
         /* LOADING OVERLAY */
         #overlay-carga {
@@ -131,7 +131,11 @@
 <div class="layout">
     <div class="module">
         <div class="module-inner">
-            <span class="label">BATTLE_SIMULATOR // SYSTEM_ACCESS</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="label">BATTLE_SIMULATOR // SYSTEM_ACCESS</span>
+                <a th:href="@{/}" style="color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.6rem; text-decoration: none; border: 1px solid var(--neon-blue); padding: 2px 5px;">EXIT_TO_CORE</a>
+            </div>
+
             <h1 class="sys-welcome">SELECCIONAR <span style="color:var(--neon-blue);">CAMPEÓN</span></h1>
 
             <form id="formDuelo" th:action="@{/pachanga/jugar}" method="post">
@@ -148,7 +152,7 @@
                     INICIAR_SIMULACIÓN
                 </button>
 
-                <a th:href="@{/inicio}" class="btn-back">VOLVER AL MENÚ</a>
+                <a th:href="@{/}" class="btn-back">VOLVER AL MENÚ PRINCIPAL</a>
             </form>
         </div>
     </div>

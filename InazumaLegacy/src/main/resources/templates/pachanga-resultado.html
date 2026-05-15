@@ -10,23 +10,30 @@
         body { height: 100vh; background: var(--core-bg); font-family: 'Rajdhani', sans-serif; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--text-main); }
         .cyber-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px); background-size: 60px 60px; z-index: -1; }
         .module { background: linear-gradient(135deg, var(--neon-orange), var(--neon-blue)); padding: 1px; width: 90%; max-width: 1000px; clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%); }
-        .module-inner { background: var(--core-bg); padding: 40px; text-align: center; clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%); }
+        .module-inner { background: var(--core-bg); padding: 40px; text-align: center; clip-path: polygon(5% 0, 100% 0, 100% 90%, 95% 100%, 0 100%, 0 10%); position: relative; }
+
         .battle-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 30px; margin: 40px 0; }
         .stat-card { border: 1px solid rgba(0, 229, 255, 0.2); padding: 20px; background: rgba(0, 229, 255, 0.02); }
         .stat-card.rival { border-color: #ff4444; }
         .power-val { font-family: 'Orbitron'; font-size: 3.5rem; display: block; margin: 10px 0; color: var(--neon-blue); text-shadow: 0 0 15px rgba(0,229,255,0.5); }
         .vs-text { font-family: 'Bebas Neue'; font-size: 4rem; color: var(--neon-orange); }
         .result-msg { font-family: 'Bebas Neue'; font-size: 3rem; letter-spacing: 5px; margin: 20px 0; padding: 10px; background: rgba(255,106,0,0.1); border-top: 1px solid var(--neon-orange); border-bottom: 1px solid var(--neon-orange); }
-        .actions { display: flex; gap: 20px; justify-content: center; }
-        .btn-h { padding: 15px 30px; text-decoration: none; font-family: 'Orbitron'; font-size: 0.8rem; letter-spacing: 2px; border: 1px solid var(--neon-blue); color: var(--neon-blue); transition: 0.4s; }
-        .btn-h:hover { background: var(--neon-blue); color: #000; }
+
+        .actions { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .btn-h { padding: 15px 30px; text-decoration: none; font-family: 'Orbitron'; font-size: 0.8rem; letter-spacing: 2px; border: 1px solid var(--neon-blue); color: var(--neon-blue); transition: 0.4s; display: inline-block; }
+        .btn-h:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
         .btn-h.primary { background: var(--neon-orange); color: #000; border: none; }
+        .btn-h.primary:hover { background: #ff9d00; box-shadow: 0 0 20px var(--neon-orange); }
+
+        .exit-top { position: absolute; top: 20px; right: 40px; color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.7rem; text-decoration: none; border-bottom: 1px solid transparent; transition: 0.3s; }
+        .exit-top:hover { border-color: var(--neon-blue); }
     </style>
 </head>
 <body>
 <div class="cyber-grid"></div>
 <div class="module">
     <div class="module-inner">
+        <a th:href="@{/}" class="exit-top">RETURN_TO_CORE</a>
         <span style="color:var(--neon-orange); letter-spacing: 5px;">BATTLE_RESULT // ANALYSIS_COMPLETE</span>
 
         <div class="battle-grid">
@@ -46,8 +53,9 @@
         <div class="result-msg" th:text="${mensaje}">VICTORIA</div>
 
         <div class="actions">
-            <a href="/pachanga" class="btn-h">NUEVO_DUELO</a>
-            <a href="/ranking" class="btn-h primary">UPDATE_RANKING</a>
+            <a th:href="@{/pachanga}" class="btn-h">RETRY_SIMULATION</a>
+            <a th:href="@{/ranking}" class="btn-h primary">VIEW_RANKINGS</a>
+            <a th:href="@{/}" class="btn-h" style="border-color: var(--text-main); color: var(--text-main);">BACK_TO_MENU</a>
         </div>
     </div>
 </div>

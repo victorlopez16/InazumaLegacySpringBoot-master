@@ -72,6 +72,28 @@
             text-shadow: 0 0 10px rgba(240, 165, 0, 0.5);
         }
 
+        /* BOTÓN VOLVER */
+        .btn-back {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: transparent;
+            color: var(--electric);
+            border: none;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2rem;
+            text-align: center;
+            text-decoration: none;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .btn-back:hover {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--white);
+            letter-spacing: 2px;
+        }
+
         .chat-tabs { overflow-y: auto; flex: 1; }
         .tab-item, .user-item {
             padding: 15px 25px; cursor: pointer; transition: 0.3s;
@@ -170,6 +192,7 @@
 <div class="chat-container">
     <div class="chat-sidebar">
         <div class="sidebar-header">COMMS_CENTER</div>
+        <a th:href="@{/}" class="btn-back">⬅ VOLVER AL MENÚ</a>
         <div class="chat-tabs">
             <div class="tab-item active" onclick="switchTab('global', 'GLOBAL', this)">⚡ GLOBAL_NET</div>
             <div class="tab-item" style="color: var(--electric)" onclick="switchTab('ia', 'IA', this)">NELLY</div>

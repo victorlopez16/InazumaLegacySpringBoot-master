@@ -43,6 +43,9 @@
             display: flex; justify-content: space-between; align-items: center;
         }
         .brand { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--neon-blue); letter-spacing: 4px; }
+
+        .nav-links { display: flex; gap: 15px; }
+
         .back-link {
             font-family: 'Bebas Neue', sans-serif; color: var(--neon-orange);
             text-decoration: none; font-size: 1.2rem; letter-spacing: 2px;
@@ -50,6 +53,14 @@
             transition: 0.3s;
         }
         .back-link:hover { background: var(--neon-orange); color: #000; box-shadow: 0 0 15px var(--neon-orange); }
+
+        .home-link {
+            font-family: 'Bebas Neue', sans-serif; color: var(--neon-blue);
+            text-decoration: none; font-size: 1.2rem; letter-spacing: 2px;
+            padding: 5px 15px; border: 1px solid var(--neon-blue);
+            transition: 0.3s;
+        }
+        .home-link:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 15px var(--neon-blue); }
 
         /* --- CONTENEDOR PRINCIPAL --- */
         .main-container {
@@ -138,7 +149,10 @@
 
 <nav class="navbar">
     <div class="brand">FILE_ACCESS // TACTICAL_DASHBOARD</div>
-    <a th:href="@{/jugadores(temporada=${temporada})}" class="back-link">← RETURN_TO_SQUAD</a>
+    <div class="nav-links">
+        <a th:href="@{/}" class="home-link">🏠 SYSTEM_HOME</a>
+        <a th:href="@{/jugadores(temporada=${temporada})}" class="back-link">← RETURN_TO_SQUAD</a>
+    </div>
 </nav>
 
 <div class="main-container">
