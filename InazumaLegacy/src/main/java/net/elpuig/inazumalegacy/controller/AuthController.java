@@ -25,7 +25,14 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/")
-    public String root() {
+    public String root(HttpSession session) {
+        String nombreUsuario = (String) session.getAttribute("usuario");
+
+        if (nombreUsuario != null) {
+            return "redirect:/inicio";
+        }
+
+        // Si no hay sesión, le mostramos la vista de invitado
         return "inicio_invitado";
     }
 
