@@ -72,15 +72,15 @@
             text-shadow: 0 0 10px rgba(240, 165, 0, 0.5);
         }
 
-        /* BOTÓN VOLVER */
+        /* BOTÓN VOLVER - CORREGIDO A /inicio */
         .btn-back {
             display: block;
             width: 100%;
-            padding: 10px;
+            padding: 15px;
             background: transparent;
             color: var(--electric);
             border: none;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            border-bottom: 2px solid var(--gold);
             font-family: 'Bebas Neue', sans-serif;
             font-size: 1.2rem;
             text-align: center;
@@ -117,7 +117,7 @@
         .chat-box { flex: 1; padding: 25px; overflow-y: auto; display: none; flex-direction: column; gap: 20px; }
         .chat-box.active { display: flex; }
 
-        /* ===== BURBUJAS DE MENSAJE (LEGIBILIDAD MAX) ===== */
+        /* ===== BURBUJAS DE MENSAJE ===== */
         .msg-wrapper { display: flex; flex-direction: column; max-width: 80%; }
         .msg-wrapper.out { align-self: flex-end; align-items: flex-end; }
         .msg-wrapper.in { align-self: flex-start; }
@@ -129,21 +129,18 @@
             word-wrap: break-word; color: var(--white);
         }
 
-        /* Mensajes Enviados */
         .msg-wrapper.out .msg {
-            background: #101040; /* Azul oscuro profundo */
+            background: #101040;
             border-right: 4px solid var(--gold);
             border-top: 1px solid rgba(240, 165, 0, 0.3);
         }
 
-        /* Mensajes Recibidos */
         .msg-wrapper.in .msg {
             background: var(--blue-dark);
             border-left: 4px solid var(--electric);
             border-top: 1px solid rgba(0, 212, 255, 0.3);
         }
 
-        /* Mensajes IA */
         .msg-ia {
             border-left: 4px solid var(--gold-bright) !important;
             background: rgba(240, 165, 0, 0.08) !important;
@@ -192,7 +189,7 @@
 <div class="chat-container">
     <div class="chat-sidebar">
         <div class="sidebar-header">COMMS_CENTER</div>
-        <a th:href="@{/}" class="btn-back">⬅ VOLVER AL MENÚ</a>
+        <a th:href="@{/inicio}" class="btn-back">⬅ VOLVER AL MENÚ</a>
         <div class="chat-tabs">
             <div class="tab-item active" onclick="switchTab('global', 'GLOBAL', this)">⚡ GLOBAL_NET</div>
             <div class="tab-item" style="color: var(--electric)" onclick="switchTab('ia', 'IA', this)">NELLY</div>
@@ -229,7 +226,6 @@
 </div>
 
 <script th:inline="javascript">
-    /* Evitamos subrayados rojos del IDE con comentarios de expresión */
     const nombreUsuario = /*[[${nombreUsuario}]]*/ 'Invitado';
     let stompClient = null;
     let tabUI = 'global';
@@ -241,10 +237,7 @@
         stompClient.debug = null;
 
         stompClient.connect({}, function() {
-            // Suscripción Global
             stompClient.subscribe('/topic/public', (msg) => mostrarMensaje(JSON.parse(msg.body)));
-
-            // Suscripción Privada / IA
             stompClient.subscribe('/queue/mensajes-' + nombreUsuario, (msg) => {
                 mostrarMensaje(JSON.parse(msg.body));
             });
@@ -254,7 +247,7 @@
     function switchTab(ui, dest, el) {
         tabUI = ui;
         destinatarioActual = dest;
-        document.getElementById('chat-title').innerText = ui === 'ia' ? 'Nelly La Asistente Virutal' : (ui === 'global' ? 'CANAL GLOBAL' : 'PRIVADO: ' + dest);
+        document.getElementById('chat-title').innerText = ui === 'ia' ? 'Nelly La Asistente Virtual' : (ui === 'global' ? 'CANAL GLOBAL' : 'PRIVADO: ' + dest);
 
         document.querySelectorAll('.tab-item, .user-item').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
