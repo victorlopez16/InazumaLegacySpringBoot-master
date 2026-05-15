@@ -133,7 +133,6 @@
         <div class="module-inner">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <span class="label">BATTLE_SIMULATOR // SYSTEM_ACCESS</span>
-                <a th:href="@{/inicio}" style="color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.6rem; text-decoration: none; border: 1px solid var(--neon-blue); padding: 2px 5px;">EXIT_TO_CORE</a>
             </div>
 
             <h1 class="sys-welcome">SELECCIONAR <span style="color:var(--neon-blue);">CAMPEÓN</span></h1>
@@ -160,10 +159,7 @@
 
 <script>
     function iniciarDuelo() {
-        // Activamos animación de carga
         document.getElementById('overlay-carga').style.display = 'flex';
-
-        // 3 segundos de delay antes del envío al controlador
         setTimeout(function() {
             document.getElementById('formDuelo').submit();
         }, 3000);

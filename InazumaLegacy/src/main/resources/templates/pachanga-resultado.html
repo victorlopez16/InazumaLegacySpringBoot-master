@@ -24,17 +24,13 @@
         .btn-h:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
         .btn-h.primary { background: var(--neon-orange); color: #000; border: none; }
         .btn-h.primary:hover { background: #ff9d00; box-shadow: 0 0 20px var(--neon-orange); }
-
-        .exit-top { position: absolute; top: 20px; right: 40px; color: var(--neon-blue); font-family: 'Orbitron'; font-size: 0.7rem; text-decoration: none; border-bottom: 1px solid transparent; transition: 0.3s; }
-        .exit-top:hover { border-color: var(--neon-blue); }
     </style>
 </head>
 <body>
 <div class="cyber-grid"></div>
 <div class="module">
     <div class="module-inner">
-        <a th:href="@{/inicio}" class="exit-top">RETURN_TO_CORE</a>
-        <span style="color:var(--neon-orange); letter-spacing: 5px;">BATTLE_RESULT // ANALYSIS_COMPLETE</span>
+        <span style="color:var(--neon-orange); letter-spacing: 5px; display: block; margin-bottom: 10px;">BATTLE_RESULT // ANALYSIS_COMPLETE</span>
 
         <div class="battle-grid">
             <div class="stat-card">
