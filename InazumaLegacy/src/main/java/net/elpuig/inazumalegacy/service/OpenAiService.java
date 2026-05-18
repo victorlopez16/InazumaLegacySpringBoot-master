@@ -1,13 +1,20 @@
 package net.elpuig.inazumalegacy.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.transport.AddressUtils;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class OpenAiService {
+
+    private static final Logger logger = LoggerFactory.getLogger(OpenAiService.class);
 
     @Value("${openai.api.key}")
     private String openAiApiKey;
@@ -21,10 +28,15 @@ public class OpenAiService {
     public String obtenerRespuestaIA(String preguntaUsuario) {
         try {
             if (openAiApiKey == null || openAiApiKey.isEmpty() || openAiApiKey.contains("tu_clave_aqui")) {
-                return "❌ [CONFIG_ERROR]: La API Key no está configurada correctamente.";
+                return "❌ [CONFIG_ERROR]: La API Key no está configurada.";
             }
 
+            // Solución para Railway: Forzar el uso del resolvedor del sistema
+            HttpClient httpClient = HttpClient.create()
+                    .resolver(spec -> spec.queryTimeout(java.time.Duration.ofSeconds(5)));
+
             WebClient client = WebClient.builder()
+                    .clientConnector(new ReactorClientHttpConnector(httpClient))
                     .baseUrl("https://api.openai.com")
                     .defaultHeader("Content-Type", "application/json")
                     .defaultHeader("Authorization", "Bearer " + openAiApiKey)
@@ -39,7 +51,9 @@ public class OpenAiService {
                     "temperature", 0.3
             );
 
-            Map response = client.post()
+            // Usamos Map<String, Object> para evitar el aviso de "Raw use of parameterized class"
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = client.post()
                     .uri("/v1/chat/completions")
                     .bodyValue(body)
                     .retrieve()
@@ -47,19 +61,19 @@ public class OpenAiService {
                     .block();
 
             if (response != null && response.containsKey("choices")) {
-                List choices = (List) response.get("choices");
-                Map firstChoice = (Map) choices.get(0);
-                Map message = (Map) firstChoice.get("message");
-                String contenido = (String) message.get("content");
-
-                return "🤖 [IA]: " + contenido;
+                List<?> choices = (List<?>) response.get("choices");
+                if (!choices.isEmpty()) {
+                    Map<?, ?> firstChoice = (Map<?, ?>) choices.getFirst(); // Uso de getFirst()
+                    Map<?, ?> message = (Map<?, ?>) firstChoice.get("message");
+                    String contenido = (String) message.get("content");
+                    return "🤖 [IA]: " + contenido;
+                }
             }
 
             return "⚠️ Error: Formato de respuesta inesperado.";
 
         } catch (Exception e) {
-            System.err.println("--- ERROR CRÍTICO EN OPENAI_SERVICE ---");
-            e.printStackTrace();
+            logger.error("Error crítico en la conexión con OpenAI: ", e);
             return "❌ [CONEXIÓN_ERROR]: " + e.getMessage();
         }
     }
