@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import reactor.netty.http.client.HttpClient;
-import reactor.netty.transport.AddressUtils;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import java.util.List;
 import java.util.Map;
 
@@ -22,26 +22,24 @@ public class OpenAiService {
     private static final String SYSTEM_PROMPT =
             "Eres GEMINI_IA, un asistente de alta precisión. " +
                     "Tu objetivo es dar respuestas veraces, directas y basadas en hechos. " +
-                    "Si no conoces una respuesta con total certeza, admítelo en lugar de especular. " +
-                    "Responde siempre en español y sé breve (máximo 2-3 frases).";
+                    "Responde siempre en español y sé breve.";
 
     public String obtenerRespuestaIA(String preguntaUsuario) {
         try {
-            if (openAiApiKey == null || openAiApiKey.isEmpty() || openAiApiKey.contains("tu_clave_aqui")) {
-                return "❌ [CONFIG_ERROR]: La API Key no está configurada.";
+            if (openAiApiKey == null || openAiApiKey.isEmpty()) {
+                return "❌ [CONFIG_ERROR]: API Key faltante.";
             }
 
-            // Solución para Railway: Forzar el uso del resolvedor del sistema
-            HttpClient httpClient = HttpClient.create()
-                    .resolver(spec -> spec.queryTimeout(java.time.Duration.ofSeconds(5)));
+            // Usamos RestTemplate en lugar de WebClient para evitar líos de Netty/IPv6
+            RestTemplate restTemplate = new RestTemplate();
+            String url = "https://api.openai.com/v1/chat/completions";
 
-            WebClient client = WebClient.builder()
-                    .clientConnector(new ReactorClientHttpConnector(httpClient))
-                    .baseUrl("https://api.openai.com")
-                    .defaultHeader("Content-Type", "application/json")
-                    .defaultHeader("Authorization", "Bearer " + openAiApiKey)
-                    .build();
+            // Configurar Headers
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(openAiApiKey);
 
+            // Configurar Body
             Map<String, Object> body = Map.of(
                     "model", "gpt-4o",
                     "messages", List.of(
@@ -51,29 +49,24 @@ public class OpenAiService {
                     "temperature", 0.3
             );
 
-            // Usamos Map<String, Object> para evitar el aviso de "Raw use of parameterized class"
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+            // Hacer la petición (esto es bloqueante, mucho más estable para red)
             @SuppressWarnings("unchecked")
-            Map<String, Object> response = client.post()
-                    .uri("/v1/chat/completions")
-                    .bodyValue(body)
-                    .retrieve()
-                    .bodyToMono(Map.class)
-                    .block();
+            Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
 
             if (response != null && response.containsKey("choices")) {
                 List<?> choices = (List<?>) response.get("choices");
                 if (!choices.isEmpty()) {
-                    Map<?, ?> firstChoice = (Map<?, ?>) choices.getFirst(); // Uso de getFirst()
+                    Map<?, ?> firstChoice = (Map<?, ?>) choices.get(0);
                     Map<?, ?> message = (Map<?, ?>) firstChoice.get("message");
-                    String contenido = (String) message.get("content");
-                    return "🤖 [IA]: " + contenido;
+                    return "🤖 [IA]: " + (String) message.get("content");
                 }
             }
-
-            return "⚠️ Error: Formato de respuesta inesperado.";
+            return "⚠️ Error: Respuesta vacía de OpenAI.";
 
         } catch (Exception e) {
-            logger.error("Error crítico en la conexión con OpenAI: ", e);
+            logger.error("Error en OpenAI con RestTemplate: ", e);
             return "❌ [CONEXIÓN_ERROR]: " + e.getMessage();
         }
     }
